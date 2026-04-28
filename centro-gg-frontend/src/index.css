@@ -1,0 +1,577 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+
+:root {
+  /*
+    =========================================================
+    Brand base
+    =========================================================
+  */
+
+  --font-headline: "Manrope", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --radius: 0.75rem;
+
+  /*
+    =========================================================
+    Brand colors
+    =========================================================
+  */
+
+  --brand-primary: #dd2817;
+  --brand-primary-50: #fef2f0;
+  --brand-primary-100: #fee3df;
+  --brand-primary-200: #fccbc4;
+  --brand-primary-300: #f9a79c;
+  --brand-primary-400: #f47567;
+  --brand-primary-500: #ec4a38;
+  --brand-primary-600: #dd2817;
+  --brand-primary-700: #b91f12;
+  --brand-primary-800: #991f15;
+  --brand-primary-900: #7f2119;
+
+  --brand-secondary: #858688;
+  --brand-secondary-50: #f7f7f8;
+  --brand-secondary-100: #eeeeef;
+  --brand-secondary-200: #d9dadd;
+  --brand-secondary-300: #bfc0c3;
+  --brand-secondary-400: #a4a5a8;
+  --brand-secondary-500: #858688;
+  --brand-secondary-600: #6b6c6f;
+  --brand-secondary-700: #55565a;
+  --brand-secondary-800: #3f4043;
+  --brand-secondary-900: #292a2d;
+
+  --brand-tertiary: #0073d1;
+  --brand-tertiary-50: #eef8ff;
+  --brand-tertiary-100: #d9efff;
+  --brand-tertiary-200: #bce3ff;
+  --brand-tertiary-300: #8ed2ff;
+  --brand-tertiary-400: #59b8f7;
+  --brand-tertiary-500: #2699e8;
+  --brand-tertiary-600: #0073d1;
+  --brand-tertiary-700: #0060ad;
+  --brand-tertiary-800: #00518f;
+  --brand-tertiary-900: #074576;
+
+  /*
+    =========================================================
+    Neutral colors
+    =========================================================
+  */
+
+  --neutral-0: #ffffff;
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --neutral-800: #1f2937;
+  --neutral-900: #111827;
+  --neutral-950: #030712;
+
+  /*
+    =========================================================
+    Semantic colors for shadcn/ui
+    =========================================================
+  */
+
+  --background: #ffffff;
+  --foreground: #1f2937;
+
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
+
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--brand-secondary);
+  --secondary-foreground: #ffffff;
+
+  --tertiary: var(--brand-tertiary);
+  --tertiary-foreground: #ffffff;
+
+  --muted: #f5f5f5;
+  --muted-foreground: #6b7280;
+
+  --accent: #eef8ff;
+  --accent-foreground: #00518f;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #111827;
+
+  --info: var(--brand-tertiary);
+  --info-foreground: #ffffff;
+
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: var(--brand-primary);
+
+  /*
+    =========================================================
+    Sidebar
+    =========================================================
+  */
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1f2937;
+
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #fef2f0;
+  --sidebar-accent-foreground: #991f15;
+
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: var(--brand-primary);
+
+  /*
+    =========================================================
+    Charts / statistics
+    =========================================================
+  */
+
+  --chart-1: var(--brand-primary);
+  --chart-2: var(--brand-tertiary);
+  --chart-3: var(--brand-secondary);
+  --chart-4: #f59e0b;
+  --chart-5: #16a34a;
+
+  /*
+    =========================================================
+    Shadows
+    =========================================================
+  */
+
+  --shadow-soft: 0 4px 16px rgb(17 24 39 / 0.08);
+  --shadow-medium: 0 8px 28px rgb(17 24 39 / 0.12);
+  --shadow-strong: 0 16px 40px rgb(17 24 39 / 0.16);
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #f9fafb;
+
+  --card: #1f2937;
+  --card-foreground: #f9fafb;
+
+  --popover: #1f2937;
+  --popover-foreground: #f9fafb;
+
+  --primary: #f47567;
+  --primary-foreground: #ffffff;
+
+  --secondary: #a4a5a8;
+  --secondary-foreground: #111827;
+
+  --tertiary: #59b8f7;
+  --tertiary-foreground: #071827;
+
+  --muted: #374151;
+  --muted-foreground: #d1d5db;
+
+  --accent: #1e3a5f;
+  --accent-foreground: #d9efff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --success: #22c55e;
+  --success-foreground: #052e16;
+
+  --warning: #fbbf24;
+  --warning-foreground: #111827;
+
+  --info: #59b8f7;
+  --info-foreground: #071827;
+
+  --border: rgb(255 255 255 / 0.12);
+  --input: rgb(255 255 255 / 0.16);
+  --ring: #f47567;
+
+  --sidebar: #1f2937;
+  --sidebar-foreground: #f9fafb;
+
+  --sidebar-primary: #f47567;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #374151;
+  --sidebar-accent-foreground: #f9fafb;
+
+  --sidebar-border: rgb(255 255 255 / 0.12);
+  --sidebar-ring: #f47567;
+
+  --chart-1: #f47567;
+  --chart-2: #59b8f7;
+  --chart-3: #a4a5a8;
+  --chart-4: #fbbf24;
+  --chart-5: #22c55e;
+}
+
+@theme inline {
+  /*
+    =========================================================
+    Radius
+    =========================================================
+  */
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /*
+    =========================================================
+    Fonts
+    =========================================================
+  */
+
+  --font-sans: var(--font-body);
+  --font-body: var(--font-body);
+  --font-headline: var(--font-headline);
+
+  /*
+    =========================================================
+    shadcn/ui colors
+    =========================================================
+  */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /*
+    =========================================================
+    Sidebar colors
+    =========================================================
+  */
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /*
+    =========================================================
+    Brand colors available as Tailwind classes
+    Example: bg-brand-primary, text-brand-tertiary-700
+    =========================================================
+  */
+
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-50: var(--brand-primary-50);
+  --color-brand-primary-100: var(--brand-primary-100);
+  --color-brand-primary-200: var(--brand-primary-200);
+  --color-brand-primary-300: var(--brand-primary-300);
+  --color-brand-primary-400: var(--brand-primary-400);
+  --color-brand-primary-500: var(--brand-primary-500);
+  --color-brand-primary-600: var(--brand-primary-600);
+  --color-brand-primary-700: var(--brand-primary-700);
+  --color-brand-primary-800: var(--brand-primary-800);
+  --color-brand-primary-900: var(--brand-primary-900);
+
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-50: var(--brand-secondary-50);
+  --color-brand-secondary-100: var(--brand-secondary-100);
+  --color-brand-secondary-200: var(--brand-secondary-200);
+  --color-brand-secondary-300: var(--brand-secondary-300);
+  --color-brand-secondary-400: var(--brand-secondary-400);
+  --color-brand-secondary-500: var(--brand-secondary-500);
+  --color-brand-secondary-600: var(--brand-secondary-600);
+  --color-brand-secondary-700: var(--brand-secondary-700);
+  --color-brand-secondary-800: var(--brand-secondary-800);
+  --color-brand-secondary-900: var(--brand-secondary-900);
+
+  --color-brand-tertiary: var(--brand-tertiary);
+  --color-brand-tertiary-50: var(--brand-tertiary-50);
+  --color-brand-tertiary-100: var(--brand-tertiary-100);
+  --color-brand-tertiary-200: var(--brand-tertiary-200);
+  --color-brand-tertiary-300: var(--brand-tertiary-300);
+  --color-brand-tertiary-400: var(--brand-tertiary-400);
+  --color-brand-tertiary-500: var(--brand-tertiary-500);
+  --color-brand-tertiary-600: var(--brand-tertiary-600);
+  --color-brand-tertiary-700: var(--brand-tertiary-700);
+  --color-brand-tertiary-800: var(--brand-tertiary-800);
+  --color-brand-tertiary-900: var(--brand-tertiary-900);
+
+  /*
+    =========================================================
+    Chart colors
+    =========================================================
+  */
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: var(--font-body);
+    font-weight: var(--font-weight-regular);
+    scrollbar-gutter: stable;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-headline);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.025em;
+    color: var(--foreground);
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+    font-weight: var(--font-weight-extrabold);
+    line-height: 1.05;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.1;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.15;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.25;
+  }
+
+  h6 {
+    @apply text-base md:text-lg;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+  }
+
+  p {
+    line-height: 1.7;
+  }
+
+  a {
+    color: var(--brand-tertiary);
+    text-underline-offset: 4px;
+  }
+
+  a:hover {
+    color: var(--brand-tertiary-700);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-body);
+  }
+
+  ::selection {
+    background-color: var(--brand-primary-100);
+    color: var(--brand-primary-900);
+  }
+
+  html body[data-scroll-locked] {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    overflow-y: scroll !important;
+  }
+}
+
+@layer components {
+  .headline {
+    font-family: var(--font-headline);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.025em;
+  }
+
+  .body-text {
+    font-family: var(--font-body);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-section {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .card-soft {
+    @apply rounded-2xl border bg-card text-card-foreground;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .brand-gradient {
+    background:
+      radial-gradient(circle at top left, rgb(221 40 23 / 0.16), transparent 32%),
+      radial-gradient(circle at bottom right, rgb(0 115 209 / 0.14), transparent 36%),
+      var(--background);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+@layer utilities {
+  .font-headline {
+    font-family: var(--font-headline);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-light {
+    font-weight: var(--font-weight-light);
+  }
+
+  .font-regular {
+    font-weight: var(--font-weight-regular);
+  }
+
+  .font-medium {
+    font-weight: var(--font-weight-medium);
+  }
+
+  .font-semibold {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .font-bold {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .font-extrabold {
+    font-weight: var(--font-weight-extrabold);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
