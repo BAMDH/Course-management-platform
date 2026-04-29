@@ -1,6 +1,6 @@
 # Centro de Capacitación G&G Frontend
 
-Frontend application for the **Centro de Capacitación G&G** platform. The system supports public course browsing, student virtual classrooms, teacher course management, and administrator operations for users, courses, payments, reports, and certificates.
+Frontend application for the **Centro de Capacitación G&G** platform. The system supports public course browsing, student virtual classrooms, teacher course management, and administrator operations.
 
 ## Tech Stack
 
@@ -103,94 +103,100 @@ Important:
 - Never use the Supabase `service_role` key in the frontend.
 - The frontend must only use `VITE_SUPABASE_ANON_KEY`.
 
-## Recommended Project Structure
+## Project Structure
+
+This repository contains a single frontend app inside `centro-gg-frontend/`.
 
 ```txt
-centro-gg-frontend/
-├── public/
-├── src/
-│   ├── app/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   ├── providers/
-│   │   └── router/
-│   ├── assets/
-│   ├── features/
-│   │   ├── auth/
-│   │   ├── landing/
-│   │   ├── courses/
-│   │   ├── student/
-│   │   ├── teacher/
-│   │   └── admin/
-│   ├── shared/
-│   │   ├── components/
-│   │   │   ├── ui/
-│   │   │   ├── layout/
-│   │   │   └── navigation/
-│   │   ├── hooks/
-│   │   ├── lib/
-│   │   ├── types/
-│   │   └── utils/
-│   └── styles/
-│       └── index.css
-├── supabase/
-│   ├── config.toml
-│   ├── migrations/
-│   ├── functions/
-│   └── .gitignore
-├── .env.example
-├── .gitignore
-├── components.json
-├── package.json
-├── pnpm-lock.yaml
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+CDCGG-Frontend/
+├── README.md                 # Root documentation (this file)
+├── .gitignore                # Root gitignore rules
+└── centro-gg-frontend/        # Main frontend application (Vite + React + TS)
+    ├── public/                # Static assets served as-is (favicons, static svg, etc.)
+    ├── src/                   # Application source code
+    │   ├── assets/             # Imported assets used by the app (images, svg, etc.)
+    │   ├── auth/               # Auth-related constants/helpers (e.g., role definitions)
+    │   ├── components/         # Reusable UI building blocks (composition components)
+    │   │   ├── nav/             # Navigation UI (header, sidebars, menus)
+    │   │   ├── router/          # Routing components (router, protected routes)
+    │   │   └── ui/              # Low-level UI primitives (shadcn/ui components)
+    │   ├── hooks/              # Reusable React hooks
+    │   ├── lib/                # Shared low-level utilities/helpers (framework-agnostic when possible)
+    │   ├── pages/              # Route-level pages grouped by area/role
+    │   │   ├── landing/         # Public pages (home, course browsing, course detail)
+    │   │   ├── auth/            # Auth pages (login, register, redirects/callbacks)
+    │   │   ├── student/         # Student area pages
+    │   │   ├── teacher/         # Teacher area pages
+    │   │   ├── admin/           # Admin area pages
+    │   │   └── other/           # Generic pages (unauthorized, error, etc.)
+    │   ├── providers/          # React Context providers / app-level state wiring
+    │   │   └── auth/            # Auth provider + auth hook/types
+    │   ├── services/           # External integrations and API clients (e.g., Supabase client, auth service)
+    │   ├── types/              # Shared TypeScript types/interfaces used across the app
+    │   └── utils/              # App utilities (e.g., query client, shared helpers)
+    ├── supabase/               # Supabase project config (CLI config + migrations)
+    ├── .env.example            # Example environment variables
+    ├── package.json            # App scripts/dependencies (pnpm)
+    ├── vite.config.ts          # Vite configuration (including path alias)
+    ├── tsconfig*.json          # TypeScript configuration
+    └── vercel.json             # Deployment configuration (Vercel)
 ```
 
 ## Important Folders
 
-### `src/app`
+### `centro-gg-frontend/src/pages`
 
-Global application setup:
+**Route-level pages**. Each subfolder groups pages by area/role:
 
-- root app component
-- routing
-- providers
-- protected routes
+- `landing/`: public browsing (home, courses, course details)
+- `auth/`: login/register + OAuth redirect/callback pages
+- `student/`, `teacher/`, `admin/`: private pages for each role
+- `other/`: generic system pages like unauthorized and error states
 
-### `src/shared`
+Rule of thumb: if a component is tied to a URL route and represents a full screen, it belongs in `pages/`.
 
-Reusable project code:
+### `centro-gg-frontend/src/components`
 
-- generic UI components
-- layouts
-- navigation
-- hooks
-- utilities
-- Supabase client
-- shared TypeScript types
+**Reusable UI components** used by multiple pages.
 
-### `src/features`
+- `ui/`: low-level primitives (shadcn/ui). Keep them presentational and generic.
+- `nav/`: navigation building blocks (header, sidebars).
+- `router/`: routing helpers/components (e.g., protected routes and router setup).
 
-Feature-based modules:
+Rule of thumb: if it’s reused across routes and not tied to one specific page, it belongs here.
 
-- `auth`: login, register, OAuth callback
-- `landing`: public pages
-- `courses`: public and shared course logic
-- `student`: student dashboard, classroom, payments, certificates
-- `teacher`: teacher dashboard, materials, announcements, grades
-- `admin`: users, roles, courses, payments, reports
+### `centro-gg-frontend/src/providers`
 
-### `supabase`
+**Application providers** (React Context) that wire global concerns:
 
-Supabase project configuration:
+- auth/session state
+- global wrappers (toasts, React Query provider, theme provider, etc.)
 
-- database migrations
-- Edge Functions
-- local Supabase config
+Keep provider composition in a single entry (e.g., an `AppProviders` component) so `main.tsx` stays clean.
 
-Do not manually use this folder as a separate Node project.
+### `centro-gg-frontend/src/services`
+
+**Integration layer** for external services and clients:
+
+- Supabase client initialization
+- authentication service functions
+- any future API wrappers
+
+Rule of thumb: if it talks to the outside world (HTTP, Supabase, storage, auth), it belongs here—not inside pages/components.
+
+### `centro-gg-frontend/supabase`
+
+**Supabase configuration and migrations**.
+
+- `config.toml`: local/CLI project configuration
+- `migrations/`: SQL migrations tracked in git
+
+This is not a separate Node app; treat it as infrastructure/config that supports the frontend.
+
+### `centro-gg-frontend/public` vs `centro-gg-frontend/src/assets`
+
+- `public/`: files served directly by the web server (stable URLs, no bundling)
+- `src/assets/`: assets imported by the code (bundled/optimized by Vite)
 
 ## Supabase Setup
 
