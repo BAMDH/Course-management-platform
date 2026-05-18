@@ -12,6 +12,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
 
 // ── Páginas públicas / auth ──────────────────────────────────────────────────
+
 const LandingPage    = lazy(() => import('@/pages/landing/LandingPage'));
 const CoursesPage    = lazy(() => import('@/pages/landing/CoursesPage'));
 const CourseDetail   = lazy(() => import('@/pages/landing/CourseDetailPage'));
@@ -43,7 +44,9 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminUsers     = lazy(() => import('@/pages/admin/AdminUsers'));
 const AdminCourses   = lazy(() => import('@/pages/admin/AdminCourses'));
 const AdminPayments  = lazy(() => import('@/pages/admin/AdminPayments'));
+const AdminPaymentDetail  = lazy(() => import('@/pages/admin/AdminPaymentDetail'));
 const AdminReports   = lazy(() => import('@/pages/admin/AdminReports'));
+const AdminCreateCourse = lazy(() => import('@/pages/admin/AdminCreateCourse'));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rutas públicas (con Header compartido)
@@ -84,6 +87,7 @@ const studentLayout = (
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
+
   >
     <Route index element={<StudentDashboard />} />
     <Route path="courses" element={<StudentCourses />} />
@@ -100,12 +104,14 @@ const studentLayout = (
 const teacherLayout = (
   <Route
     path="teacher"
+   
     element={
       <ProtectedRoute allowedRoles={[ROLES.TEACHER]}>
         <Header />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
+    
   >
     <Route index element={<TeacherDashboard />} />
     <Route path="courses" element={<TeacherCourses />} />
@@ -122,18 +128,23 @@ const teacherLayout = (
 const adminLayout = (
   <Route
     path="admin"
+    
     element={
       <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
         <Header />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
+    
   >
+    <Route path="courses/create" element={<AdminCreateCourse />} />
     <Route index element={<AdminDashboard />} />
     <Route path="users" element={<AdminUsers />} />
     <Route path="courses" element={<AdminCourses />} />
     <Route path="payments" element={<AdminPayments />} />
     <Route path="reports" element={<AdminReports />} />
+    <Route path="payments/detail/:id" element={<AdminPaymentDetail />}
+/>
   </Route>
 );
 

@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom';
 import type { AppRole } from '@/types/roles';
 import { useAuth } from '@/providers/auth/useAuth';
 
+
 interface ProtectedRouteProps {
   allowedRoles?: AppRole[];
   children: React.ReactNode;
