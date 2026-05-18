@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import { PublicLayout } from './PublicLayout';
 import {
   Route,
   createBrowserRouter,
@@ -15,10 +16,12 @@ import { ROLES } from '@/auth/roles';
 const LandingPage    = lazy(() => import('@/pages/landing/LandingPage'));
 const CoursesPage    = lazy(() => import('@/pages/landing/CoursesPage'));
 const CourseDetail   = lazy(() => import('@/pages/landing/CourseDetailPage'));
+const AboutPage      = lazy(() => import('@/pages/landing/AboutPage'));
+const ContactPage = lazy(() => import('@/pages/landing/ContactPage'));
 const LoginPage      = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage   = lazy(() => import('@/pages/auth/RegisterPage'));
 const AuthCallback   = lazy(() => import('@/pages/auth/AuthCallback'));
-const AuthRedirect   = lazy(() => import('@/pages/auth/AuthRedirect'));
+//const AuthRedirect   = lazy(() => import('@/pages/auth/AuthRedirect'));
 const Unauthorized   = lazy(() => import('@/pages/other/UnauthorizedPage'));
 const ErrorPage      = lazy(() => import('@/pages/other/ErrorPage'));
 
@@ -49,13 +52,12 @@ const AdminReports   = lazy(() => import('@/pages/admin/AdminReports'));
 // Rutas públicas (con Header compartido)
 // ─────────────────────────────────────────────────────────────────────────────
 const publicLayout = (
-  <Route element={<Header />} errorElement={<ErrorPage />}>
-    {/* Redirige / según sesión y rol */}
-    <Route index element={<AuthRedirect />} />
-
-    {/* Catálogo público de cursos */}
+  <Route element={<PublicLayout />} errorElement={<ErrorPage />}>
+    <Route index element={<LandingPage />} />
     <Route path="courses" element={<CoursesPage />} />
     <Route path="courses/:courseId" element={<CourseDetail />} />
+    <Route path="about" element={<AboutPage />} />
+    <Route path="contact" element={<ContactPage />} />
   </Route>
 );
 
