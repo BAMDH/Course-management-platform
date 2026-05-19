@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import AdminLayout from "@/layout/AdminLayout";
 
@@ -15,27 +18,6 @@ import Button from "@/components/admin/Button";
 import Badge from "@/components/admin/badges/Badges";
 
 import { supabase } from "@/services/supabase";
-
-const products = [
-  {
-    id: "PRD-001",
-    name: "Masterclass Pastelería Fina",
-    quantity: 1,
-    price: "$240.00",
-  },
-  {
-    id: "PRD-015",
-    name: "Libro sobre bases de datos",
-    quantity: 1,
-    price: "$45.00",
-  },
-  {
-    id: "PRD-022",
-    name: "Introducción a la Administración",
-    quantity: 1,
-    price: "$140.00",
-  },
-];
 
 type PaymentDetail = {
   id: string;
@@ -53,6 +35,26 @@ type PaymentDetail = {
   issued_at: string;
 
   paid_at: string | null;
+
+  receipt_image_path: string | null;
+};
+
+type PaymentItem = {
+  id: string;
+
+  quantity: number;
+
+  unit_price: number;
+
+  total: number;
+
+  description: string;
+
+  course: {
+    id: string;
+
+    title: string;
+  } | null;
 };
 
 const badgeVariants: Record<
@@ -74,71 +76,136 @@ const AdminPaymentDetail = () => {
   const [payment, setPayment] =
     useState<PaymentDetail | null>(null);
 
+  const [products, setProducts] = useState<
+    PaymentItem[]
+  >([]);
+
   const [loading, setLoading] =
     useState(true);
 
   useEffect(() => {
-    fetchPayment();
-  }, []);
+    if (id) {
+      fetchPayment();
+    }
+  }, [id]);
 
   const fetchPayment = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { data, error } =
-      await supabase
-        .from("payments")
+      // PAYMENT
+      const { data, error } =
+        await supabase
+          .from("payments")
+          .select(`
+              id,
+              status,
+              subtotal,
+              discount,
+              total,
+              issued_at,
+              paid_at,
+              receipt_image_path,
+              student_id,
+              profiles (
+                full_name
+              )
+            `)
+          .eq("id", id)
+          .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      // PAYMENT ITEMS
+      const {
+        data: paymentItems,
+        error: itemsError,
+      } = await supabase
+        .from("payment_items")
         .select(`
-                id,
-                status,
-                subtotal,
-                discount,
-                total,
-                issued_at,
-                paid_at,
-                student_id,
-                profiles (
-                  full_name
-                )
-              `)
-        .eq("id", id)
-        .single();
+          id,
+          quantity,
+          unit_price,
+          total,
+          description,
+          course_id,
+          courses (
+            id,
+            title
+          )
+        `)
+        .eq("payment_id", id);
 
-    if (error) {
+      if (itemsError) {
+        console.error(itemsError);
+        return;
+      }
+
+      const formattedPayment = {
+          id: data.id,
+
+            student:
+              data.profiles?.full_name ??
+              "Sin nombre",
+
+        subtotal: Number(data.subtotal),
+
+        discount: Number(data.discount),
+
+        total: Number(data.total),
+
+        issued_at: data.issued_at,
+
+        paid_at: data.paid_at,
+
+        receipt_image_path:
+          data.receipt_image_path,
+
+        status:
+          data.status === "paid"
+            ? "PAGADO"
+            : data.status === "pending"
+            ? "PENDIENTE"
+            : "ATRASADO",
+      };
+
+      const formattedItems =
+        paymentItems?.map((item: any) => ({
+          id: item.id,
+
+          quantity: item.quantity,
+
+          unit_price: Number(
+            item.unit_price
+          ),
+
+          total: Number(item.total),
+
+          description: item.description,
+
+          course: item.courses
+            ? {
+                id: item.courses.id,
+
+                title:
+                  item.courses.title,
+              }
+            : null,
+        })) || [];
+
+      setPayment(formattedPayment);
+
+      setProducts(formattedItems);
+
+    } catch (error) {
       console.error(error);
 
+    } finally {
       setLoading(false);
-
-      return;
     }
-
-    const formattedPayment = {
-      id: data.id,
-
-      student:
-        data.profiles?.full_name ??
-        "Sin nombre",
-
-      subtotal: data.subtotal,
-
-      discount: data.discount,
-
-      total: data.total,
-
-      issued_at: data.issued_at,
-
-      paid_at: data.paid_at,
-
-      status:
-        data.status === "paid"
-          ? "PAGADO"
-          : data.status === "pending"
-          ? "PENDIENTE"
-          : "ATRASADO",
-    };
-
-    setPayment(formattedPayment);
-
-    setLoading(false);
   };
 
   if (loading || !payment) {
@@ -150,6 +217,140 @@ const AdminPaymentDetail = () => {
       </AdminLayout>
     );
   }
+
+  const validatePayment = async () => {
+  const confirmed = window.confirm(
+    "¿Desea marcar la factura como pagada? Recuerde verificar el pago correctamente."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    // Obtener payment items
+    const {
+      data: paymentItems,
+      error: itemsError,
+    } = await supabase
+      .from("payment_items")
+      .select(`
+        course_id
+      `)
+      .eq("payment_id", payment.id);
+
+    if (itemsError) {
+      console.error(itemsError);
+
+      alert(
+        "Error obteniendo cursos de la factura."
+      );
+
+      return;
+    }
+
+    // Obtener student_id del payment
+    const {
+      data: paymentData,
+      error: paymentError,
+    } = await supabase
+      .from("payments")
+      .select(`
+        student_id
+      `)
+      .eq("id", payment.id)
+      .single();
+
+    if (paymentError) {
+      console.error(paymentError);
+
+      alert(
+        "Error obteniendo estudiante."
+      );
+
+      return;
+    }
+
+    //Crear enrollments
+    const enrollments =
+      paymentItems
+        ?.filter(
+          (item) => item.course_id
+        )
+        .map((item) => ({
+          course_id: item.course_id,
+
+          student_id:
+            paymentData.student_id,
+
+          status: "waitlisted",
+
+          enrolled_at:
+            new Date().toISOString(),
+        })) || [];
+
+    //Insertar enrollments
+    if (enrollments.length > 0) {
+      const {
+        error: enrollmentsError,
+      } = await supabase
+        .from("enrollments")
+        .insert(enrollments);
+
+      if (enrollmentsError) {
+        console.error(
+          enrollmentsError
+        );
+
+        alert(
+          "Error creando matrículas."
+        );
+
+        return;
+      }
+    }
+
+    //Actualizar payment
+    const { error: updateError } =
+      await supabase
+        .from("payments")
+        .update({
+          status: "paid",
+
+          paid_at:
+            new Date().toISOString(),
+        })
+        .eq("id", payment.id);
+
+    if (updateError) {
+      console.error(updateError);
+
+      alert(
+        "Error validando pago."
+      );
+
+      return;
+    }
+
+  
+    await fetchPayment();
+
+  
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    alert(
+      "Pago validado y estudiantes agregados a la lista de espera."
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Ocurrió un error inesperado."
+    );
+  }
+};
 
   return (
     <AdminLayout>
@@ -282,29 +483,48 @@ const AdminPaymentDetail = () => {
               </div>
 
               <div className="divide-y divide-gray-100">
-                {products.map(
-                  (product, index) => (
+                {products.length === 0 ? (
+                  <div className="px-6 py-10 text-center text-gray-500">
+                    No hay productos asociados
+                  </div>
+                ) : (
+                  products.map((product) => (
                     <div
-                      key={index}
+                      key={product.id}
                       className="grid grid-cols-4 px-6 py-6 items-center"
                     >
                       <p className="text-gray-500">
-                        {product.id}
+                        #
+                        {product.course?.id.slice(
+                          0,
+                          8
+                        ) || "N/A"}
                       </p>
 
-                      <p className="font-semibold">
-                        {product.name}
-                      </p>
+                      <div>
+                        <p className="font-semibold">
+                          {product.course
+                            ?.title ||
+                            product.description}
+                        </p>
+
+                        <p className="text-sm text-gray-400 mt-1">
+                          {
+                            product.description
+                          }
+                        </p>
+                      </div>
 
                       <p>
                         {product.quantity}
                       </p>
 
                       <p className="font-bold">
-                        {product.price}
+                        ₡
+                        {product.unit_price.toLocaleString()}
                       </p>
                     </div>
-                  )
+                  ))
                 )}
               </div>
             </Card>
@@ -354,19 +574,30 @@ const AdminPaymentDetail = () => {
             </div>
 
             <div className="mt-10">
-              <h3 className="text-xl font-bold mb-4">
-                Comprobante de Pago
-              </h3>
+                  <h3 className="text-xl font-bold mb-4">
+                    Comprobante de Pago
+                  </h3>
 
-              <img
-                src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c"
-                className="rounded-3xl w-full h-[420px] object-cover"
-              />
-            </div>
+                  {payment.receipt_image_path ? (
+                    <img
+                      src={payment.receipt_image_path}
+                      className="rounded-3xl w-full h-[420px] object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="rounded-3xl border border-dashed border-gray-300 h-[220px] flex items-center justify-center bg-gray-50">
+                      <p className="text-gray-400 font-medium">
+                        No se ha pagado la factura
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-            {payment.status !==
-              "PAGADO" && (
-              <Button className="w-full mt-8">
+            {payment.status ===
+              "PENDIENTE" && (
+              <Button
+                className="w-full mt-8"
+                onClick={validatePayment}
+              >
                 Validar Pago
               </Button>
             )}

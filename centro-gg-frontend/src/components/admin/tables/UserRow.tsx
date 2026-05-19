@@ -13,9 +13,11 @@ type User = {
 };
 
 type Props = {
-  user: User;
+  user: any;
 
-  onBan: () => void;
+  onBan?: () => void;
+
+  onEdit?: () => void;
 };
 
 const roleVariants: Record<string, string> = {
@@ -27,6 +29,7 @@ const roleVariants: Record<string, string> = {
 const UserRow = ({
   user,
   onBan,
+  onEdit,
 }: Props) => {
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50 transition">
@@ -78,9 +81,13 @@ const UserRow = ({
       </TableCell>
 
       {/* Actions */}
+   
       <TableCell>
         <div className="flex items-center gap-3">
-          <button className="hover:scale-110 transition text-lg">
+          <button
+            onClick={onEdit}
+            className="hover:scale-110 transition text-lg"
+          >
             ✏️
           </button>
 

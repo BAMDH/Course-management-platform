@@ -11,6 +11,7 @@ import {
 import Header from '@/components/nav/Header';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
+import AdminResources from '@/pages/admin/AdminResources';
 
 // ── Páginas públicas / auth ──────────────────────────────────────────────────
 
@@ -145,7 +146,8 @@ const adminLayout = (
     <Route path="courses" element={<AdminCourses />} />
     <Route path="payments" element={<AdminPayments />} />
     <Route path="reports" element={<AdminReports />} />
-    <Route path="payments/detail/:id" element={<AdminPaymentDetail />}
+    <Route path="payments/detail/:id" element={<AdminPaymentDetail />}/>
+    <Route path="resources/:id" element={<AdminResources />}
 />
   </Route>
 );
