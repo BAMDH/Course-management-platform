@@ -58,7 +58,7 @@ export default function RegisterPage() {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
+      const { error: profileError } = await supabase.from("profiles").upsert({
         id: data.user.id,
         email: formData.email,
         full_name: `${formData.firstName} ${formData.lastName}`,
@@ -75,7 +75,22 @@ export default function RegisterPage() {
         setIsSubmitting(false)
         return
       }
+
+      const { error: roleError } = await supabase.from("user_roles").upsert({
+        user_id: data.user.id,
+        role: "student",
+      })
+
+      if (roleError) {
+        setErrorMessage(roleError.message)
+        setIsSubmitting(false)
+        return
+      }
     }
+
+    setIsSubmitting(false)
+    alert("Registro exitoso. Por favor revisá tu correo y validá tu email antes de iniciar sesión.")
+    navigate("/login")
 
     navigate("/login")
   }
