@@ -58,43 +58,52 @@ const AdminCourses = () => {
   }, []);
 
   const fetchCourses = async () => {
-    const { data, error } = await supabase
-      .from("courses")
-      .select(`
-        id,
-        title,
-        level,
-        start_date,
-        max_capacity,
-        status,
-        price,
-        cover_image_path,
-        created_at,
+  const { data, error } = await supabase
+    .from("courses")
+    .select(`
+      id,
+      title,
+      level,
+      start_date,
+      max_capacity,
+      status,
+      price,
+      cover_image_path,
+      created_at,
 
-        course_teachers (
-          teacher:profiles (
-            full_name
-          )
-        ),
-
-        enrollments (
-          id
+      course_teachers (
+        teacher:profiles (
+          full_name
         )
-      `)
-      .order("created_at", {
-        ascending: false,
-      });
+      ),
 
-    if (error) {
-      console.error(error);
+      enrollments (
+        id,
+        status
+      )
+    `)
+    .order("created_at", {
+      ascending: false,
+    });
 
-      setLoading(false);
+  if (error) {
+    console.error(error);
 
-      return;
-    }
+    setLoading(false);
 
-    const formattedCourses = data.map(
-      (course) => ({
+    return;
+  }
+
+  const formattedCourses = data.map(
+    (course) => {
+      const activeEnrollments =
+        course.enrollments?.filter(
+          (enrollment: any) =>
+            enrollment.status ===
+            "active"
+        ) ?? [];
+
+      return {
         id: course.id,
 
         title:
@@ -102,11 +111,11 @@ const AdminCourses = () => {
 
         teacher:
           course.course_teachers?.[0]
-            ?.teacher?.[0]?.full_name ??
+            ?.teacher?.full_name ??
           "Sin asignar",
 
         slots: `${
-          course.enrollments?.length ?? 0
+          activeEnrollments.length
         }/${course.max_capacity ?? 0}`,
 
         start: course.start_date
@@ -116,7 +125,9 @@ const AdminCourses = () => {
           : "Sin fecha",
 
         price: course.price
-          ? `₡${course.price.toLocaleString()}`
+          ? `₡${Number(
+              course.price
+            ).toLocaleString()}`
           : "₡0",
 
         image:
@@ -124,12 +135,17 @@ const AdminCourses = () => {
           "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
 
         level:
-          course.level ?? "Sin nivel",
+          course.level ??
+          "Sin nivel",
 
         status:
-          course.status ?? "Pendiente",
-      })
-    );
+          course.status ??
+          "Pendiente",
+      };
+    }
+  );
+
+
 
     setCourses(formattedCourses);
 

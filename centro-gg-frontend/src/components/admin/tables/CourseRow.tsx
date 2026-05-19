@@ -1,14 +1,25 @@
+import { Link } from "react-router-dom";
+
 import Badge from "../badges/Badges";
 import StatusBadge from "../badges/StatusBadge";
 
 type Course = {
+  id: string;
+
   title: string;
+
   teacher: string;
+
   slots: string;
+
   start: string;
+
   price: string;
+
   image: string;
+
   level: string;
+
   status: string;
 };
 
@@ -75,9 +86,12 @@ const CourseRow = ({
 
       {/* Actions */}
       <td className="px-6 py-5">
-        <button className="hover:scale-110 transition text-lg">
+        <Link
+          to={`/admin/resources/${course.id}`}
+          className="hover:scale-110 transition text-lg inline-block"
+        >
           ✏️
-        </button>
+        </Link>
       </td>
     </tr>
   );

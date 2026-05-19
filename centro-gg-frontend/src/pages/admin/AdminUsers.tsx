@@ -1,13 +1,16 @@
 // src/pages/admin/AdminUsers.tsx
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import AdminLayout from "@/layout/AdminLayout";
 
 import Card from "@/components/admin/Cards/Card";
-import StatCard from "@/components/admin/Cards/StatCard";
 
-import Button from "@/components/admin/Button";
+import StatCard from "@/components/admin/Cards/StatCard";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
@@ -23,17 +26,37 @@ import { supabase } from "@/services/supabase";
 
 type UserData = {
   id: string;
+
   full_name: string | null;
+
   email: string;
+
   status: string;
+
   role: string;
+
   avatar_url: string | null;
 };
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState<
+    UserData[]
+  >([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [selectedRole, setSelectedRole] =
+    useState("");
+
+  const [selectedUser, setSelectedUser] =
+    useState<UserData | null>(null);
+
+  const [roleModalOpen, setRoleModalOpen] =
+    useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -43,52 +66,65 @@ const AdminUsers = () => {
     try {
       setLoading(true);
 
-      // Obtener profiles
-      const { data: profiles, error: profilesError } =
-        await supabase
-          .from("profiles")
-          .select(`
-            id,
-            full_name,
-            email,
-            status,
-            avatar_url
-          `);
+      const {
+        data: profiles,
+        error: profilesError,
+      } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          full_name,
+          email,
+          status,
+          avatar_url
+        `);
 
       if (profilesError) {
         console.error(profilesError);
+
         return;
       }
 
-      // Obtener roles
-      const { data: roles, error: rolesError } =
-        await supabase
-          .from("user_roles")
-          .select(`
-            user_id,
-            role
-          `);
+      const {
+        data: roles,
+        error: rolesError,
+      } = await supabase
+        .from("user_roles")
+        .select(`
+          user_id,
+          role
+        `);
 
       if (rolesError) {
         console.error(rolesError);
+
         return;
       }
 
-      // Combinar datos
       const formattedUsers =
         profiles?.map((profile) => {
           const userRole = roles?.find(
-            (r) => r.user_id === profile.id
+            (r) =>
+              r.user_id === profile.id
           );
 
           return {
             id: profile.id,
+
             full_name:
-              profile.full_name || "Sin nombre",
+              profile.full_name ||
+              "Sin nombre",
+
             email: profile.email,
+
             status: profile.status,
-            role: userRole?.role || "student",
-            avatar_url: profile.avatar_url,
+
+            role:
+              userRole?.role ||
+              "student",
+
+            avatar_url:
+              profile.avatar_url,
           };
         }) || [];
 
@@ -102,10 +138,48 @@ const AdminUsers = () => {
     }
   };
 
-  // Filtrar búsqueda
+  const openRoleModal = (
+    user: UserData
+  ) => {
+    setSelectedUser(user);
+
+    setSelectedRole(user.role);
+
+    setRoleModalOpen(true);
+  };
+
+  const updateUserRole = async () => {
+    if (!selectedUser) return;
+
+    const { error } = await supabase
+      .from("user_roles")
+      .update({
+        role: selectedRole,
+      })
+      .eq(
+        "user_id",
+        selectedUser.id
+      );
+
+    if (error) {
+      console.error(error);
+
+      return;
+    }
+
+    setRoleModalOpen(false);
+
+    setSelectedUser(null);
+
+    setSelectedRole("");
+
+    await fetchUsers();
+  };
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      const value = search.toLowerCase();
+      const value =
+        search.toLowerCase();
 
       return (
         user.full_name
@@ -121,7 +195,6 @@ const AdminUsers = () => {
     });
   }, [users, search]);
 
-  // Estadísticas
   const totalUsers = users.length;
 
   const totalStudents = users.filter(
@@ -137,30 +210,29 @@ const AdminUsers = () => {
   ).length;
 
   const toggleUserStatus = async (
-  userId: string,
-  currentStatus: string
-) => {
-  const newStatus =
-    currentStatus === "active"
-      ? "blocked"
-      : "active";
+    userId: string,
+    currentStatus: string
+  ) => {
+    const newStatus =
+      currentStatus === "active"
+        ? "blocked"
+        : "active";
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      status: newStatus,
-    })
-    .eq("id", userId);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        status: newStatus,
+      })
+      .eq("id", userId);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-  
+    if (error) {
+      console.error(error);
 
-  await fetchUsers();
+      return;
+    }
 
-};
+    await fetchUsers();
+  };
 
   return (
     <AdminLayout>
@@ -170,13 +242,18 @@ const AdminUsers = () => {
           <Breadcrumbs
             items={[
               {
-                label: "Administración",
+                label:
+                  "Administración",
+
                 href: "/admin",
               },
 
               {
-                label: "Gestión de Usuarios",
-                href: "/admin/users",
+                label:
+                  "Gestión de Usuarios",
+
+                href:
+                  "/admin/users",
               },
             ]}
           />
@@ -191,25 +268,33 @@ const AdminUsers = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
           <StatCard
             title="TOTAL USUARIOS"
-            value={String(totalUsers)}
+            value={String(
+              totalUsers
+            )}
             icon="👤"
           />
 
           <StatCard
             title="ESTUDIANTES"
-            value={String(totalStudents)}
+            value={String(
+              totalStudents
+            )}
             icon="🎓"
           />
 
           <StatCard
             title="PROFESORES"
-            value={String(totalTeachers)}
+            value={String(
+              totalTeachers
+            )}
             icon="🧑‍🏫"
           />
 
           <StatCard
             title="ACTIVOS"
-            value={String(totalActive)}
+            value={String(
+              totalActive
+            )}
             icon="⚡"
           />
         </div>
@@ -222,7 +307,9 @@ const AdminUsers = () => {
               placeholder="Buscar usuarios, correos o roles..."
               value={search}
               onChange={(e: any) =>
-                setSearch(e.target.value)
+                setSearch(
+                  e.target.value
+                )
               }
             />
           </div>
@@ -261,55 +348,71 @@ const AdminUsers = () => {
                       colSpan={5}
                       className="text-center py-10 text-gray-500"
                     >
-                      Cargando usuarios...
+                      Cargando
+                      usuarios...
                     </td>
                   </tr>
-                ) : filteredUsers.length === 0 ? (
+                ) : filteredUsers.length ===
+                  0 ? (
                   <tr>
                     <td
                       colSpan={5}
                       className="text-center py-10 text-gray-500"
                     >
-                      No se encontraron usuarios
+                      No se
+                      encontraron
+                      usuarios
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((user) => (
-                    <UserRow
-                      key={user.id}
-                      onBan={() =>
+                  filteredUsers.map(
+                    (user) => (
+                      <UserRow
+                        key={user.id}
+                        onEdit={() =>
+                          openRoleModal(
+                            user
+                          )
+                        }
+                        onBan={() =>
                           toggleUserStatus(
                             user.id,
                             user.status
                           )
                         }
                         user={{
-                        name: user.full_name || "Sin nombre",
-                        email: user.email,
+                          name:
+                            user.full_name ||
+                            "Sin nombre",
 
-                        role:
-                          user.role === "admin"
-                            ? "Administrador"
-                            : user.role ===
-                              "teacher"
-                            ? "Profesor"
-                            : "Estudiante",
+                          email:
+                            user.email,
 
-                        status:
-                          
-                            user.status === "active"
+                          role:
+                            user.role ===
+                            "admin"
+                              ? "Administrador"
+                              : user.role ===
+                                "teacher"
+                              ? "Profesor"
+                              : "Estudiante",
+
+                          status:
+                            user.status ===
+                            "active"
                               ? "Activo"
                               : "Bloqueado",
 
-                        image:
-                          user.avatar_url ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            user.full_name ||
-                              "Usuario"
-                          )}`,
-                      }}
-                    />
-                  ))
+                          image:
+                            user.avatar_url ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              user.full_name ||
+                                "Usuario"
+                            )}`,
+                        }}
+                      />
+                    )
+                  )
                 )}
               </tbody>
             </table>
@@ -318,25 +421,33 @@ const AdminUsers = () => {
           {/* Footer */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-5 text-sm text-gray-500">
             <p>
-              Mostrando {filteredUsers.length} de{" "}
-              {users.length} usuarios
+              Mostrando{" "}
+              {
+                filteredUsers.length
+              }{" "}
+              de {users.length}{" "}
+              usuarios
             </p>
           </div>
         </Card>
 
         {/* Bottom Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Security */}
           <Card className="bg-[#ebe8e8] p-8 relative overflow-hidden border-none">
             <div className="relative z-10">
               <h3 className="text-2xl font-bold mb-4">
-                Protocolo de Seguridad
+                Protocolo de
+                Seguridad
               </h3>
 
               <p className="text-gray-600 leading-relaxed max-w-md">
-                Recuerde que el bloqueo de usuarios
-                suspende el acceso inmediato a la
-                plataforma y materiales de curso.
+                Recuerde que el
+                bloqueo de usuarios
+                suspende el acceso
+                inmediato a la
+                plataforma y
+                materiales de
+                curso.
               </p>
             </div>
 
@@ -345,17 +456,21 @@ const AdminUsers = () => {
             </div>
           </Card>
 
-          {/* Roles */}
           <Card className="bg-red-600 text-white p-8 relative overflow-hidden border-none">
             <div className="relative z-10">
               <h3 className="text-2xl font-bold mb-4">
-                Asignación de Roles
+                Asignación de
+                Roles
               </h3>
 
               <p className="leading-relaxed max-w-md text-red-100">
-                Los roles de profesor habilitan
-                herramientas de gestión, evaluación y
-                administración académica.
+                Los roles de
+                profesor habilitan
+                herramientas de
+                gestión,
+                evaluación y
+                administración
+                académica.
               </p>
             </div>
 
@@ -364,6 +479,95 @@ const AdminUsers = () => {
             </div>
           </Card>
         </div>
+
+        {/* Modal */}
+        {roleModalOpen && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-[32px] p-8 w-full max-w-md">
+              <h2 className="text-3xl font-bold mb-2">
+                Editar Rol
+              </h2>
+
+              <p className="text-gray-500 mb-8">
+                Modifique el rol
+                del usuario
+              </p>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-400 mb-2">
+                  Usuario
+                </p>
+
+                <div className="bg-gray-100 rounded-2xl px-4 py-3 font-semibold">
+                  {
+                    selectedUser?.full_name
+                  }
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <p className="text-sm text-gray-400 mb-2">
+                  Rol
+                </p>
+
+                <select
+                  value={
+                    selectedRole
+                  }
+                  onChange={(e) =>
+                    setSelectedRole(
+                      e.target.value
+                    )
+                  }
+                  className="w-full bg-gray-100 rounded-2xl px-4 py-4 outline-none"
+                >
+                  <option value="student">
+                    Estudiante
+                  </option>
+
+                  <option value="teacher">
+                    Profesor
+                  </option>
+
+                  <option value="admin">
+                    Administrador
+                  </option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    setRoleModalOpen(
+                      false
+                    );
+
+                    setSelectedUser(
+                      null
+                    );
+
+                    setSelectedRole(
+                      ""
+                    );
+                  }}
+                  className="px-6 py-3 rounded-2xl border border-gray-200 font-semibold"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  onClick={
+                    updateUserRole
+                  }
+                  className="px-6 py-3 rounded-2xl bg-red-600 text-white font-semibold"
+                >
+                  Guardar
+                  Cambios
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </AdminLayout>
   );
