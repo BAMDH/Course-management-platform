@@ -11,6 +11,7 @@ import {
 import Header from '@/components/nav/Header';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
+import { StudentLayout } from '@/components/layout/StudentLayout';
 
 // ── Páginas públicas / auth ──────────────────────────────────────────────────
 
@@ -33,6 +34,7 @@ const StudentClassroom   = lazy(() => import('@/pages/student/StudentClassroom')
 const StudentPayments    = lazy(() => import('@/pages/student/StudentPayments'));
 const StudentCertificates = lazy(() => import('@/pages/student/StudentCertificates'));
 const StudentProfile     = lazy(() => import('@/pages/student/StudentProfile'));
+const StudentCalendar    = lazy(() => import('@/pages/student/StudentCalendar'));
 
 // ── Páginas de profesor ──────────────────────────────────────────────────────
 const TeacherDashboard    = lazy(() => import('@/pages/teacher/TeacherDashboard'));
@@ -85,7 +87,7 @@ const studentLayout = (
     path="student"
     element={
       <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-        <Header />
+        <StudentLayout />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
@@ -97,6 +99,7 @@ const studentLayout = (
     <Route path="payments" element={<StudentPayments />} />
     <Route path="certificates" element={<StudentCertificates />} />
     <Route path="profile" element={<StudentProfile />} />
+    <Route path="calendar" element={<StudentCalendar />} />
   </Route>
 );
 
