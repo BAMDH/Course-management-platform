@@ -11,46 +11,47 @@ import {
 import Header from '@/components/nav/Header';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
+import AdminResources from '@/pages/admin/AdminResources';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 
 // ── Páginas públicas / auth ──────────────────────────────────────────────────
 
-const LandingPage    = lazy(() => import('@/pages/landing/LandingPage'));
-const CoursesPage    = lazy(() => import('@/pages/landing/CoursesPage'));
-const CourseDetail   = lazy(() => import('@/pages/landing/CourseDetailPage'));
-const AboutPage      = lazy(() => import('@/pages/landing/AboutPage'));
+const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
+const CoursesPage = lazy(() => import('@/pages/landing/CoursesPage'));
+const CourseDetail = lazy(() => import('@/pages/landing/CourseDetailPage'));
+const AboutPage = lazy(() => import('@/pages/landing/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/landing/ContactPage'));
-const LoginPage      = lazy(() => import('@/pages/auth/LoginPage'));
-const RegisterPage   = lazy(() => import('@/pages/auth/RegisterPage'));
-const AuthCallback   = lazy(() => import('@/pages/auth/AuthCallback'));
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const AuthCallback = lazy(() => import('@/pages/auth/AuthCallback'));
 //const AuthRedirect   = lazy(() => import('@/pages/auth/AuthRedirect'));
-const Unauthorized   = lazy(() => import('@/pages/other/UnauthorizedPage'));
-const ErrorPage      = lazy(() => import('@/pages/other/ErrorPage'));
+const Unauthorized = lazy(() => import('@/pages/other/UnauthorizedPage'));
+const ErrorPage = lazy(() => import('@/pages/other/ErrorPage'));
 
 // ── Páginas de estudiante ────────────────────────────────────────────────────
-const StudentDashboard   = lazy(() => import('@/pages/student/StudentDashboard'));
-const StudentCourses     = lazy(() => import('@/pages/student/StudentCourses'));
-const StudentClassroom   = lazy(() => import('@/pages/student/StudentClassroom'));
-const StudentPayments    = lazy(() => import('@/pages/student/StudentPayments'));
+const StudentDashboard = lazy(() => import('@/pages/student/StudentDashboard'));
+const StudentCourses = lazy(() => import('@/pages/student/StudentCourses'));
+const StudentClassroom = lazy(() => import('@/pages/student/StudentClassroom'));
+const StudentPayments = lazy(() => import('@/pages/student/StudentPayments'));
 const StudentCertificates = lazy(() => import('@/pages/student/StudentCertificates'));
-const StudentProfile     = lazy(() => import('@/pages/student/StudentProfile'));
-const StudentCalendar    = lazy(() => import('@/pages/student/StudentCalendar'));
+const StudentProfile = lazy(() => import('@/pages/student/StudentProfile'));
+const StudentCalendar = lazy(() => import('@/pages/student/StudentCalendar'));
 
 // ── Páginas de profesor ──────────────────────────────────────────────────────
-const TeacherDashboard    = lazy(() => import('@/pages/teacher/TeacherDashboard'));
-const TeacherCourses      = lazy(() => import('@/pages/teacher/TeacherCourses'));
+const TeacherDashboard = lazy(() => import('@/pages/teacher/TeacherDashboard'));
+const TeacherCourses = lazy(() => import('@/pages/teacher/TeacherCourses'));
 const TeacherCourseDetail = lazy(() => import('@/pages/teacher/TeacherCourseDetail'));
-const TeacherMaterials    = lazy(() => import('@/pages/teacher/TeacherMaterials'));
+const TeacherMaterials = lazy(() => import('@/pages/teacher/TeacherMaterials'));
 const TeacherAnnouncements = lazy(() => import('@/pages/teacher/TeacherAnnouncements'));
-const TeacherGrades       = lazy(() => import('@/pages/teacher/TeacherGrades'));
+const TeacherGrades = lazy(() => import('@/pages/teacher/TeacherGrades'));
 
 // ── Páginas de administrador ─────────────────────────────────────────────────
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
-const AdminUsers     = lazy(() => import('@/pages/admin/AdminUsers'));
-const AdminCourses   = lazy(() => import('@/pages/admin/AdminCourses'));
-const AdminPayments  = lazy(() => import('@/pages/admin/AdminPayments'));
-const AdminPaymentDetail  = lazy(() => import('@/pages/admin/AdminPaymentDetail'));
-const AdminReports   = lazy(() => import('@/pages/admin/AdminReports'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const AdminCourses = lazy(() => import('@/pages/admin/AdminCourses'));
+const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
+const AdminPaymentDetail = lazy(() => import('@/pages/admin/AdminPaymentDetail'));
+const AdminReports = lazy(() => import('@/pages/admin/AdminReports'));
 const AdminCreateCourse = lazy(() => import('@/pages/admin/AdminCreateCourse'));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -109,14 +110,14 @@ const studentLayout = (
 const teacherLayout = (
   <Route
     path="teacher"
-   
+
     element={
       <ProtectedRoute allowedRoles={[ROLES.TEACHER]}>
         <Header />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
-    
+
   >
     <Route index element={<TeacherDashboard />} />
     <Route path="courses" element={<TeacherCourses />} />
@@ -133,14 +134,14 @@ const teacherLayout = (
 const adminLayout = (
   <Route
     path="admin"
-    
+
     element={
       <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
         <Header />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
-    
+
   >
     <Route path="courses/create" element={<AdminCreateCourse />} />
     <Route index element={<AdminDashboard />} />
@@ -148,8 +149,9 @@ const adminLayout = (
     <Route path="courses" element={<AdminCourses />} />
     <Route path="payments" element={<AdminPayments />} />
     <Route path="reports" element={<AdminReports />} />
-    <Route path="payments/detail/:id" element={<AdminPaymentDetail />}
-/>
+    <Route path="payments/detail/:id" element={<AdminPaymentDetail />} />
+    <Route path="resources/:id" element={<AdminResources />}
+    />
   </Route>
 );
 

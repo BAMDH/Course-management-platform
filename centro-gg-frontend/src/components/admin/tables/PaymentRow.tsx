@@ -3,10 +3,12 @@ import Badge from "@/components/admin/badges/Badges";
 
 import TableCell from "@/components/admin/tables/TableCell";
 
-import { ArrowRight } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 
 type Payment = {
+   id: string;
+   
   initials: string;
 
   student: string;
