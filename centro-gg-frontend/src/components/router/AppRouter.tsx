@@ -9,6 +9,7 @@ import {
 
 // ── Componentes core ─────────────────────────────────────────────────────────
 import Header from '@/components/nav/Header';
+import { TeacherLayout } from '@/layout/TeacherLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
 import AdminResources from '@/pages/admin/AdminResources';
@@ -42,8 +43,11 @@ const TeacherDashboard = lazy(() => import('@/pages/teacher/TeacherDashboard'));
 const TeacherCourses = lazy(() => import('@/pages/teacher/TeacherCourses'));
 const TeacherCourseDetail = lazy(() => import('@/pages/teacher/TeacherCourseDetail'));
 const TeacherMaterials = lazy(() => import('@/pages/teacher/TeacherMaterials'));
+const TeacherAttendance = lazy(() => import('@/pages/teacher/TeacherAttendance'));
 const TeacherAnnouncements = lazy(() => import('@/pages/teacher/TeacherAnnouncements'));
 const TeacherGrades = lazy(() => import('@/pages/teacher/TeacherGrades'));
+const TeacherCalendar = lazy(() => import('@/pages/teacher/TeacherCalendar'));
+
 
 // ── Páginas de administrador ─────────────────────────────────────────────────
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -110,14 +114,12 @@ const studentLayout = (
 const teacherLayout = (
   <Route
     path="teacher"
-
     element={
       <ProtectedRoute allowedRoles={[ROLES.TEACHER]}>
-        <Header />
+        <TeacherLayout />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
-
   >
     <Route index element={<TeacherDashboard />} />
     <Route path="courses" element={<TeacherCourses />} />
@@ -125,6 +127,8 @@ const teacherLayout = (
     <Route path="courses/:courseId/materials" element={<TeacherMaterials />} />
     <Route path="courses/:courseId/announcements" element={<TeacherAnnouncements />} />
     <Route path="courses/:courseId/grades" element={<TeacherGrades />} />
+    <Route path="courses/:courseId/attendance" element={<TeacherAttendance />} />
+    <Route path="calendar" element={<TeacherCalendar />} />
   </Route>
 );
 

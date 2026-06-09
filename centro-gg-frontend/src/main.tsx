@@ -23,7 +23,7 @@ const mockUser = {
 
 const mockAuthValue = {
   user: mockUser,
-  role: 'student' as const, // Must be 'student' | 'teacher' | 'admin'
+  role: 'teacher' as const, // Must be 'student' | 'teacher' | 'admin'
   loading: false,
 };
 
