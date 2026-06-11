@@ -4,11 +4,12 @@ import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/services/supabase"
 import { getUserRoles } from "@/services/authService"
+import { useAuth } from "@/providers/auth/useAuth"
 import type { AppRole } from "@/types/roles"
 
 export default function LoginPage() {
   const navigate = useNavigate()
-
+  const { selectRole } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [rememberSession, setRememberSession] = useState(false)
@@ -30,7 +31,7 @@ export default function LoginPage() {
   }
 
   function handleSelectRole(role: AppRole) {
-    localStorage.setItem("selected_app_role", role)
+    selectRole(role)
     navigate(getRouteByRole(role))
   }
 
@@ -69,7 +70,7 @@ export default function LoginPage() {
     }
 
     if (roles.length === 1) {
-      localStorage.setItem("selected_app_role", roles[0])
+      selectRole(roles[0])
       navigate(getRouteByRole(roles[0]))
       return
     }
