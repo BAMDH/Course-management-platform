@@ -1,57 +1,131 @@
-import type React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FolderOpen } from "lucide-react"
 import {
   ArrowLeft,
   ChevronRight,
   Search,
   Share2,
-  Star,
   UserCheck,
-} from "lucide-react"
+} from "lucide-react";
 
-const students = [
-  {
-    initials: "AM",
-    name: "Ana Martínez",
-    email: "ana.martinez@culinary.edu",
-    attendance: 95,
-    grade: 9.2,
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    initials: "JR",
-    name: "Julián Rojas",
-    email: "j.rojas@culinary.edu",
-    attendance: 78,
-    grade: 7.5,
-    color: "bg-orange-100 text-orange-600",
-  },
-  {
-    initials: "CP",
-    name: "Carla Paredes",
-    email: "c.paredes@culinary.edu",
-    attendance: 100,
-    grade: 8.8,
-    color: "bg-purple-100 text-purple-600",
-  },
-  {
-    initials: "LM",
-    name: "Luis Méndez",
-    email: "l.mendez@culinary.edu",
-    attendance: 60,
-    grade: 6.4,
-    color: "bg-red-100 text-red-600",
-  },
-]
+import { supabase } from "@/services/supabase";
+
+type StudentProfile = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+};
+
+type Enrollment = {
+  id: string;
+  status: string | null;
+  student: StudentProfile | null;
+};
+
+type CourseDetail = {
+  id: string;
+  title: string | null;
+  level: string | null;
+  location: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  max_capacity: number | null;
+  status: string | null;
+  enrollments: Enrollment[] | null;
+};
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 export default function TeacherCourseDetail() {
-  const { courseId } = useParams()
-  const navigate = useNavigate()
+  const { courseId } = useParams();
+  const navigate = useNavigate();
+
+  const [course, setCourse] = useState<CourseDetail | null>(null);
+
+  useEffect(() => {
+    if (!courseId) return;
+
+    let isMounted = true;
+
+    async function loadCourseDetail() {
+      try {
+        const { data, error } = await supabase
+          .from("courses")
+          .select(`
+            id,
+            title,
+            level,
+            location,
+            start_date,
+            end_date,
+            max_capacity,
+            status,
+            enrollments (
+              id,
+              status,
+              student:profiles (
+                id,
+                full_name,
+                email
+              )
+            )
+          `)
+          .eq("id", courseId)
+          .single();
+
+        if (error) throw error;
+
+        if (isMounted) {
+          setCourse(data as unknown as CourseDetail);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    void loadCourseDetail();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [courseId]);
+
+  const activeEnrollments =
+    course?.enrollments?.filter(
+      (enrollment) => enrollment.status === "active"
+    ) ?? [];
+
+  const students = activeEnrollments.map((enrollment) => {
+    const name = enrollment.student?.full_name ?? "Sin nombre";
+
+    return {
+      id: enrollment.student?.id ?? enrollment.id,
+      initials: getInitials(name),
+      name,
+      email: enrollment.student?.email ?? "Sin correo",
+      attendance: "N/A",
+      grade: "N/A",
+    };
+  });
+
+  const capacity = course?.max_capacity ?? 0;
+
+  const progress =
+    capacity > 0
+      ? Math.min((activeEnrollments.length / capacity) * 100, 100)
+      : 0;
 
   return (
     <main className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
-      {/* Header */}
-
       <div className="flex items-start justify-between mb-8">
         <div>
           <button
@@ -63,11 +137,11 @@ export default function TeacherCourseDetail() {
           </button>
 
           <h1 className="text-5xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b]">
-            Repostería Básica
+            {course?.title ?? "Curso"}
           </h1>
 
           <p className="text-xl text-[#5d5e60] mt-2">
-            Grupo Martes 9:00 AM - 12:00 pm • Ciclo 2024-B
+            {course?.level ?? "Sin nivel"} • {course?.location ?? "Sin ubicación"}
           </p>
 
           <p className="text-xs text-[#858688] mt-2">
@@ -81,11 +155,7 @@ export default function TeacherCourseDetail() {
         </button>
       </div>
 
-      {/* Top Grid */}
-
       <section className="grid grid-cols-1 xl:grid-cols-[2fr_320px] gap-6 mb-8">
-        {/* Progress */}
-
         <div className="rounded-3xl border border-[#e9e8e7] bg-white p-8">
           <h2 className="text-2xl font-bold font-['Manrope',sans-serif] mb-8">
             Resumen de progreso del grupo
@@ -94,55 +164,49 @@ export default function TeacherCourseDetail() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="GENERAL"
-              value="65%"
-              subtitle="+12%"
+              value={`${Math.round(progress)}%`}
+              subtitle="Cupos ocupados"
               highlight
             />
 
             <StatCard
               title="ASISTENCIA"
-              value="92%"
-              subtitle="Promedio grupal"
+              value="N/A"
+              subtitle="No disponible"
             />
 
             <StatCard
-              title="ENTREGAS"
-              value="14/20"
-              subtitle="Recetas completadas"
+              title="ALUMNOS"
+              value={`${activeEnrollments.length}/${capacity}`}
+              subtitle="Matriculados activos"
             />
 
             <StatCard
               title="PROMEDIO"
-              value="8.4"
-              subtitle="Calificación técnica"
+              value="N/A"
+              subtitle="Sin calificaciones"
             />
           </div>
         </div>
-
-        {/* Actions */}
 
         <div className="space-y-4">
           <ActionCard
             icon={<UserCheck className="w-6 h-6 text-[#dd2817]" />}
             title="Pasar Asistencia"
-            subtitle="Sesión actual: Macarons"
+            subtitle="Registrar asistencia del curso"
             onClick={() => navigate(`/teacher/courses/${courseId}/attendance`)}
           />
 
           <ActionCard
-            icon={<Star className="w-6 h-6 text-[#858688]" />}
-            title="Calificar"
-            subtitle="Evaluar sesión anterior"
-            onClick={() => navigate(`/teacher/courses/${courseId}/grades`)}
+            icon={<FolderOpen className="w-6 h-6 text-[#dd2817]" />}
+            title="Materiales"
+            subtitle="Documentos, videos y recetas"
+            onClick={() => navigate(`/teacher/courses/${courseId}/materials`)}
           />
         </div>
       </section>
 
-      {/* Bottom Grid */}
-
       <section className="grid grid-cols-1 xl:grid-cols-[1fr_1.4fr] gap-6">
-        {/* Timeline */}
-
         <div className="rounded-3xl border border-[#e9e8e7] bg-white p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold font-['Manrope',sans-serif]">
@@ -150,56 +214,40 @@ export default function TeacherCourseDetail() {
             </h2>
 
             <span className="rounded-lg bg-red-50 px-4 py-2 text-sm font-bold text-[#dd2817]">
-              Semana 8 de 12
+              Información general
             </span>
           </div>
 
           <div className="space-y-8">
             <div>
-              <p className="text-green-600 text-sm font-bold uppercase">
-                COMPLETADA - 12 OCT
-              </p>
-
-              <h3 className="text-2xl font-bold text-[#1b1c1b]">
-                Técnicas de Merengue Suizo
-              </h3>
-
-              <p className="text-[#5d5e60]">
-                Asistencia: 100% • Recetas: 2
-              </p>
-            </div>
-
-            <div>
               <p className="text-[#dd2817] text-sm font-bold uppercase">
-                EN CURSO - HOY
+                INICIO
               </p>
 
               <h3 className="text-2xl font-bold text-[#1b1c1b]">
-                Macarons y Ganache
+                {course?.start_date ?? "Sin fecha de inicio"}
               </h3>
 
               <p className="text-[#5d5e60]">
-                Laboratorio central • 08:00 AM
+                {course?.location ?? "Sin ubicación"}
               </p>
             </div>
 
             <div>
               <p className="text-[#858688] text-sm font-bold uppercase">
-                SIGUIENTE - 26 OCT
+                FINALIZACIÓN
               </p>
 
               <h3 className="text-2xl font-bold text-[#858688]">
-                Pastelería Francesa Clásica
+                {course?.end_date ?? "Sin fecha final"}
               </h3>
 
               <p className="text-[#858688]">
-                Pendiente de material
+                Estado: {course?.status ?? "Sin estado"}
               </p>
             </div>
           </div>
         </div>
-
-        {/* Students */}
 
         <div className="rounded-3xl border border-[#e9e8e7] bg-white overflow-hidden">
           <div className="p-8 border-b border-[#e9e8e7] flex justify-between items-center">
@@ -227,50 +275,59 @@ export default function TeacherCourseDetail() {
             </thead>
 
             <tbody>
-              {students.map((student) => (
-                <tr
-                  key={student.email}
-                  className="border-t border-[#e9e8e7]"
-                >
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${student.color}`}
-                      >
-                        {student.initials}
-                      </div>
-
-                      <div>
-                        <div className="font-semibold">
-                          {student.name}
-                        </div>
-
-                        <div className="text-sm text-[#858688]">
-                          {student.email}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="px-8 py-5 font-bold">
-                    {student.attendance}%
-                  </td>
-
-                  <td className="px-8 py-5 font-bold">
-                    {student.grade}
+              {students.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-8 py-8 text-center text-sm text-[#858688]"
+                  >
+                    No hay alumnos matriculados en este curso.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                students.map((student) => (
+                  <tr
+                    key={student.id}
+                    className="border-t border-[#e9e8e7]"
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold bg-red-100 text-red-600">
+                          {student.initials}
+                        </div>
+
+                        <div>
+                          <div className="font-semibold">
+                            {student.name}
+                          </div>
+
+                          <div className="text-sm text-[#858688]">
+                            {student.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-8 py-5 font-bold">
+                      {student.attendance}
+                    </td>
+
+                    <td className="px-8 py-5 font-bold">
+                      {student.grade}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
 
           <button className="w-full py-5 text-[#dd2817] font-bold">
-            Ver todos los alumnos (22)
+            Ver todos los alumnos ({students.length})
           </button>
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 function StatCard({
@@ -279,10 +336,10 @@ function StatCard({
   subtitle,
   highlight = false,
 }: {
-  title: string
-  value: string
-  subtitle: string
-  highlight?: boolean
+  title: string;
+  value: string;
+  subtitle: string;
+  highlight?: boolean;
 }) {
   return (
     <div className="rounded-2xl bg-[#f5f3f2] p-5">
@@ -298,11 +355,9 @@ function StatCard({
         {value}
       </h3>
 
-      <p className="text-sm text-[#5d5e60] mt-2">
-        {subtitle}
-      </p>
+      <p className="text-sm text-[#5d5e60] mt-2">{subtitle}</p>
     </div>
-  )
+  );
 }
 
 function ActionCard({
@@ -311,10 +366,10 @@ function ActionCard({
   subtitle,
   onClick,
 }: {
-  icon: React.ReactNode
-  title: string
-  subtitle: string
-  onClick?: () => void
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  onClick?: () => void;
 }) {
   return (
     <button
@@ -334,5 +389,5 @@ function ActionCard({
 
       <ChevronRight className="w-5 h-5 text-[#858688]" />
     </button>
-  )
+  );
 }

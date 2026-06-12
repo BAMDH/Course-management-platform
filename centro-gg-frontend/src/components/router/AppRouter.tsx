@@ -128,6 +128,7 @@ const teacherLayout = (
     <Route path="courses/:courseId/announcements" element={<TeacherAnnouncements />} />
     <Route path="courses/:courseId/grades" element={<TeacherGrades />} />
     <Route path="courses/:courseId/attendance" element={<TeacherAttendance />} />
+    <Route path="attendance" element={<TeacherAttendance />} />
     <Route path="calendar" element={<TeacherCalendar />} />
   </Route>
 );

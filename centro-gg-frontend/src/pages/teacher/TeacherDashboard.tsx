@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   ClipboardCheck,
@@ -18,6 +19,7 @@ import {
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [dashboardData, setDashboardData] =
     useState<TeacherDashboardData | null>(null);
@@ -86,6 +88,7 @@ const TeacherDashboard = () => {
   const courses = dashboardData?.courses ?? [];
   const events = dashboardData?.events ?? [];
   const students = dashboardData?.students ?? [];
+
   if (!user) {
     return (
       <main className="p-8">
@@ -148,7 +151,10 @@ const TeacherDashboard = () => {
               Cursos Asignados
             </h2>
 
-            <button className="text-sm font-bold text-[#b70700]">
+            <button
+              onClick={() => navigate("/teacher/courses")}
+              className="text-sm font-bold text-[#b70700]"
+            >
               Ver todos
             </button>
           </div>
@@ -162,7 +168,8 @@ const TeacherDashboard = () => {
               courses.map((course) => (
                 <article
                   key={course.id}
-                  className="flex items-center gap-4 rounded-xl bg-white p-4"
+                  onClick={() => navigate(`/teacher/courses/${course.id}`)}
+                  className="flex cursor-pointer items-center gap-4 rounded-xl bg-white p-4 transition-all hover:-translate-y-1 hover:shadow-md"
                 >
                   <img
                     src={course.image}
@@ -277,9 +284,7 @@ const TeacherDashboard = () => {
                 <th className="px-8 py-4">Curso</th>
                 <th className="px-8 py-4">Estado</th>
                 <th className="px-8 py-4">Progreso</th>
-                <th className="px-8 py-4 text-right">
-                  Calificación
-                </th>
+                <th className="px-8 py-4 text-right">Calificación</th>
               </tr>
             </thead>
 

@@ -1,28 +1,29 @@
-import { Outlet, NavLink, Link } from "react-router-dom"
+import { Outlet, NavLink, Link } from "react-router-dom";
 import {
   Bell,
   BookOpen,
   CalendarDays,
-  GraduationCap,
+  ClipboardList,
   HelpCircle,
   LayoutDashboard,
   LogOut,
-} from "lucide-react"
-import clsx from "clsx"
-import { supabase } from "@/services/supabase"
+} from "lucide-react";
+import clsx from "clsx";
+
+import { supabase } from "@/services/supabase";
 
 const navItems = [
   { name: "Dashboard", path: "/teacher", icon: LayoutDashboard },
   { name: "Mis Cursos", path: "/teacher/courses", icon: BookOpen },
   { name: "Calendario", path: "/teacher/calendar", icon: CalendarDays },
-  { name: "Calificaciones", path: "/teacher/grades", icon: GraduationCap },
-]
+  { name: "Asistencia", path: "/teacher/attendance", icon: ClipboardList },
+];
 
 export function TeacherLayout() {
   async function handleLogout() {
-    localStorage.removeItem("selected_app_role")
-    await supabase.auth.signOut()
-    window.location.href = "/"
+    localStorage.removeItem("selected_app_role");
+    await supabase.auth.signOut();
+    window.location.href = "/";
   }
 
   return (
@@ -33,6 +34,7 @@ export function TeacherLayout() {
             <div className="flex h-20 w-20 items-center justify-center bg-white text-sm font-black text-[#dd2817]">
               G&G
             </div>
+
             <h1 className="font-['Manrope',sans-serif] text-xl font-extrabold uppercase leading-7 text-[#dd2817]">
               Centro de Capacitación G&G
             </h1>
@@ -57,6 +59,7 @@ export function TeacherLayout() {
           <h2 className="font-['Manrope',sans-serif] text-lg font-bold leading-7 text-[#1b1c1b]">
             Panel de Control
           </h2>
+
           <p className="text-xs font-medium leading-4 text-[#5d5e60]">
             Profesor
           </p>
@@ -106,5 +109,5 @@ export function TeacherLayout() {
         <Outlet />
       </div>
     </div>
-  )
+  );
 }
