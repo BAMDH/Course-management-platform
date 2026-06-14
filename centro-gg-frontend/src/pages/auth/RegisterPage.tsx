@@ -176,7 +176,7 @@ export default function RegisterPage() {
                 Inscripciones abiertas
               </span>
 
-              <h1 className="mt-4 text-4xl font-extrabold leading-tight">
+              <h1 className="mt-4 text-4xl font-extrabold leading-tight text-white">
                 Centro de Capacitación <br /> G&G
               </h1>
 

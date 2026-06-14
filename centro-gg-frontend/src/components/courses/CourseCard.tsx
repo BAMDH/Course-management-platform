@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Clock3, ArrowRight } from "lucide-react"
 
 import type { LandingCourse } from "@/services/courseService"
@@ -8,8 +9,10 @@ interface Props {
 
 export function CourseCard({ course }: Props) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-
+    <Link
+      to={`/courses/${course.id}`}
+      className="block overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+    >
       <img
         src={
           course.cover_image_path ||
@@ -20,7 +23,6 @@ export function CourseCard({ course }: Props) {
       />
 
       <div className="flex flex-col gap-4 p-6">
-
         <div>
           <span className="rounded-full bg-red-700 px-3 py-1 text-xs font-bold uppercase text-white">
             {course.level || "Curso"}
@@ -38,7 +40,6 @@ export function CourseCard({ course }: Props) {
         </div>
 
         <div className="flex items-center justify-between pt-2">
-
           <div className="flex items-center gap-2 text-sm text-zinc-500">
             <Clock3 size={16} />
             <span>
@@ -46,14 +47,12 @@ export function CourseCard({ course }: Props) {
             </span>
           </div>
 
-          <button className="flex items-center gap-2 font-bold text-red-700 transition-all hover:gap-3">
+          <div className="flex items-center gap-2 font-bold text-red-700 transition-all hover:gap-3">
             Ver más
             <ArrowRight size={16} />
-          </button>
-
+          </div>
         </div>
-
       </div>
-    </div>
+    </Link>
   )
 }

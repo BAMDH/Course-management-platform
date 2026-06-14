@@ -7,6 +7,7 @@ import { supabase } from "@/services/supabase"
 import { getUserRoles } from "@/services/authService"
 import { useAuth } from "@/providers/auth/useAuth"
 import type { AppRole } from "@/types/roles"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -146,9 +147,13 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-500"
+                    className="absolute right-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-zinc-500 transition hover:bg-red-50 hover:text-red-600"
                   >
-                    {showPassword ? "Ocultar" : "Ver"}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -209,7 +214,7 @@ export default function LoginPage() {
                 Inscripciones abiertas
               </span>
 
-              <h2 className="mt-5 text-5xl font-extrabold leading-tight">
+              <h2 className="mt-5 text-5xl font-extrabold leading-tight text-white">
                 Centro de Capacitación
                 <br />
                 G&G
