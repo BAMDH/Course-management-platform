@@ -12,6 +12,8 @@ import Card from "@/components/admin/Cards/Card";
 
 import Button from "@/components/admin/Button";
 
+import ImageLibraryModal from "@/components/admin/imageManager/ImageLibraryModal";
+
 import SearchInput from "@/components/admin/ui/SearchInput";
 
 import { supabase } from "@/services/supabase";
@@ -54,6 +56,8 @@ const AdminResources = () => {
   const [loading, setLoading] =
     useState(true);
 
+  const [showImageLibrary, setShowImageLibrary] =
+  useState(false);  
   const [course, setCourse] =
     useState<Course | null>(null);
 
@@ -77,6 +81,44 @@ const AdminResources = () => {
       fetchData();
     }
   }, [id]);
+
+  /*Actualiza la imagen, usa la url publica */
+ const handleImageChange = async (
+      imagePath: string
+    ) => {
+      if (!id) return;
+
+      const imageUrl = supabase.storage
+        .from("course-images")
+        .getPublicUrl(imagePath)
+        .data.publicUrl;
+
+      const { error } = await supabase
+        .from("courses")
+        .update({
+          cover_image_path: imageUrl,
+        })
+        .eq("id", id);
+
+      if (error) {
+        console.error(error);
+        alert("Error al actualizar imagen");
+        return;
+      }
+
+      setCourse((prev) =>
+        prev
+          ? {
+              ...prev,
+              cover_image_path: imageUrl,
+            }
+          : null
+      );
+
+      setShowImageLibrary(false);
+
+      alert("Imagen actualizada correctamente");
+    };
 
   const fetchData = async () => {
     try {
@@ -124,7 +166,30 @@ const AdminResources = () => {
           ?.teacher_id || ""
       );
 
+     
       // TEACHERS
+      const {
+        data: roles,
+        error: rolesError,
+      } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "teacher");
+
+      if (rolesError) {
+        console.error(rolesError);
+        return;
+      }
+
+      const teacherIds = roles.map(
+        (item) => item.user_id
+      );
+
+      if (!teacherIds.length) {
+        setTeachers([]);
+        return;
+      }
+
       const {
         data: teachersData,
         error: teachersError,
@@ -133,17 +198,17 @@ const AdminResources = () => {
         .select(`
           id,
           full_name
-        `);
+        `)
+        .in("id", teacherIds)
+        .eq("status", "active");
 
       if (teachersError) {
         console.error(teachersError);
-
         return;
       }
 
-      setTeachers(
-        teachersData || []
-      );
+      setTeachers(teachersData || []);
+
         // ACTIVE ENROLLMENTS COUNT
 const {
   data: activeEnrollments,
@@ -370,7 +435,7 @@ const handleTeacherChange = async (
   if (!id) return;
 
   try {
-    // ELIMINAR RELACIÓN ACTUAL
+  
     const { error: deleteError } =
       await supabase
         .from("course_teachers")
@@ -383,12 +448,12 @@ const handleTeacherChange = async (
       return;
     }
 
-    // SI NO HAY PROFESOR SELECCIONADO
+  
     if (!value) {
       return;
     }
 
-    // INSERTAR NUEVO PROFESOR
+
     const { error: insertError } =
       await supabase
         .from("course_teachers")
@@ -458,6 +523,68 @@ const availableSlots =
         </div>
 
         <div className="grid xl:grid-cols-[2fr,1fr] gap-8">
+          
+          
+          {/* RIGHT */}
+          <Card className="p-6 h-fit">
+            <h2 className="text-3xl font-bold mb-6">
+              Resumen del Estado
+            </h2>
+
+            <img
+              src={
+                course.cover_image_path ||
+                "https://images.unsplash.com/photo-1556911220-bff31c812dba"
+              }
+              className="rounded-3xl h-52 w-full object-cover"
+            />
+
+            <div className="mt-8 space-y-6">
+              <div className="flex justify-between gap-4">
+                <span className="text-gray-500">
+                  Curso Actual
+                </span>
+
+                <span className="font-bold text-right">
+                  {course.title}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">
+                  Disponibilidad
+                </span>
+
+                <span className="text-green-600 font-bold">
+                  {
+                    availableSlots
+                  }{" "}
+                  Cupos
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">
+                  Pendientes
+                </span>
+
+                <span className="font-bold">
+                  {
+                    students.length
+                  }
+                </span>
+              </div>
+            </div>
+          <Button
+                className="w-full mt-4"
+                onClick={() =>
+                  setShowImageLibrary(true)
+                }
+              >
+                Cambiar Imagen
+              </Button>
+           
+          </Card>
           {/* LEFT */}
           <Card className="p-8">
             <h2 className="text-3xl font-bold mb-8">
@@ -594,61 +721,15 @@ const availableSlots =
             </div>
           </Card>
 
-          {/* RIGHT */}
-          <Card className="p-6 h-fit">
-            <h2 className="text-3xl font-bold mb-6">
-              Resumen del Estado
-            </h2>
-
-            <img
-              src={
-                course.cover_image_path ||
-                "https://images.unsplash.com/photo-1556911220-bff31c812dba"
-              }
-              className="rounded-3xl h-52 w-full object-cover"
-            />
-
-            <div className="mt-8 space-y-6">
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-500">
-                  Curso Actual
-                </span>
-
-                <span className="font-bold text-right">
-                  {course.title}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Disponibilidad
-                </span>
-
-                <span className="text-green-600 font-bold">
-                  {
-                    availableSlots
-                  }{" "}
-                  Cupos
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Pendientes
-                </span>
-
-                <span className="font-bold">
-                  {
-                    students.length
-                  }
-                </span>
-              </div>
-            </div>
-
-           
-          </Card>
         </div>
       </main>
+      <ImageLibraryModal
+        open={showImageLibrary}
+        onClose={() =>
+          setShowImageLibrary(false)
+        }
+        onSelect={handleImageChange}
+      />
     </AdminLayout>
   );
 };

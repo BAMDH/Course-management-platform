@@ -21,7 +21,9 @@ import NumberInput from "@/components/admin/form/NumberInput";
 import TeacherSelect from "@/components/admin/form/TeacherSelect";
 
 import { supabase } from "@/services/supabase";
-
+import ImageLibraryModal from "@/components/admin/imageManager/ImageLibraryModal";
+import { useNavigate } from "react-router-dom";
+  
 import {
   GraduationCap,
   MapPin,
@@ -42,6 +44,9 @@ const levels = [
 
 
 const AdminCreateCourse = () => {
+  const [courseImage, setCourseImage] = useState<File | null>(null);
+  const [showImageLibrary, setShowImageLibrary] =
+  useState(false);
   const [teachers, setTeachers] = useState<
     Teacher[]
   >([]);
@@ -63,12 +68,13 @@ const AdminCreateCourse = () => {
     status: "Pendiente",
     price: "",
     teacher_id: "",
+    cover_image_path: "",
     });
 
   useEffect(() => {
     fetchTeachers();
   }, []);
-
+  const navigate = useNavigate();
  const fetchTeachers = async () => {
   const { data: roles, error: rolesError } =
     await supabase
@@ -106,11 +112,16 @@ const AdminCreateCourse = () => {
   setTeachers(data || []);
 };
 
-  const handleCreateCourse = async () => {
+ const handleCreateCourse = async () => {
   try {
     setLoading(true);
 
-    console.log("FORM DATA:", formData);
+    const imageUrl = formData.cover_image_path
+    ? supabase.storage
+        .from("course-images")
+        .getPublicUrl(formData.cover_image_path)
+        .data.publicUrl
+    : null;
     const slug = formData.title
       .toLowerCase()
       .replace(/\s+/g, "-")
@@ -120,7 +131,7 @@ const AdminCreateCourse = () => {
         .from("courses")
         .insert({
           title: formData.title,
-          slug: slug,
+          slug,
           description: formData.description,
           category: formData.category,
           level: formData.level,
@@ -132,6 +143,7 @@ const AdminCreateCourse = () => {
           max_capacity: formData.max_capacity,
           status: formData.status,
           price: Number(formData.price),
+          cover_image_path: imageUrl, 
         })
         .select()
         .single();
@@ -165,6 +177,7 @@ const AdminCreateCourse = () => {
 }
 
     alert("Curso creado correctamente");
+    navigate("/admin/courses");
   } catch (error) {
     console.error(error);
   } finally {
@@ -481,7 +494,38 @@ const AdminCreateCourse = () => {
                   })
                 }
               />
+              <div>
+                    <p className="text-sm uppercase tracking-[3px] text-gray-500 font-bold mb-4">
+                      Imagen del Curso
+                    </p>
 
+                    {formData.cover_image_path ? (
+                      <img
+                        src={
+                          supabase.storage
+                            .from("course-images")
+                            .getPublicUrl(
+                              formData.cover_image_path
+                            ).data.publicUrl
+                        }
+                        className="w-full h-48 rounded-2xl object-cover mb-4"
+                      />
+                    ) : (
+                      <div className="w-full h-48 rounded-2xl bg-gray-200 flex items-center justify-center mb-4">
+                        Sin imagen seleccionada
+                      </div>
+                    )}
+
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() =>
+                        setShowImageLibrary(true)
+                      }
+                    >
+                      Seleccionar Imagen
+                    </Button>
+                  </div>
               
 
               {/* BUTTON */}
@@ -498,7 +542,18 @@ const AdminCreateCourse = () => {
             </div>
           </Card>
         </div>
+        
       </main>
+      <ImageLibraryModal
+      open={showImageLibrary}
+      onClose={() => setShowImageLibrary(false)}
+      onSelect={(path) =>
+        setFormData({
+          ...formData,
+          cover_image_path: path,
+        })
+      }
+    />
     </AdminLayout>
   );
 };
