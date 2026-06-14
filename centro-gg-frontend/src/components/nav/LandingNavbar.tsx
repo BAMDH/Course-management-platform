@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/providers/auth/useAuth"
 import { supabase } from "@/services/supabase"
 
 export function LandingNavbar() {
   const { user, role } = useAuth()
+  const location = useLocation()
 
   function getPanelRoute() {
     if (role === "admin") return "/admin"
@@ -16,7 +17,7 @@ export function LandingNavbar() {
     localStorage.removeItem("selected_app_role")
     await supabase.auth.signOut()
     window.location.href = "/"
-    }
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
@@ -41,17 +42,21 @@ export function LandingNavbar() {
         <div className="flex items-center gap-3">
           {!user ? (
             <>
-              <Button
-                asChild
-                variant="secondary"
-                className="hidden bg-zinc-900 text-white hover:bg-zinc-800 md:inline-flex"
-              >
-                <Link to="/login">Iniciar Sesión</Link>
-              </Button>
+              {location.pathname !== "/login" && (
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="hidden bg-zinc-900 text-white hover:bg-zinc-800 md:inline-flex"
+                >
+                  <Link to="/login">Iniciar Sesión</Link>
+                </Button>
+              )}
 
-              <Button asChild className="bg-red-600 hover:bg-red-700">
-                <Link to="/register">Registrarse</Link>
-              </Button>
+              {location.pathname !== "/register" && (
+                <Button asChild className="bg-red-600 hover:bg-red-700">
+                  <Link to="/register">Registrarse</Link>
+                </Button>
+              )}
             </>
           ) : (
             <>
