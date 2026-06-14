@@ -7,6 +7,8 @@ import { AuthContext } from "./useAuth"
 import type { AppRole } from "@/types/roles"
 import type { AuthProviderProps } from "./auth.types"
 
+const ROLE_PRIORITY: AppRole[] = ["admin", "teacher", "student"]
+
 export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
   const [user, setUser] = useState<User | null>(null)
   const [roles, setRoles] = useState<AppRole[]>([])
@@ -27,16 +29,25 @@ export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
       }
 
       const currentRoles = await getUserRoles(currentUser.id)
-
       const selectedRole = localStorage.getItem("selected_app_role") as AppRole | null
+
+      const fallbackRole =
+        ROLE_PRIORITY.find((availableRole) =>
+          currentRoles.includes(availableRole)
+        ) ?? null
+
+      const resolvedRole =
+        selectedRole && currentRoles.includes(selectedRole)
+          ? selectedRole
+          : fallbackRole
 
       if (isMounted) {
         setRoles(currentRoles)
+        setRole(resolvedRole)
 
-        if (selectedRole && currentRoles.includes(selectedRole)) {
-          setRole(selectedRole)
+        if (resolvedRole) {
+          localStorage.setItem("selected_app_role", resolvedRole)
         } else {
-          setRole(null)
           localStorage.removeItem("selected_app_role")
         }
 
@@ -86,7 +97,6 @@ export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
     localStorage.setItem("selected_app_role", selectedRole)
     setRole(selectedRole)
   }
-
 
   const value = useMemo(
     () => ({
