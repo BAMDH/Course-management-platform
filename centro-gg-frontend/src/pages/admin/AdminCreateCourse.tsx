@@ -4,7 +4,7 @@ import AdminLayout from "@/layout/AdminLayout";
 
 import Card from "@/components/admin/Cards/Card";
 
-import PageHeader from "@/components/admin/headers/PageHeader";
+import PageHeader from "@/components/admin/Headers/PageHeader";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 

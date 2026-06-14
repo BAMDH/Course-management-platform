@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
+import { LandingNavbar } from "@/components/nav/LandingNavbar"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/services/supabase"
 import { getUserRoles } from "@/services/authService"
@@ -10,9 +11,9 @@ import type { AppRole } from "@/types/roles"
 export default function LoginPage() {
   const navigate = useNavigate()
   const { selectRole } = useAuth()
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [rememberSession, setRememberSession] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [availableRoles, setAvailableRoles] = useState<AppRole[]>([])
@@ -79,194 +80,149 @@ export default function LoginPage() {
     setIsLoading(false)
   }
 
-  async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-  }
-
   return (
-    <main className="min-h-screen bg-white">
-      <section className="mx-auto grid min-h-screen max-w-7xl items-center gap-20 px-8 py-16 lg:grid-cols-2">
-        <div className="mx-auto w-full max-w-md">
-          <div>
-            <h1 className="text-5xl font-extrabold text-zinc-900">
-              Bienvenido de nuevo
-            </h1>
+    <>
+      <LandingNavbar />
 
-            <p className="mt-4 text-base font-medium text-zinc-600">
-              Accede al portal oficial para Estudiantes y Profesores.
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="mt-10 space-y-6">
-            {errorMessage && (
-              <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                {errorMessage}
-              </div>
-            )}
-
+      <main className="min-h-screen bg-white">
+        <section className="mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl items-center gap-20 px-8 py-16 lg:grid-cols-2">
+          <div className="mx-auto w-full max-w-md">
             <div>
-              <label className="text-sm font-semibold text-zinc-900">
-                Correo Electrónico
-              </label>
+              <h1 className="text-5xl font-extrabold text-zinc-900">
+                Bienvenido de nuevo
+              </h1>
 
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="ejemplo@culinaria.com"
-                className="mt-2 w-full rounded-3xl bg-stone-100 px-5 py-4 text-base outline-none transition focus:ring-2 focus:ring-red-200"
-              />
+              <p className="mt-4 text-base font-medium text-zinc-600">
+                Accede al portal oficial para estudiantes y profesores.
+              </p>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
+            <form onSubmit={handleLogin} className="mt-10 space-y-6">
+              {errorMessage && (
+                <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div>
                 <label className="text-sm font-semibold text-zinc-900">
-                  Contraseña
+                  Correo Electrónico
                 </label>
 
-                <button type="button" className="text-xs font-semibold text-red-700">
-                  ¿Olvidaste tu contraseña?
-                </button>
-              </div>
-
-              <div className="relative mt-2">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type="email"
                   required
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-3xl bg-stone-100 px-5 py-4 pr-14 text-base outline-none transition focus:ring-2 focus:ring-red-200"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="ejemplo@correo.com"
+                  className="mt-2 w-full rounded-3xl bg-stone-100 px-5 py-4 text-base outline-none transition focus:ring-2 focus:ring-red-200"
                 />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((current) => !current)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-500"
-                >
-                  {showPassword ? "Ocultar" : "Ver"}
-                </button>
               </div>
-            </div>
 
-            <label className="flex items-center gap-3 py-1">
-              <input
-                type="checkbox"
-                checked={rememberSession}
-                onChange={(event) => setRememberSession(event.target.checked)}
-                className="h-5 w-5 rounded border-red-200"
-              />
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-zinc-900">
+                    Contraseña
+                  </label>
 
-              <span className="text-sm font-medium text-zinc-600">
-                Mantener sesión iniciada
-              </span>
-            </label>
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-red-700"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="h-16 w-full rounded-3xl bg-gradient-to-r from-red-700 to-red-600 text-lg font-bold shadow-xl shadow-red-700/20 hover:from-red-800 hover:to-red-700"
-            >
-              {isLoading ? "Ingresando..." : "Iniciar Sesión →"}
-            </Button>
+                <div className="relative mt-2">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-3xl bg-stone-100 px-5 py-4 pr-14 text-base outline-none transition focus:ring-2 focus:ring-red-200"
+                  />
 
-            {availableRoles.length > 1 && (
-              <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
-                <p className="mb-3 text-sm font-semibold text-zinc-900">
-                  Seleccioná con qué perfil querés ingresar:
-                </p>
-
-                <div className="grid gap-2">
-                  {availableRoles.map((role) => (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => handleSelectRole(role)}
-                      className="rounded-xl bg-white px-4 py-3 text-left font-semibold text-zinc-800 hover:bg-red-100"
-                    >
-                      {getRoleLabel(role)}
-                    </button>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-500"
+                  >
+                    {showPassword ? "Ocultar" : "Ver"}
+                  </button>
                 </div>
               </div>
-            )}
 
-            <div className="flex items-center py-4">
-              <div className="h-px flex-1 bg-neutral-200" />
-              <span className="px-4 text-xs font-semibold uppercase tracking-wider text-zinc-600">
-                O inicia sesión con
-              </span>
-              <div className="h-px flex-1 bg-neutral-200" />
-            </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-16 w-full rounded-3xl bg-gradient-to-r from-red-700 to-red-600 text-lg font-bold shadow-xl shadow-red-700/20 hover:from-red-800 hover:to-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoading ? "Ingresando..." : "Iniciar Sesión →"}
+              </Button>
 
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="flex h-16 w-full items-center justify-center gap-3 rounded-3xl border-2 border-neutral-200 bg-stone-50 transition hover:bg-neutral-100"
-            >
-              <GoogleLogo />
+              {availableRoles.length > 1 && (
+                <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+                  <p className="mb-3 text-sm font-semibold text-zinc-900">
+                    Seleccioná con qué perfil querés ingresar:
+                  </p>
 
-              <span className="text-lg font-bold text-zinc-900">
-                Continuar con Google
-              </span>
-            </button>
+                  <div className="grid gap-2">
+                    {availableRoles.map((role) => (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => handleSelectRole(role)}
+                        className="rounded-xl bg-white px-4 py-3 text-left font-semibold text-zinc-800 hover:bg-red-100"
+                      >
+                        {getRoleLabel(role)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <p className="pt-4 text-center text-xs text-zinc-600">
-              © 2026 Centro De Capacitación G&G.
-            </p>
+              <p className="pt-4 text-center text-xs text-zinc-600">
+                © 2026 Centro de Capacitación G&G.
+              </p>
 
-            <p className="text-center text-sm text-zinc-600">
-              ¿No tienes cuenta?{" "}
-              <Link to="/register" className="font-semibold text-red-700">
-                Registrarse
-              </Link>
-            </p>
-          </form>
-        </div>
-
-        <div className="relative hidden overflow-hidden rounded-3xl shadow-2xl lg:block">
-          <img
-            src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1200&auto=format&fit=crop"
-            alt="Pastelería artesanal"
-            className="h-[760px] w-full object-cover"
-          />
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-          <div className="absolute bottom-10 left-8 right-8 text-white">
-            <span className="rounded-full bg-red-600 px-4 py-1 text-xs font-bold uppercase tracking-wider">
-              Inscripciones abiertas
-            </span>
-
-            <h2 className="mt-5 text-5xl font-extrabold leading-tight">
-              Centro de Capacitación
-              <br />
-              G&G
-            </h2>
-
-            <p className="mt-4 text-lg font-light text-stone-100/90">
-              “Forjando el futuro de la pastelería artesanal con técnica y pasión.”
-            </p>
+              <p className="text-center text-sm text-zinc-600">
+                ¿No tienes cuenta?{" "}
+                <Link to="/register" className="font-semibold text-red-700">
+                  Registrarse
+                </Link>
+              </p>
+            </form>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
 
-function GoogleLogo() {
-  return (
-    <div className="relative h-5 w-5 overflow-hidden">
-      <div className="absolute left-[10px] top-[8px] h-2 w-2 bg-[#4285F4]" />
-      <div className="absolute left-[2px] top-[12px] h-2 w-4 bg-[#34A853]" />
-      <div className="absolute left-[1px] top-[6px] h-2 w-1 bg-[#FBBC05]" />
-      <div className="absolute left-[2px] top-[1px] h-2 w-4 bg-[#EA4335]" />
-    </div>
+          <div className="relative hidden overflow-hidden rounded-3xl shadow-2xl lg:block">
+            <img
+              src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1200&auto=format&fit=crop"
+              alt="Pastelería artesanal"
+              className="h-[720px] w-full object-cover"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+            <div className="absolute bottom-10 left-8 right-8 text-white">
+              <span className="rounded-full bg-red-600 px-4 py-1 text-xs font-bold uppercase tracking-wider">
+                Inscripciones abiertas
+              </span>
+
+              <h2 className="mt-5 text-5xl font-extrabold leading-tight">
+                Centro de Capacitación
+                <br />
+                G&G
+              </h2>
+
+              <p className="mt-4 text-lg font-light text-stone-100/90">
+                “Forjando el futuro de la pastelería artesanal con técnica y
+                pasión.”
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   )
 }

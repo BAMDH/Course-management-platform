@@ -14,7 +14,7 @@ import StatCard from "@/components/admin/Cards/StatCard";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
-import PageHeader from "@/components/admin/headers/PageHeader";
+import PageHeader from "@/components/admin/Headers/PageHeader";
 
 import SearchInput from "@/components/admin/ui/SearchInput";
 

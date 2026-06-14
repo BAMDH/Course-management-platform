@@ -17,7 +17,7 @@ import {
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
-import PageHeader from "@/components/admin/headers/PageHeader";
+import PageHeader from "@/components/admin/Headers/PageHeader";
 
 import Card from "@/components/admin/Cards/Card";
 

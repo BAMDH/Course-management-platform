@@ -15,12 +15,15 @@ export type LandingCourse = {
 }
 
 export async function getPublishedCourses(): Promise<LandingCourse[]> {
+  const today = new Date().toISOString().split("T")[0]
+
   const { data, error } = await supabase
     .from("courses")
     .select(
       "id, title, slug, description, category, level, duration_hours, price, cover_image_path, start_date, location"
     )
     .eq("status", "published")
+    .gte("start_date", today)
     .order("start_date", { ascending: true })
 
   if (error) {
@@ -31,12 +34,15 @@ export async function getPublishedCourses(): Promise<LandingCourse[]> {
 }
 
 export async function getFeaturedPublishedCourses(): Promise<LandingCourse[]> {
+  const today = new Date().toISOString().split("T")[0]
+
   const { data, error } = await supabase
     .from("courses")
     .select(
       "id, title, slug, description, category, level, duration_hours, price, cover_image_path, start_date, location"
     )
     .eq("status", "published")
+    .gte("start_date", today)
     .order("start_date", { ascending: true })
     .limit(4)
 

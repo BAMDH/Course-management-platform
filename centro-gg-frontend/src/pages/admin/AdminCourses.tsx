@@ -16,7 +16,7 @@ import SearchInput from "@/components/admin/ui/SearchInput";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
-import PageHeader from "@/components/admin/headers/PageHeader";
+import PageHeader from "@/components/admin/Headers/PageHeader";
 
 import { supabase } from "@/services/supabase";
 
