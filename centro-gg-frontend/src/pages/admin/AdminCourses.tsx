@@ -102,17 +102,16 @@ const AdminCourses = () => {
             enrollment.status ===
             "active"
         ) ?? [];
-
+        
       return {
         id: course.id,
 
         title:
           course.title ?? "Sin título",
 
-        teacher:
-          course.course_teachers?.[0]
-            ?.teacher?.full_name ??
-          "Sin asignar",
+       teacher:
+        (course.course_teachers?.[0]?.teacher as any)?.full_name ??
+        "Sin asignar",
 
         slots: `${
           activeEnrollments.length

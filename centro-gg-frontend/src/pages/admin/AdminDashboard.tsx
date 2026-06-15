@@ -93,7 +93,7 @@ const quickActions = [
 
     title: "Informe de\nasistencias",
 
-    href: "/admin/attendance",
+    href: "/admin/Attendance",
   },
 
   {

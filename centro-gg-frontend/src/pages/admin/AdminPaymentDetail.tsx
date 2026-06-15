@@ -61,7 +61,7 @@ const badgeVariants: Record<
   string,
   "danger" | "warning" | "info"
 > = {
-  ATRASADO: "danger",
+  RECHAZADO: "danger",
 
   PENDIENTE: "warning",
 
@@ -148,8 +148,7 @@ const AdminPaymentDetail = () => {
           id: data.id,
 
             student:
-              data.profiles?.full_name ??
-              "Sin nombre",
+             (data.profiles as any)?.full_name ?? "Sin nombre",
 
         subtotal: Number(data.subtotal),
 
@@ -169,7 +168,7 @@ const AdminPaymentDetail = () => {
             ? "PAGADO"
             : data.status === "pending"
             ? "PENDIENTE"
-            : "ATRASADO",
+            : "RECHAZADA",
       };
 
       const formattedItems =
@@ -351,7 +350,46 @@ const AdminPaymentDetail = () => {
     );
   }
 };
+const rejectPayment = async () => {
+  const confirmed = window.confirm(
+    "¿Desea rechazar esta factura?"
+  );
 
+  if (!confirmed) return;
+
+  try {
+    const { error } =
+      await supabase
+        .from("payments")
+        .update({
+          status: "cancelled",
+        })
+        .eq("id", payment.id);
+
+    if (error) {
+      console.error(error);
+
+      alert(
+        "Error rechazando factura."
+      );
+
+      return;
+    }
+
+    await fetchPayment();
+
+    alert(
+      "Factura rechazada."
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Error inesperado."
+    );
+  }
+};
   return (
     <AdminLayout>
       <main className="bg-[#f5f5f5] min-h-screen p-8">
@@ -394,10 +432,6 @@ const AdminPaymentDetail = () => {
               >
                 Volver
               </Button>
-
-              <Button>
-                Descargar PDF
-              </Button>
             </div>
           </div>
         </div>
@@ -412,9 +446,9 @@ const AdminPaymentDetail = () => {
                   ESTUDIANTE
                 </p>
 
-                <h3 className="text-xl font-bold mt-3">
-                  {payment.student}
-                </h3>
+                <h3 className="text-xl font-bold mt-3 break-words">
+                      {payment.student}
+                    </h3>
               </Card>
 
               <Card className="p-6">
@@ -458,15 +492,17 @@ const AdminPaymentDetail = () => {
                   ESTADO
                 </p>
 
-                <Badge
-                  variant={
-                    badgeVariants[
-                      payment.status
-                    ]
-                  }
-                >
-                  {payment.status}
-                </Badge>
+               
+              <Badge
+                variant={
+                  badgeVariants[
+                    payment.status
+                  ]
+                }
+                className="w-fit max-w-full"
+              >
+                {payment.status}
+              </Badge>
               </Card>
             </div>
 
@@ -592,15 +628,25 @@ const AdminPaymentDetail = () => {
                   )}
                 </div>
 
-            {payment.status ===
-              "PENDIENTE" && (
+           {payment.status ===
+            "PENDIENTE" && (
+            <div className="flex gap-3 mt-8">
               <Button
-                className="w-full mt-8"
+                className="flex-1"
                 onClick={validatePayment}
               >
                 Validar Pago
               </Button>
-            )}
+
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={rejectPayment}
+              >
+                Rechazar
+              </Button>
+            </div>
+          )}
           </Card>
         </div>
       </main>

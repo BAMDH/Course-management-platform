@@ -57,7 +57,9 @@ const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
 const AdminPaymentDetail = lazy(() => import('@/pages/admin/AdminPaymentDetail'));
 const AdminReports = lazy(() => import('@/pages/admin/AdminReports'));
 const AdminCreateCourse = lazy(() => import('@/pages/admin/AdminCreateCourse'));
-
+const AdminAttendance = lazy(() => import('@/pages/admin/AdminAttendance'));
+const AdminAttendanceDetails =  lazy(() =>import("@/pages/admin/AdminAttendanceDetails")
+  );
 // ─────────────────────────────────────────────────────────────────────────────
 // Rutas públicas (con Header compartido)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -155,9 +157,11 @@ const adminLayout = (
     <Route path="payments" element={<AdminPayments />} />
     <Route path="reports" element={<AdminReports />} />
     <Route path="payments/detail/:id" element={<AdminPaymentDetail />} />
-    <Route path="resources/:id" element={<AdminResources />}
-    />
-  </Route>
+    <Route path="resources/:id" element={<AdminResources />} />
+     <Route path="attendance" element={<AdminAttendance />} /> 
+     <Route path="attendance/details/:id" element={<AdminAttendanceDetails />} />
+     
+      </Route>
 );
 
 // ─────────────────────────────────────────────────────────────────────────────

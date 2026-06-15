@@ -50,15 +50,6 @@ type PendingStudent = {
   };
 };
 
-type CourseSession = {
-  id: string;
-  course_id: string;
-  title: string;
-  description: string | null;
-  starts_at: string | null;
-  ends_at: string | null;
-  session_order: number | null;
-};
 
 const AdminResources = () => {
   const { id } = useParams();
@@ -332,38 +323,7 @@ setStudents(formattedStudents);
     }
   };
 
-  const updateTeacher =
-    async () => {
-      if (!id) return;
 
-      // DELETE OLD
-      await supabase
-        .from("course_teachers")
-        .delete()
-        .eq("course_id", id);
-
-      // INSERT NEW
-      if (teacherId) {
-        const { error } =
-          await supabase
-            .from("course_teachers")
-            .insert({
-              course_id: id,
-
-              teacher_id: teacherId,
-            });
-
-        if (error) {
-          console.error(error);
-
-          return;
-        }
-      }
-
-      alert(
-        "Profesor actualizado correctamente"
-      );
-    };
 
   const approveStudent =
     async (

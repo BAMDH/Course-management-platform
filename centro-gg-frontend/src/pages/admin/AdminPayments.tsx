@@ -2,7 +2,6 @@ import AdminLayout from "@/layout/AdminLayout";
 
 import {
   Wallet,
-  ArrowRight,
 } from "lucide-react";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
@@ -13,15 +12,11 @@ import Card from "@/components/admin/Cards/Card";
 
 import StatCard from "@/components/admin/Cards/StatCard";
 
-import Badge from "@/components/admin/badges/Badges";
-
 import TableHeader from "@/components/admin/tables/TableHeader";
 
-import TableCell from "@/components/admin/tables/TableCell";
 
 import SearchInput from "@/components/admin/ui/SearchInput";
 
-import Button from "@/components/admin/Button";
 import PaymentRow from "@/components/admin/tables/PaymentRow";
 import { useEffect, useMemo, useState } from "react";
 
@@ -29,15 +24,11 @@ import { supabase } from "@/services/supabase";
 
 type Payment = {
   id: string;
-
+  studentId: string; // 👈 AGREGAR ESTO
   initials: string;
-
   student: string;
-
   invoiceId: string;
-
   date: string;
-
   status: string;
 };
 
@@ -55,7 +46,17 @@ const AdminPayments = () => {
     fetchPayments();
     
   }, []);
+  const statusMap: Record<string, string> = {
+  paid: "PAGADO",
+  pending: "PENDIENTE",
+  cancelled: "RECHAZADO",
+};
 
+const [stats, setStats] = useState({
+  paid: 0,
+  pending: 0,
+  cancelled: 0,
+});
   const fetchPayments = async () => {
     setLoading(true);
 
@@ -86,15 +87,15 @@ const AdminPayments = () => {
     const formattedPayments =
       data.map((payment) => ({
         id: payment.id,
-
+          studentId: payment.student_id,
         student:
-            payment.profiles?.full_name ??
+            (payment.profiles as any)?.full_name ??
             "Sin nombre",
 
         initials:
-          payment.profiles?.full_name
+          (payment.profiles as any)?.full_name
             ?.split(" ")
-            .map((n) => n[0])
+            .map((n: string) => n[0])
             .join("")
             .slice(0, 2)
             .toUpperCase() ?? "NA",
@@ -106,20 +107,27 @@ const AdminPayments = () => {
           payment.issued_at
         ).toLocaleDateString(),
 
-        status:
-          payment.status === "paid"
-            ? "PAGADO"
-            : payment.status ===
-              "pending"
-            ? "PENDIENTE"
-            : "ATRASADO",
+       status: statusMap[payment.status] ?? payment.status,
       })) || [];
 
     setPayments(formattedPayments);
 
-    setLoading(false);
-   
-  };
+const paid = data.filter(
+  (p) => p.status === "paid"
+).length;
+
+const pending = data.filter(
+  (p) => p.status === "pending"
+).length;
+
+const cancelled = data.filter(
+  (p) => p.status === "cancelled"
+).length;
+
+setStats({ paid,  pending,  cancelled,});
+
+setLoading(false);
+}
 
 const filteredPayments =
   useMemo(() => {
@@ -145,17 +153,6 @@ const filteredPayments =
           .includes(value)
     );
   }, [payments, search]);   
-
-const badgeVariants: Record<
-  string,
-  "danger" | "warning" | "info"
-> = {
-  ATRASADO: "danger",
-
-  PENDIENTE: "warning",
-
-  PAGADO: "info",
-};
 
 
   return (
@@ -184,17 +181,22 @@ const badgeVariants: Record<
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard
-            title="RECAUDADO"
-            value="92%"
+            title="PAGADOS"
+            value={stats.paid}
             icon={<Wallet size={28} />}
-            trend="+8% este mes"
           />
 
           <StatCard
-            title="PAGOS PENDIENTES"
-            value="14"
+            title="PENDIENTES"
+            value={stats.pending}
+            icon={<Wallet size={28} />}
+          />
+
+          <StatCard
+            title="RECHAZADOS"
+            value={stats.cancelled}
             icon={<Wallet size={28} />}
           />
         </div>

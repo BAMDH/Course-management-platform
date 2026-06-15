@@ -44,7 +44,6 @@ const levels = [
 
 
 const AdminCreateCourse = () => {
-  const [courseImage, setCourseImage] = useState<File | null>(null);
   const [showImageLibrary, setShowImageLibrary] =
   useState(false);
   const [teachers, setTeachers] = useState<
