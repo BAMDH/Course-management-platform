@@ -17,7 +17,7 @@ import ImageLibraryModal from "@/components/admin/imageManager/ImageLibraryModal
 import SearchInput from "@/components/admin/ui/SearchInput";
 
 import { supabase } from "@/services/supabase";
-
+import CourseSessionsManager from "@/components/admin/sessions/CourseSessionsManager" 
 type Course = {
   id: string;
 
@@ -48,6 +48,16 @@ type PendingStudent = {
 
     avatar: string;
   };
+};
+
+type CourseSession = {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  session_order: number | null;
 };
 
 const AdminResources = () => {
@@ -565,7 +575,7 @@ const availableSlots =
 
               <div className="flex justify-between">
                 <span className="text-gray-500">
-                  Pendientes
+                  Solicitudes pendientes
                 </span>
 
                 <span className="font-bold">
@@ -639,6 +649,9 @@ const availableSlots =
             </div>
 
             <div className="mt-10">
+              <p className="text-sm text-gray-400 mb-2">
+                  Lista de solicitudes pendientes
+                </p>
               <SearchInput
                 placeholder="Buscar estudiante..."
                 value={search}
@@ -722,6 +735,9 @@ const availableSlots =
           </Card>
 
         </div>
+        <CourseSessionsManager
+        courseId={course.id}
+      />
       </main>
       <ImageLibraryModal
         open={showImageLibrary}
@@ -730,8 +746,10 @@ const availableSlots =
         }
         onSelect={handleImageChange}
       />
+      
     </AdminLayout>
-  );
+  )
+  ;
 };
 
 export default AdminResources;

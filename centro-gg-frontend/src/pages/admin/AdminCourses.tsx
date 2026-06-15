@@ -354,7 +354,7 @@ const AdminCourses = () => {
                 Instructores
               </h3>
 
-              <p className="leading-relaxed max-w-md text-red-100">
+              <p className="leading-relaxed max-w-md text-red-600">
                 Asigne chefs
                 profesionales y
                 especialistas para elevar
