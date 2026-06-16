@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/auth/useAuth';
 import {
   LayoutDashboard,
@@ -34,7 +34,6 @@ const navItems = [
 export function StudentLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);

@@ -103,8 +103,6 @@ const StudentProfile = () => {
     }
   }, [profile, isEditing]);
 
-  const isProfileComplete = profile && profile.full_name && profile.phone && profile.identification;
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile) return;

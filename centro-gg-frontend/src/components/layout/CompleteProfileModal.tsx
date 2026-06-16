@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { updateStudentProfile } from '@/services/studentProfileService';
 import { supabase } from '@/services/supabase';
