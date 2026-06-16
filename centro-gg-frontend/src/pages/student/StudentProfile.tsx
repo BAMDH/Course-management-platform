@@ -105,16 +105,6 @@ const StudentProfile = () => {
 
   const isProfileComplete = profile && profile.full_name && profile.phone && profile.identification;
 
-  // Force edit mode if essential info is missing
-  useEffect(() => {
-    if (profile && !isEditing) {
-      if (!isProfileComplete) {
-        setIsEditing(true);
-        setFormError('Por favor completa tu información personal obligatoria para poder continuar.');
-      }
-    }
-  }, [profile, isEditing, isProfileComplete]);
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile) return;
@@ -665,14 +655,12 @@ const StudentProfile = () => {
 
               {/* Actions */}
               <div className="flex justify-end gap-4 pt-4">
-                {isProfileComplete && (
-                  <button 
-                    onClick={() => setIsEditing(false)}
-                    className="px-6 py-2.5 rounded-full font-bold text-sm text-[#1b1c1b] border border-[#e9e8e7] hover:bg-gray-50 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                )}
+                <button 
+                  onClick={() => setIsEditing(false)}
+                  className="px-6 py-2.5 rounded-full font-bold text-sm text-[#1b1c1b] border border-[#e9e8e7] hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
                 <button 
                   onClick={handleSave}
                   disabled={updateMutation.isPending}

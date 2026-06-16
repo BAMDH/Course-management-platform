@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { supabase } from '@/services/supabase';
+import { CompleteProfileModal } from './CompleteProfileModal';
 import { useState, useEffect, useRef } from 'react';
 
 const navItems = [
@@ -95,13 +96,7 @@ export function StudentLayout() {
     fetchLayoutData();
   }, [user]);
 
-  useEffect(() => {
-    if (profile && location.pathname !== '/student/profile') {
-      if (!profile.full_name || !profile.phone || !profile.identification) {
-        navigate('/student/profile', { replace: true });
-      }
-    }
-  }, [profile, location.pathname, navigate]);
+  const isProfileComplete = profile && profile.full_name && profile.phone && profile.identification && profile.province && profile.district && profile.exact_address;
 
   const handleLogout = async () => {
     localStorage.removeItem("selected_app_role");
@@ -327,6 +322,17 @@ export function StudentLayout() {
           <Outlet />
         </main>
       </div>
+
+      {profile && !isProfileComplete && (
+        <CompleteProfileModal 
+          user={user} 
+          profile={profile} 
+          onSave={() => {
+            // Refetch or navigate to self to update state
+            window.location.reload();
+          }} 
+        />
+      )}
     </div>
   );
 }
