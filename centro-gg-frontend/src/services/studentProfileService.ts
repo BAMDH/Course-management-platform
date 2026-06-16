@@ -159,7 +159,7 @@ export async function updateStudentProfile(userId: string, updates: ProfileUpdat
       full_name: updates.full_name,
       phone: updates.phone,
       identification: updates.identification,
-      date_of_birth: updates.date_of_birth,
+      date_of_birth: updates.date_of_birth || null,
       province: updates.province,
       canton: updates.canton,
       district: updates.district,

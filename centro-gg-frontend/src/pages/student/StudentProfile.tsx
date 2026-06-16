@@ -79,6 +79,9 @@ const StudentProfile = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studentProfile'] });
       setIsEditing(false);
+    },
+    onError: (err: any) => {
+      setFormError(err.message || 'Error al actualizar el perfil.');
     }
   });
 
