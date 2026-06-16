@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   ChevronRight, 
   User, 
@@ -68,7 +68,6 @@ const MOCK_MATERIALS: MaterialCard[] = [
 ];
 
 export default function StudentClassroom() {
-  const { courseId } = useParams();
   const [activeTab, setActiveTab] = useState('Materiales');
 
   const tabs = ['Materiales', 'Anuncios', 'Información', 'Tareas'];

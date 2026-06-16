@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/auth/useAuth';
-import { Award, CalendarDays, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getStudentDashboardData } from '@/services/studentDashboardService';
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   // Fetch real data from the database
@@ -29,11 +31,10 @@ const StudentDashboard = () => {
     );
   }
 
-  const studentName = user?.user_metadata?.full_name?.split(' ')[0];
-  const { generalAverage, hoursCompleted, ongoingCourses } = data || {
-    generalAverage: 0,
-    hoursCompleted: 0,
-    ongoingCourses: []
+  const studentName = user?.user_metadata?.full_name?.split(' ')[0] || 'Estudiante';
+  const { ongoingCourses, avatarUrl } = data || {
+    ongoingCourses: [],
+    avatarUrl: null
   };
 
   return (
@@ -52,42 +53,54 @@ const StudentDashboard = () => {
           </div>
 
           <p className="text-[#5d5e60] text-[15px] leading-relaxed max-w-md">
-            Tu progreso culinario va por excelente camino. Hoy tienes 2 lecciones pendientes en el Módulo de Repostería Francesa.
+            {ongoingCourses.length > 0 
+              ? `Actualmente estás inscrito en ${ongoingCourses.length} curso(s). ¡Sigue aprendiendo y mejorando tus habilidades!`
+              : "No tienes cursos activos en este momento. ¡Explora nuestras opciones!"}
           </p>
-
-          <div className="flex gap-4 pt-2">
-            <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-[#e9e8e7]">
-              <div className="text-2xl font-bold text-[#1b1c1b]">{generalAverage}%</div>
-              <div className="text-[10px] font-bold text-[#5d5e60] uppercase tracking-wider mt-1">Promedio General</div>
-            </div>
-            <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-[#e9e8e7]">
-              <div className="text-2xl font-bold text-[#1b1c1b]">{hoursCompleted}</div>
-              <div className="text-[10px] font-bold text-[#5d5e60] uppercase tracking-wider mt-1">Horas Cursadas</div>
-            </div>
-          </div>
         </div>
 
-        {/* Decorative Chef Image */}
-        <div className="hidden md:block w-[300px] h-[300px] absolute right-8 bottom-[-40px] transform rotate-[-2deg] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 z-0">
+        {/* Profile Image */}
+        <div className="hidden md:block w-32 h-32 absolute right-12 top-1/2 -translate-y-1/2 rounded-full overflow-hidden shadow-md border-4 border-white/80 z-0">
           <img
-            src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=400"
-            alt="Chef"
+            src={avatarUrl || "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=200"}
+            alt="Perfil"
             className="w-full h-full object-cover"
           />
         </div>
       </section>
 
-      {/* Bento Grid layout for Courses and Quick Access */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Courses Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">Mis Cursos</h2>
+          <button 
+            onClick={() => navigate('/student/courses')}
+            className="text-sm font-bold text-[#dc2626] hover:underline"
+          >
+            Ver todos
+          </button>
+        </div>
 
-        {/* Mis Cursos (Takes 2 columns) */}
-        <section className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">Mis Cursos</h2>
-            <button className="text-sm font-bold text-[#dc2626] hover:underline">Ver todos</button>
+        {ongoingCourses.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-dashed border-[#a3a3a3] shadow-sm overflow-hidden flex flex-col items-center justify-center py-12 px-6 text-center h-[300px]">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-gray-400 font-bold text-xl">!</span>
+            </div>
+            <h2 className="text-[20px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-2">
+              Aún no estás inscrito en ningún curso
+            </h2>
+            <p className="text-[#5d5e60] text-[14px] mb-6 max-w-sm">
+              Explora nuestra oferta académica y comienza tu viaje culinario.
+            </p>
+            <button 
+              onClick={() => navigate('/courses')}
+              className="bg-[#dc2626] hover:bg-[#b91c1c] px-6 text-white font-bold py-2.5 rounded-xl transition-colors text-[14px]"
+            >
+              Ver Cursos Disponibles
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ongoingCourses.map(course => (
               <div key={course.id} className="bg-white rounded-3xl p-4 shadow-sm border border-[#e9e8e7] flex flex-col hover:shadow-md transition-shadow">
                 <div className="h-40 rounded-2xl overflow-hidden mb-4 relative">
@@ -115,58 +128,8 @@ const StudentDashboard = () => {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Accesos Rápidos (Takes 1 column) */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">Accesos Rápidos</h2>
-
-          <div className="bg-[#f5f3f2] rounded-3xl p-6 shadow-sm flex flex-col gap-6">
-
-            {/* Camino a la Certificación */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e9e8e7]">
-              <div className="flex gap-4 items-start mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                  <Award className="w-5 h-5 text-[#dc2626]" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-bold text-sm text-[#1b1c1b]">Camino a la<br />Certificación</h4>
-                    <span className="font-bold text-[#dc2626] text-sm">75%</span>
-                  </div>
-                  <div className="h-2 w-full bg-[#f5f3f2] rounded-full overflow-hidden mt-3">
-                    <div className="h-full bg-[#dc2626] rounded-full w-[75%]" />
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-[#5d5e60] font-medium italic">
-                ¡Sólo te falta completar 1 módulo más para tu diploma!
-              </p>
-            </div>
-
-            {/* Próximos Eventos */}
-            <div>
-              <h3 className="text-xs font-bold text-[#5d5e60] tracking-wider uppercase mb-4">Próximos Eventos</h3>
-
-              <div className="flex items-center gap-4 group cursor-pointer">
-                <div className="bg-white rounded-xl shadow-sm border border-[#e9e8e7] w-14 h-14 flex flex-col items-center justify-center flex-shrink-0 group-hover:border-[#dc2626] transition-colors">
-                  <span className="text-[#dc2626] text-[10px] font-bold uppercase">Oct</span>
-                  <span className="text-[#1b1c1b] font-bold text-lg leading-none">24</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#1b1c1b] group-hover:text-[#dc2626] transition-colors">Masterclass: Macarons</h4>
-                  <div className="flex items-center gap-1 text-xs text-[#5d5e60] mt-1">
-                    <CalendarDays className="w-3 h-3" />
-                    <span>18:00 hrs • Zoom</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-      </div>
+        )}
+      </section>
     </div>
   );
 };

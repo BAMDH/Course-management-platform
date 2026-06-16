@@ -96,3 +96,48 @@ export async function getFeaturedPublishedCourses(): Promise<LandingCourse[]> {
 
   return data ?? []
 }
+
+export type StudentEnrolledCourse = {
+  id: string;
+  course_id: string;
+  status: string;
+  enrolled_at: string;
+  course: {
+    id: string;
+    title: string;
+    description: string | null;
+    cover_image_path: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    location: string | null;
+    status: string;
+  };
+};
+
+export async function getStudentCourses(studentId: string): Promise<StudentEnrolledCourse[]> {
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select(`
+      id,
+      course_id,
+      status,
+      enrolled_at,
+      course:courses (
+        id,
+        title,
+        description,
+        cover_image_path,
+        start_date,
+        end_date,
+        location,
+        status
+      )
+    `)
+    .eq("student_id", studentId);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data as any) ?? [];
+}

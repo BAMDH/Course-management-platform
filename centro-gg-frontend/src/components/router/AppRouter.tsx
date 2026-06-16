@@ -1,10 +1,12 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { PublicLayout } from './PublicLayout';
 import {
   Route,
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
+  useLocation,
+  Outlet
 } from 'react-router-dom';
 
 // ── Componentes core ─────────────────────────────────────────────────────────
@@ -170,9 +172,37 @@ const adminLayout = (
 // ─────────────────────────────────────────────────────────────────────────────
 // Router
 // ─────────────────────────────────────────────────────────────────────────────
+
+function TitleManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    let title = 'Centro GG';
+
+    if (path.startsWith('/admin')) {
+      title = 'Admin | Centro GG';
+    } else if (path.startsWith('/teacher')) {
+      title = 'Teacher | Centro GG';
+    } else if (path.startsWith('/student')) {
+      title = 'Student | Centro GG';
+    } else if (path.includes('/login')) {
+      title = 'Login | Centro GG';
+    } else if (path.includes('/register')) {
+      title = 'Register | Centro GG';
+    } else if (path.includes('/courses')) {
+      title = 'Courses | Centro GG';
+    }
+
+    document.title = title;
+  }, [location]);
+
+  return <Outlet />;
+}
+
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/">
+    <Route path="/" element={<TitleManager />}>
       {publicLayout}
       {authLayout}
       {studentLayout}

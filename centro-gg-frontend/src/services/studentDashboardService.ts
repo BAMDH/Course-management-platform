@@ -1,8 +1,7 @@
 import { supabase } from "@/services/supabase";
 
 export type StudentDashboardData = {
-  generalAverage: number;
-  hoursCompleted: number;
+  avatarUrl: string | null;
   ongoingCourses: {
     id: string;
     title: string;
@@ -13,10 +12,10 @@ export type StudentDashboardData = {
 };
 
 export async function getStudentDashboardData(email: string): Promise<StudentDashboardData> {
-  // 1. Get the actual user ID by email since we might be mocking the session
+  // 1. Get the actual user ID and avatar by email since we might be mocking the session
   const { data: profileData, error: profileError } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, avatar_url')
     .eq('email', email)
     .single();
 
@@ -24,8 +23,7 @@ export async function getStudentDashboardData(email: string): Promise<StudentDas
     console.error("Could not find profile for email:", email, profileError);
     // Return empty fallback
     return {
-      generalAverage: 0,
-      hoursCompleted: 0,
+      avatarUrl: null,
       ongoingCourses: [],
     };
   }
@@ -55,17 +53,12 @@ export async function getStudentDashboardData(email: string): Promise<StudentDas
   }
 
   // 3. Process data
-  let totalHours = 0;
   const ongoingCourses = (enrollments || []).map((enrollment: any, index: number) => {
     const course = enrollment.courses;
-    if (course.duration_hours) {
-      totalHours += Number(course.duration_hours);
-    }
     
     return {
       id: course.id,
       title: course.title,
-      // We don't have modules mapped yet, fallback to level or a generic string
       module: course.level ? course.level.toUpperCase() : `MÓDULO ${index + 1}`,
       // Progress is not natively tracked yet, simulate a value for visual purposes
       progress: Math.floor(Math.random() * 40) + 10, // random between 10 and 50
@@ -73,12 +66,8 @@ export async function getStudentDashboardData(email: string): Promise<StudentDas
     };
   });
 
-  // Since we don't have assignment_grades yet to calculate an average, we fallback
-  const generalAverage = enrollments && enrollments.length > 0 ? 85 : 0;
-
   return {
-    generalAverage,
-    hoursCompleted: totalHours,
+    avatarUrl: profileData.avatar_url,
     ongoingCourses,
   };
 }

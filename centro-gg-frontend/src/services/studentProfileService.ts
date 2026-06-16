@@ -6,6 +6,7 @@ export type StudentProfileData = {
   full_name: string;
   phone: string;
   cedula: string;
+  date_of_birth: string;
   level: string;
   avatar_url: string;
   provincia: string;
@@ -14,7 +15,9 @@ export type StudentProfileData = {
   direccion_exacta: string;
   created_at: string;
   generalAverage: number;
-  hoursCompleted: number;
+  generalAttendance: number;
+  attendanceStatus: string;
+  email_notifications: boolean;
   recentModules: {
     id: string;
     title: string;
@@ -32,7 +35,7 @@ export type StudentProfileData = {
   } | null;
 };
 
-export type ProfileUpdatePayload = Partial<Omit<StudentProfileData, 'id' | 'email' | 'created_at' | 'generalAverage' | 'hoursCompleted' | 'recentModules' | 'certifications' | 'ongoingCourse'>>;
+export type ProfileUpdatePayload = Partial<Omit<StudentProfileData, 'id' | 'email' | 'created_at' | 'generalAverage' | 'generalAttendance' | 'attendanceStatus' | 'recentModules' | 'certifications' | 'ongoingCourse'>>;
 
 export async function getStudentProfileData(email: string): Promise<StudentProfileData> {
   const { data: profileData, error: profileError } = await supabase
@@ -64,38 +67,66 @@ export async function getStudentProfileData(email: string): Promise<StudentProfi
     throw enrollmentsError;
   }
 
-  let totalHours = 0;
-  let ongoingCourse = null;
+  let ongoingCourse: { id: string; title: string; schedule: string } | null = null;
   
   if (enrollments && enrollments.length > 0) {
     enrollments.forEach((enrollment: any) => {
       const courseArray = enrollment.courses;
       const course = Array.isArray(courseArray) ? courseArray[0] : courseArray;
 
-      if (course && course.duration_hours) {
-        totalHours += Number(course.duration_hours);
-      }
       if (enrollment.status === 'active' && !ongoingCourse) {
         // Find the first active course
         ongoingCourse = {
           id: course.id,
           title: course.title,
-          schedule: 'Jueves, 18:00 - 21:00' // Mock schedule since we don't have sessions mapped to enrollments easily yet
+          schedule: 'Horario por definir' // Requires session integration
         };
       }
     });
   }
 
-  // Fallbacks for data that doesn't exist yet natively
-  const recentModules = [
-    { id: '1', title: 'Masas Laminadas y Hojaldres', grade: 95 },
-    { id: '2', title: 'Galletería Fina', grade: 98 },
-  ];
+  // Fetch Attendance
+  const { data: attendanceData } = await supabase
+    .from('attendance')
+    .select('status')
+    .eq('student_id', profileData.id);
 
-  const certifications = [
-    { id: '1', title: 'Fundamentos de Repostería Básica', date: 'Junio 2023' },
-    { id: '2', title: 'Manipulación de Alimentos Acreditada', date: 'Enero 2023' },
-  ];
+  let generalAttendance = 0;
+  let attendanceStatus = 'Sin datos';
+  if (attendanceData && attendanceData.length > 0) {
+    const present = attendanceData.filter((a: any) => a.status === 'present' || a.status === 'late').length;
+    generalAttendance = Math.round((present / attendanceData.length) * 100);
+    if (generalAttendance >= 90) attendanceStatus = 'Excelente';
+    else if (generalAttendance >= 80) attendanceStatus = 'Bueno';
+    else if (generalAttendance >= 70) attendanceStatus = 'Regular';
+    else attendanceStatus = 'En Riesgo';
+  }
+
+  // Fetch Certificates
+  const { data: certsData } = await supabase
+    .from('certificates')
+    .select('id, course_id, issued_at, courses(title)')
+    .eq('student_id', profileData.id);
+
+  const certifications = (certsData || []).map((c: any) => ({
+    id: c.id,
+    title: c.courses?.title || 'Certificado',
+    date: new Date(c.issued_at).toLocaleDateString('es-CR', { year: 'numeric', month: 'long' })
+  }));
+
+  // Fetch Grades (Recent Modules)
+  const { data: gradesData } = await supabase
+    .from('assignment_grades')
+    .select('id, score, assignments(title), graded_at')
+    .eq('student_id', profileData.id)
+    .order('graded_at', { ascending: false })
+    .limit(3);
+
+  const recentModules = (gradesData || []).map((g: any) => ({
+    id: g.id,
+    title: g.assignments?.title || 'Asignación',
+    grade: Number(g.score)
+  }));
 
   return {
     id: profileData.id,
@@ -103,15 +134,18 @@ export async function getStudentProfileData(email: string): Promise<StudentProfi
     full_name: profileData.full_name || '',
     phone: profileData.phone || '',
     cedula: profileData.cedula || '',
-    level: profileData.level || 'Estudiante Nivel Intermedio',
+    date_of_birth: profileData.date_of_birth || '',
+    level: profileData.level || '',
     avatar_url: profileData.avatar_url || '',
     provincia: profileData.provincia || '',
     canton: profileData.canton || '',
     distrito: profileData.distrito || '',
     direccion_exacta: profileData.direccion_exacta || '',
     created_at: profileData.created_at,
-    generalAverage: 92, // Mock for visual representation as in Figma
-    hoursCompleted: totalHours,
+    email_notifications: profileData.email_notifications ?? true,
+    generalAverage: 0, // Placeholder as calculating accurate average depends on multiple weights
+    generalAttendance,
+    attendanceStatus,
     recentModules,
     certifications,
     ongoingCourse
@@ -125,11 +159,13 @@ export async function updateStudentProfile(userId: string, updates: ProfileUpdat
       full_name: updates.full_name,
       phone: updates.phone,
       cedula: updates.cedula,
+      date_of_birth: updates.date_of_birth,
       provincia: updates.provincia,
       canton: updates.canton,
       distrito: updates.distrito,
       direccion_exacta: updates.direccion_exacta,
       avatar_url: updates.avatar_url,
+      email_notifications: updates.email_notifications,
     })
     .eq('id', userId);
 
@@ -159,5 +195,12 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
 
 export async function updateStudentPassword(password: string): Promise<void> {
   const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+}
+
+export async function resetStudentPassword(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
   if (error) throw error;
 }

@@ -11,7 +11,8 @@ import {
   Camera, 
   Loader2,
   Award,
-  Download
+  Download,
+  X
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -19,8 +20,26 @@ import {
   updateStudentProfile, 
   uploadAvatar, 
   updateStudentPassword,
+  resetStudentPassword,
   type ProfileUpdatePayload
 } from '@/services/studentProfileService';
+import { costaRicaLocations, type Province } from "@/data/costaRicaLocations";
+
+function onlyNumbers(value: string) {
+  return value.replace(/\D/g, "")
+}
+
+function isValidIdentification(value: string) {
+  return /^\d{9}$/.test(value)
+}
+
+function isValidPhone(value: string) {
+  return /^\d{8}$/.test(value)
+}
+
+function isValidPassword(value: string) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(value)
+}
 
 const StudentProfile = () => {
   const { user } = useAuth();
@@ -32,6 +51,22 @@ const StudentProfile = () => {
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+
+  const provincesList = Object.keys(costaRicaLocations);
+
+  const cantonsList = formData.provincia
+    ? Object.keys(costaRicaLocations[formData.provincia as Province] || {})
+    : [];
+
+  const districtsList =
+    formData.provincia && formData.canton
+      ? costaRicaLocations[formData.provincia as Province]?.[
+          formData.canton as keyof (typeof costaRicaLocations)[Province]
+        ] ?? []
+      : [];
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['studentProfile', user?.email],
@@ -58,12 +93,25 @@ const StudentProfile = () => {
         canton: profile.canton,
         distrito: profile.distrito,
         direccion_exacta: profile.direccion_exacta,
+        date_of_birth: profile.date_of_birth,
         avatar_url: profile.avatar_url,
+        email_notifications: profile.email_notifications,
       });
       setPasswordData({ current: '', new: '', confirm: '' });
       setPasswordError('');
+      setFormError('');
     }
   }, [profile, isEditing]);
+
+  // Force edit mode if essential info is missing
+  useEffect(() => {
+    if (profile && !isEditing) {
+      if (!profile.full_name || !profile.phone || !profile.cedula) {
+        setIsEditing(true);
+        setFormError('Por favor completa tu información personal obligatoria.');
+      }
+    }
+  }, [profile]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,7 +130,28 @@ const StudentProfile = () => {
   };
 
   const handleSave = async () => {
+    setFormError('');
+    // Validation
+    if (!formData.full_name?.trim() || !formData.phone?.trim() || !formData.cedula?.trim()) {
+      setFormError('Nombre Completo, Teléfono y Cédula son obligatorios.');
+      return;
+    }
+
+    if (!isValidIdentification(formData.cedula || '')) {
+      setFormError('La cédula debe contener exactamente 9 dígitos numéricos.');
+      return;
+    }
+
+    if (!isValidPhone(formData.phone || '')) {
+      setFormError('El teléfono debe contener exactamente 8 dígitos numéricos.');
+      return;
+    }
+
     if (passwordData.new) {
+      if (!isValidPassword(passwordData.new)) {
+        setPasswordError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.');
+        return;
+      }
       if (passwordData.new !== passwordData.confirm) {
         setPasswordError('Las contraseñas no coinciden');
         return;
@@ -96,6 +165,22 @@ const StudentProfile = () => {
     }
     
     updateMutation.mutate(formData);
+  };
+
+  const handleResetPassword = async () => {
+    if (!profile?.email) return;
+    try {
+      await resetStudentPassword(profile.email);
+      setResetMessage('Se ha enviado un enlace de restablecimiento a tu correo electrónico.');
+    } catch (err: any) {
+      setResetMessage('Error al enviar enlace de restablecimiento.');
+    }
+  };
+
+  const handleToggleNotifications = () => {
+    if (profile) {
+      updateMutation.mutate({ email_notifications: !profile.email_notifications });
+    }
   };
 
   if (isLoading) {
@@ -179,9 +264,11 @@ const StudentProfile = () => {
               <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mt-4 text-center">
                 {profile.full_name || 'Estudiante'}
               </h2>
-              <span className="text-[#5d5e60] text-xs font-medium mt-1 text-center">
-                {profile.level}
-              </span>
+              {profile.level && (
+                <span className="text-[#5d5e60] text-xs font-medium mt-1 text-center">
+                  {profile.level}
+                </span>
+              )}
             </div>
 
             {!isEditing && (
@@ -220,6 +307,17 @@ const StudentProfile = () => {
                     </div>
                   </div>
                 </div>
+                {profile.date_of_birth && (
+                  <div className="flex items-start gap-3">
+                    <CalendarDays className="w-4 h-4 text-[#dc2626] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-[10px] font-bold text-[#5d5e60] uppercase tracking-wider">Fecha de Nacimiento</div>
+                      <div className="text-sm text-[#1b1c1b] font-medium mt-0.5">
+                        {new Date(profile.date_of_birth).toLocaleDateString('es-CR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -262,12 +360,12 @@ const StudentProfile = () => {
                     <div className="relative w-20 h-20 mt-4 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path className="text-gray-200 stroke-current" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path className="text-[#dc2626] stroke-current" strokeDasharray="92, 100" strokeWidth="3" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path className="text-[#dc2626] stroke-current" strokeDasharray={`${profile.generalAttendance}, 100`} strokeWidth="3" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                       </svg>
-                      <div className="absolute font-bold text-lg text-[#1b1c1b]">92%</div>
+                      <div className="absolute font-bold text-lg text-[#1b1c1b]">{profile.generalAttendance}%</div>
                     </div>
                     <div className="bg-blue-100 text-blue-700 text-[10px] font-bold uppercase px-3 py-1 rounded-full mt-3">
-                      Excelente
+                      {profile.attendanceStatus}
                     </div>
                   </div>
                 </div>
@@ -278,7 +376,7 @@ const StudentProfile = () => {
                     Módulos Recientes
                   </div>
                   <div className="divide-y divide-[#e9e8e7]">
-                    {profile.recentModules.map(mod => (
+                    {profile.recentModules.length > 0 ? profile.recentModules.map(mod => (
                       <div key={mod.id} className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
@@ -293,7 +391,11 @@ const StudentProfile = () => {
                           {mod.grade}/100
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="p-4 text-sm text-gray-500 text-center">
+                        No hay módulos recientes.
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
@@ -305,11 +407,18 @@ const StudentProfile = () => {
                     <Award className="w-5 h-5 text-[#dc2626]" />
                     Certificaciones Obtenidas
                   </h3>
-                  <button className="text-sm font-bold text-[#dc2626] hover:underline">Ver todas</button>
+                  {profile.certifications.length > 0 && (
+                    <button 
+                      onClick={() => setIsCertModalOpen(true)}
+                      className="text-sm font-bold text-[#dc2626] hover:underline"
+                    >
+                      Ver todas
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {profile.certifications.map(cert => (
+                  {profile.certifications.length > 0 ? profile.certifications.map(cert => (
                     <div key={cert.id} className="bg-white border border-[#e9e8e7] rounded-2xl p-5 flex gap-4 items-start shadow-sm hover:border-red-200 transition-colors">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Award className="w-6 h-6 text-gray-400" />
@@ -323,7 +432,11 @@ const StudentProfile = () => {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="col-span-1 md:col-span-2 p-6 text-center bg-white border border-[#e9e8e7] rounded-2xl shadow-sm text-gray-500 text-sm">
+                      Aún no has obtenido certificaciones. ¡Sigue aprendiendo!
+                    </div>
+                  )}
                 </div>
               </section>
 
@@ -340,15 +453,19 @@ const StudentProfile = () => {
                       <div className="font-bold text-sm text-[#1b1c1b]">Notificaciones por Correo</div>
                       <div className="text-xs text-[#5d5e60]">Recibir actualizaciones de cursos y horarios.</div>
                     </div>
-                    {/* Fake Toggle */}
-                    <div className="w-11 h-6 bg-[#dc2626] rounded-full relative cursor-pointer">
-                      <div className="absolute right-1 top-1 bg-white w-4 h-4 rounded-full" />
-                    </div>
+                    {/* Real Toggle */}
+                    <button 
+                      onClick={handleToggleNotifications}
+                      className={`w-11 h-6 rounded-full relative transition-colors ${profile.email_notifications ? 'bg-[#dc2626]' : 'bg-gray-300'}`}
+                      aria-label="Toggle notifications"
+                    >
+                      <div className={`absolute top-1 bg-white w-4 h-4 rounded-full transition-transform ${profile.email_notifications ? 'right-1' : 'left-1'}`} />
+                    </button>
                   </div>
                   <div className="p-5 flex justify-between items-center">
                     <div>
                       <div className="font-bold text-sm text-[#1b1c1b]">Contraseña</div>
-                      <div className="text-xs text-[#5d5e60]">Última actualización hace 3 meses.</div>
+                      <div className="text-xs text-[#5d5e60]">Puedes actualizar tu contraseña en el modo de edición.</div>
                     </div>
                     <button 
                       onClick={() => setIsEditing(true)}
@@ -364,24 +481,41 @@ const StudentProfile = () => {
             // ================= EDIT MODE =================
             <div className="space-y-6">
               
+              {formError && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-medium border border-red-100">
+                  {formError}
+                </div>
+              )}
+
               {/* Información Personal */}
               <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
                 <h3 className="flex items-center gap-2 text-lg font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-6">
-                  <span className="text-[#dc2626]">👤</span> Información Personal
+                  Información Personal
                 </h3>
                 
                 <div className="space-y-5">
-                  <div>
-                    <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Nombre Completo</label>
-                    <input 
-                      type="text" 
-                      value={formData.full_name || ''}
-                      onChange={e => setFormData({...formData, full_name: e.target.value})}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Nombre Completo <span className="text-red-500">*</span></label>
+                      <input 
+                        type="text" 
+                        value={formData.full_name || ''}
+                        onChange={e => setFormData({...formData, full_name: e.target.value})}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Cédula <span className="text-red-500">*</span></label>
+                      <input 
+                        type="text" 
+                        value={formData.cedula || ''}
+                        onChange={e => setFormData({...formData, cedula: onlyNumbers(e.target.value).slice(0, 9)})}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
+                      />
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Correo Electrónico</label>
                       <input 
@@ -392,11 +526,20 @@ const StudentProfile = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Teléfono</label>
+                      <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Teléfono <span className="text-red-500">*</span></label>
                       <input 
                         type="tel" 
                         value={formData.phone || ''}
-                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        onChange={e => setFormData({...formData, phone: onlyNumbers(e.target.value).slice(0, 8)})}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Fecha de Nacimiento</label>
+                      <input 
+                        type="date" 
+                        value={formData.date_of_birth || ''}
+                        onChange={e => setFormData({...formData, date_of_birth: e.target.value})}
                         className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
                       />
                     </div>
@@ -409,38 +552,42 @@ const StudentProfile = () => {
                         <label className="block text-xs text-gray-500 mb-1">Provincia</label>
                         <select 
                           value={formData.provincia || ''}
-                          onChange={e => setFormData({...formData, provincia: e.target.value})}
+                          onChange={e => setFormData({...formData, provincia: e.target.value, canton: '', distrito: ''})}
                           className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white"
                         >
                           <option value="">Seleccionar...</option>
-                          <option value="San José">San José</option>
-                          <option value="Alajuela">Alajuela</option>
-                          <option value="Cartago">Cartago</option>
-                          <option value="Heredia">Heredia</option>
-                          <option value="Guanacaste">Guanacaste</option>
-                          <option value="Puntarenas">Puntarenas</option>
-                          <option value="Limón">Limón</option>
+                          {provincesList.map(prov => (
+                            <option key={prov} value={prov}>{prov}</option>
+                          ))}
                         </select>
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">Cantón</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ej. Escazú"
+                        <select 
                           value={formData.canton || ''}
-                          onChange={e => setFormData({...formData, canton: e.target.value})}
-                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
-                        />
+                          onChange={e => setFormData({...formData, canton: e.target.value, distrito: ''})}
+                          disabled={!formData.provincia}
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white disabled:bg-gray-50 disabled:text-gray-400"
+                        >
+                          <option value="">Seleccionar...</option>
+                          {cantonsList.map(can => (
+                            <option key={can} value={can}>{can}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">Distrito</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ej. San Rafael"
+                        <select 
                           value={formData.distrito || ''}
                           onChange={e => setFormData({...formData, distrito: e.target.value})}
-                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
-                        />
+                          disabled={!formData.canton}
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white disabled:bg-gray-50 disabled:text-gray-400"
+                        >
+                          <option value="">Seleccionar...</option>
+                          {districtsList.map(dist => (
+                            <option key={dist} value={dist}>{dist}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                     <div>
@@ -459,13 +606,18 @@ const StudentProfile = () => {
               {/* Seguridad */}
               <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
                 <h3 className="flex items-center gap-2 text-lg font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-6">
-                  <span className="text-[#dc2626]">🔒</span> Seguridad
+                  Seguridad
                 </h3>
                 
                 <div className="space-y-5">
                   {passwordError && (
-                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl">
+                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100">
                       {passwordError}
+                    </div>
+                  )}
+                  {resetMessage && (
+                    <div className="p-3 bg-green-50 text-green-600 text-sm rounded-xl border border-green-100">
+                      {resetMessage}
                     </div>
                   )}
                   <div>
@@ -497,6 +649,15 @@ const StudentProfile = () => {
                       />
                     </div>
                   </div>
+                  <div className="pt-2 flex justify-start">
+                    <button 
+                      type="button"
+                      onClick={handleResetPassword}
+                      className="text-xs font-bold text-[#dc2626] hover:text-red-700 hover:underline transition-colors"
+                    >
+                      Olvidé mi contraseña, enviar enlace de restablecimiento
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -523,6 +684,53 @@ const StudentProfile = () => {
 
         </div>
       </div>
+
+      {/* Certifications Modal */}
+      {isCertModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-6 border-b border-[#e9e8e7] flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold font-['Manrope',sans-serif] flex items-center gap-2">
+                <Award className="w-6 h-6 text-[#dc2626]" />
+                Mis Certificaciones
+              </h2>
+              <button 
+                onClick={() => setIsCertModalOpen(false)}
+                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 gap-4">
+                {profile.certifications.map(cert => (
+                  <div key={cert.id} className="bg-white border border-[#e9e8e7] rounded-2xl p-5 flex gap-4 items-start shadow-sm hover:border-red-200 transition-colors">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Award className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-sm text-[#1b1c1b] leading-tight mb-1">{cert.title}</h4>
+                      <div className="text-xs text-[#5d5e60] mb-3">Emitido: {cert.date}</div>
+                      <button className="flex items-center gap-1.5 text-xs font-bold text-[#dc2626] hover:text-red-700 transition-colors">
+                        <Download className="w-3.5 h-3.5" />
+                        Descargar PDF
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-6 border-t border-[#e9e8e7] bg-gray-50 flex justify-end">
+              <button 
+                onClick={() => setIsCertModalOpen(false)}
+                className="px-6 py-2.5 rounded-full font-bold text-sm text-[#1b1c1b] border border-[#e9e8e7] hover:bg-gray-100 transition-colors bg-white shadow-sm"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

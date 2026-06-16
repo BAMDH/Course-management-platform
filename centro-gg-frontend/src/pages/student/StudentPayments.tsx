@@ -1,59 +1,59 @@
+import { useState, useMemo } from 'react';
 import { 
   Calendar, 
   Wallet, 
-  Filter, 
-  Download, 
-  Info 
+  Eye, 
+  Info,
+  X,
+  Loader2
 } from 'lucide-react';
 import clsx from 'clsx';
-
-interface Transaction {
-  id: string;
-  dateStr: string;
-  conceptTitle: string;
-  conceptSubtitle: string;
-  amount: string;
-  status: 'Pagado' | 'Pendiente';
-}
-
-const TRANSACTIONS: Transaction[] = [
-  {
-    id: 'tx-1',
-    dateStr: '12 Oct, 2023',
-    conceptTitle: 'Mensualidad Octubre',
-    conceptSubtitle: 'Masterclass de Cocina Francesa',
-    amount: '$150.00',
-    status: 'Pagado'
-  },
-  {
-    id: 'tx-2',
-    dateStr: '12 Sep, 2023',
-    conceptTitle: 'Matrícula Anual',
-    conceptSubtitle: 'Renovación 2023-2024',
-    amount: '$250.00',
-    status: 'Pagado'
-  },
-  {
-    id: 'tx-3',
-    dateStr: '15 Nov, 2023',
-    conceptTitle: 'Mensualidad Noviembre',
-    conceptSubtitle: 'Curso de Repostería Avanzada',
-    amount: '$150.00',
-    status: 'Pendiente'
-  },
-  {
-    id: 'tx-4',
-    dateStr: '05 Ago, 2023',
-    conceptTitle: 'Kit de Cuchillos Pro',
-    conceptSubtitle: 'Equipamiento',
-    amount: '$350.00',
-    status: 'Pagado'
-  }
-];
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/providers/auth/useAuth';
+import { getStudentPayments } from '@/services/studentPaymentsService';
+import { supabase } from '@/services/supabase';
 
 export default function StudentPayments() {
+  const { user } = useAuth();
+  const [filterMode, setFilterMode] = useState<string>('all');
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+
+  const { data: payments, isLoading, error } = useQuery({
+    queryKey: ['studentPayments', user?.email],
+    queryFn: () => getStudentPayments(user?.email || ''),
+    enabled: !!user?.email,
+  });
+
+  const filteredPayments = useMemo(() => {
+    if (!payments) return [];
+    if (filterMode === 'all') return payments;
+    return payments.filter(p => p.status.toLowerCase() === filterMode.toLowerCase());
+  }, [payments, filterMode]);
+
+  const nextPayment = useMemo(() => {
+    if (!payments) return null;
+    const pending = payments.filter(p => p.status === 'PENDIENTE');
+    return pending.length > 0 ? pending[pending.length - 1] : null;
+  }, [payments]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <Loader2 className="w-8 h-8 text-[#dc2626] animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-red-500">
+        Error cargando el historial de pagos. Intenta de nuevo más tarde.
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif] relative">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b]">
@@ -65,54 +65,53 @@ export default function StudentPayments() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8">
         {/* Próximo Pago Card */}
-        <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between">
-          <div className="flex items-start gap-5 mb-8">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-[#dc2626]" />
+        {nextPayment ? (
+          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
+            <div className="flex items-start gap-5 mb-8">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-[#dc2626]" />
+              </div>
+              <div>
+                <p className="text-[15px] font-medium text-[#5d5e60] mb-1">Próximo Pago</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">
+                    ₡{nextPayment.total.toLocaleString()}
+                  </span>
+                  <span className="text-[15px] text-[#5d5e60] font-medium">CRC</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[15px] font-medium text-[#5d5e60] mb-1">Próximo Pago</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">$150.00</span>
-                <span className="text-[15px] text-[#5d5e60] font-medium">USD</span>
+            
+            <div className="flex flex-col gap-2 pt-6 border-t border-[#e9e8e7]">
+              {nextPayment.items.map(item => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <Info className="w-[18px] h-[18px] text-[#5d5e60]" />
+                  <span className="text-[14px] text-[#5d5e60]">
+                    {item.courseTitle || item.description}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
+             <div className="flex items-start gap-5 mb-8">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <Wallet className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-[15px] font-medium text-[#5d5e60] mb-1">Próximo Pago</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">
+                    Al día
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 pt-6 border-t border-[#e9e8e7]">
-            <Info className="w-[18px] h-[18px] text-[#5d5e60]" />
-            <span className="text-[14px] text-[#5d5e60]">
-              Vence el 15 de Noviembre, 2023 (Curso de Repostería Avanzada)
-            </span>
-          </div>
-        </div>
-
-        {/* Total Invertido Card */}
-        <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between">
-          <div className="flex items-start gap-5 mb-8">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <Wallet className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-[15px] font-medium text-[#5d5e60] mb-1">Total Invertido</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">$1,450.00</span>
-                <span className="text-[15px] text-[#5d5e60] font-medium">USD</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between pt-6 border-t border-[#e9e8e7]">
-            <span className="text-[14px] text-[#5d5e60]">
-              Desde Enero 2023
-            </span>
-            <button className="text-[14px] font-bold text-[#dc2626] hover:underline">
-              Ver Reporte Anual
-            </button>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Transactions Table Card */}
@@ -122,10 +121,16 @@ export default function StudentPayments() {
           <h2 className="text-[18px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">
             Transacciones Recientes
           </h2>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#5d5e60] font-medium hover:bg-white border border-transparent hover:border-[#e9e8e7] transition-all">
-            <Filter className="w-[18px] h-[18px]" />
-            <span className="text-[14px]">Filtrar</span>
-          </button>
+          <select 
+            value={filterMode}
+            onChange={(e) => setFilterMode(e.target.value)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#5d5e60] font-medium hover:bg-white border border-[#e9e8e7] transition-all bg-white outline-none focus:ring-2 focus:ring-[#dc2626]"
+          >
+            <option value="all">Todos los estados</option>
+            <option value="pagado">Pagados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="rechazado">Rechazados</option>
+          </select>
         </div>
 
         {/* Responsive Table */}
@@ -141,57 +146,99 @@ export default function StudentPayments() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e9e8e7]">
-              {TRANSACTIONS.map((tx) => (
-                <tr key={tx.id} className="hover:bg-slate-50 transition-colors group">
-                  <td className="py-5 px-8 whitespace-nowrap">
-                    <span className="text-[14px] font-medium text-[#1b1c1b]">{tx.dateStr}</span>
-                  </td>
-                  <td className="py-5 px-8">
-                    <div>
-                      <p className="text-[15px] font-bold text-[#1b1c1b] leading-tight mb-1">{tx.conceptTitle}</p>
-                      <p className="text-[13px] text-[#5d5e60]">{tx.conceptSubtitle}</p>
-                    </div>
-                  </td>
-                  <td className="py-5 px-8 whitespace-nowrap">
-                    <span className="text-[15px] font-bold text-[#1b1c1b]">{tx.amount}</span>
-                  </td>
-                  <td className="py-5 px-8 whitespace-nowrap">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f5f3f2]">
-                      <div className={clsx(
-                        "w-1.5 h-1.5 rounded-full",
-                        tx.status === 'Pagado' ? "bg-[#dc2626]" : "bg-[#a3a3a3]"
-                      )} />
-                      <span className="text-[13px] font-bold text-[#5d5e60]">
-                        {tx.status}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-5 px-8 text-right whitespace-nowrap">
-                    <button className="p-2 text-[#5d5e60] hover:text-[#dc2626] hover:bg-[#fee2e2] rounded-lg transition-colors inline-flex justify-center items-center">
-                      <Download className="w-[18px] h-[18px]" />
-                    </button>
+              {filteredPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 px-8 text-center text-[#5d5e60] text-[15px]">
+                    No se encontraron transacciones.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredPayments.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-slate-50 transition-colors group">
+                    <td className="py-5 px-8 whitespace-nowrap">
+                      <span className="text-[14px] font-medium text-[#1b1c1b]">
+                        {new Date(tx.issued_at).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td className="py-5 px-8">
+                      <div className="space-y-1">
+                        {tx.items.length === 0 ? (
+                           <p className="text-[15px] font-bold text-[#1b1c1b] leading-tight">Factura #{tx.id.slice(0,8)}</p>
+                        ) : (
+                           tx.items.map(item => (
+                             <div key={item.id}>
+                                <p className="text-[15px] font-bold text-[#1b1c1b] leading-tight">{item.courseTitle || item.description}</p>
+                                <p className="text-[13px] text-[#5d5e60]">{item.description}</p>
+                             </div>
+                           ))
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-5 px-8 whitespace-nowrap">
+                      <span className="text-[15px] font-bold text-[#1b1c1b]">₡{tx.total.toLocaleString()}</span>
+                    </td>
+                    <td className="py-5 px-8 whitespace-nowrap">
+                      <div className={clsx(
+                        "inline-flex items-center gap-2 px-3 py-1.5 rounded-full",
+                        tx.status === 'PAGADO' ? "bg-[#f0fdf4]" : 
+                        tx.status === 'PENDIENTE' ? "bg-[#fffbeb]" : "bg-[#fef2f2]"
+                      )}>
+                        <div className={clsx(
+                          "w-1.5 h-1.5 rounded-full",
+                          tx.status === 'PAGADO' ? "bg-[#16a34a]" : 
+                          tx.status === 'PENDIENTE' ? "bg-[#d97706]" : "bg-[#dc2626]"
+                        )} />
+                        <span className={clsx(
+                          "text-[13px] font-bold",
+                          tx.status === 'PAGADO' ? "text-[#16a34a]" : 
+                          tx.status === 'PENDIENTE' ? "text-[#d97706]" : "text-[#dc2626]"
+                        )}>
+                          {tx.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-5 px-8 text-right whitespace-nowrap">
+                      {tx.receipt_image_path ? (
+                        <button 
+                          onClick={() => setSelectedReceipt(tx.receipt_image_path)}
+                          className="p-2 text-[#5d5e60] hover:text-[#dc2626] hover:bg-[#fee2e2] rounded-lg transition-colors inline-flex justify-center items-center"
+                          title="Ver Recibo"
+                        >
+                          <Eye className="w-[18px] h-[18px]" />
+                        </button>
+                      ) : (
+                        <span className="text-[13px] text-[#a3a3a3] italic">Sin recibo</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+      </div>
 
-        {/* Table Footer / Pagination */}
-        <div className="p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between border-t border-[#e9e8e7] gap-4">
-          <span className="text-[14px] text-[#5d5e60] font-medium">
-            Mostrando 4 de 12 transacciones
-          </span>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-xl border border-[#e9e8e7] text-[14px] font-bold text-[#5d5e60] hover:bg-[#f5f3f2] transition-colors">
-              Anterior
+      {/* Receipt Modal */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedReceipt(null)}>
+          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-auto relative" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setSelectedReceipt(null)}
+              className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
             </button>
-            <button className="px-4 py-2 rounded-xl border border-[#e9e8e7] text-[14px] font-bold text-[#1b1c1b] hover:bg-[#f5f3f2] transition-colors">
-              Siguiente
-            </button>
+            <h3 className="text-xl font-bold mb-4 pr-10">Comprobante de Pago</h3>
+            <div className="rounded-xl overflow-hidden border border-gray-200">
+              {selectedReceipt.startsWith('http') ? (
+                <img src={selectedReceipt} alt="Comprobante de Pago" className="w-full h-auto object-contain max-h-[70vh]" />
+              ) : (
+                <img src={supabase.storage.from('receipts').getPublicUrl(selectedReceipt).data.publicUrl} alt="Comprobante de Pago" className="w-full h-auto object-contain max-h-[70vh]" />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
