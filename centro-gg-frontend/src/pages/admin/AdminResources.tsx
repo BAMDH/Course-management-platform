@@ -325,33 +325,76 @@ setStudents(formattedStudents);
 
 
 
-  const approveStudent =
-    async (
-      enrollmentId: string
-    ) => {
-      const confirmAction =
-        window.confirm(
-          "¿Desea aprobar este estudiante?"
-        );
+ const approveStudent = async (
+  enrollmentId: string
+) => {
+   if (!course) return;
+    if (
+    activeEnrollmentsCount >=
+    course.max_capacity
+  ) {
+    alert(
+      "El curso ya alcanzó su capacidad máxima."
+    );
 
-      if (!confirmAction) return;
+    return;
+  }
+  const confirmAction =
+    window.confirm(
+      "¿Desea aprobar este estudiante?"
+    );
 
-      const { error } =
-        await supabase
-          .from("enrollments")
-          .update({
-            status: "active",
-          })
-          .eq("id", enrollmentId);
+  if (!confirmAction) return;
 
-      if (error) {
-        console.error(error);
+  const { error } = await supabase
+    .from("enrollments")
+    .update({
+      status: "active",
+    })
+    .eq("id", enrollmentId);
 
-        return;
-      }
+  if (error) {
+    console.error(error);
+    return;
+  }
 
-      fetchData();
-    };
+  // Contar estudiantes activos
+  const {
+    data: activeEnrollments,
+    error: countError,
+  } = await supabase
+    .from("enrollments")
+    .select("id")
+    .eq("course_id", id)
+    .eq("status", "active");
+
+  if (countError) {
+    console.error(countError);
+    return;
+  }
+
+  
+  if (
+    activeEnrollments.length >=
+    course.max_capacity
+  )
+  
+  {
+    const { error: courseError } =
+      await supabase
+        .from("courses")
+        .update({
+          status: "Activo",
+        })
+        .eq("id", id);
+
+    if (courseError) {
+      console.error(courseError);
+    }
+  }
+
+  fetchData();
+};
 
   const rejectStudent =
     async (
