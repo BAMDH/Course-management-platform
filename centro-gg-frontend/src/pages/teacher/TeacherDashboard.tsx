@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
@@ -22,6 +23,7 @@ const TeacherDashboard = () => {
 
   const [dashboardData, setDashboardData] =
     useState<TeacherDashboardData | null>(null);
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState("all");
 
   useEffect(() => {
     const teacherId = user?.id ?? "";
@@ -71,17 +73,79 @@ const TeacherDashboard = () => {
   const courses = dashboardData?.courses ?? [];
   const events = dashboardData?.events ?? [];
   const students = dashboardData?.students ?? [];
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const courseFilterOptions = Array.from(
+    new Set(students.map((student) => student.course))
+  );
+
+  const searchResults =
+    searchTerm.trim().length === 0
+      ? []
+      : [
+          ...courses
+            .filter((course) =>
+              course.title.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((course) => ({
+              id: course.id,
+              title: course.title,
+              subtitle: "Curso",
+              type: "course" as const,
+            })),
+          ...students
+            .filter(
+              (student) =>
+                student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                student.course.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((student) => ({
+              id: student.id,
+              title: student.name,
+              subtitle: student.course,
+              type: "student" as const,
+            })),
+        ];
+
+  const filteredStudents =
+    selectedCourseFilter === "all"
+      ? students
+      : students.filter((student) => student.course === selectedCourseFilter);
+
+  function getAttendancePercentage(student: (typeof students)[number]) {
+    return Number(student.progress ?? 0);
+  }
+
+  function handleExportExcel() {
+    const rows = filteredStudents.map((student) => ({
+      Estudiante: student.name,
+      Curso: student.course,
+      Estado: student.status,
+      Asistencia: `${getAttendancePercentage(student)}%`,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    worksheet["!cols"] = [
+      { wch: 28 },
+      { wch: 28 },
+      { wch: 16 },
+      { wch: 14 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asistencia");
+
+    XLSX.writeFile(workbook, "asistencia-estudiantes.xlsx");
+  }
 
   if (!user) {
-    return (
-      <main className="p-8">
-        Debe iniciar sesión para ver el dashboard.
-      </main>
-    );
+    return <main className="p-8">Debe iniciar sesión para ver el dashboard.</main>;
   }
 
   return (
-    <main className="p-8 max-w-7xl mx-auto space-y-10 font-['Inter',sans-serif] bg-white">
+    <main className="mx-auto max-w-7xl space-y-10 bg-white p-8 font-['Inter',sans-serif]">
       <section className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
@@ -93,12 +157,44 @@ const TeacherDashboard = () => {
           </p>
         </div>
 
-        <div className="flex w-full items-center gap-2 rounded-full bg-[#f5f3f2] px-5 py-3 text-[#5d5e60] lg:w-[320px]">
-          <Search className="h-5 w-5" />
+        <div className="relative w-80">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-[#858688]" />
 
-          <span className="text-sm text-[#5d5e60]/50">
-            Buscar alumnos o cursos...
-          </span>
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Buscar alumno o curso..."
+            className="w-full rounded-xl border border-[#e9e8e7] py-2 pl-10 pr-4 outline-none focus:border-[#dd2817]"
+          />
+
+          {searchResults.length > 0 && (
+            <div className="absolute top-12 z-50 w-full overflow-hidden rounded-2xl border border-[#e9e8e7] bg-white shadow-xl">
+              {searchResults.slice(0, 8).map((result) => (
+                <button
+                  key={`${result.type}-${result.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+
+                    if (result.type === "course") {
+                      navigate(`/teacher/courses/${result.id}`);
+                    } else {
+                      navigate("/teacher/students");
+                    }
+                  }}
+                  className="block w-full border-b border-[#f5f3f2] px-4 py-3 text-left hover:bg-[#f5f3f2]"
+                >
+                  <p className="text-sm font-bold text-[#1b1c1b]">
+                    {result.title}
+                  </p>
+
+                  <p className="text-xs text-[#5d5e60]">
+                    {result.subtitle}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -242,51 +338,64 @@ const TeacherDashboard = () => {
             </h2>
 
             <p className="mt-1 text-sm text-[#5d5e60]">
-              Revise sus alumnos y su progreso académico.
+              Revise sus alumnos y su porcentaje de asistencia.
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <button className="inline-flex items-center gap-2 rounded-lg bg-[#f5f3f2] px-4 py-2 text-sm font-semibold text-[#5d5e60]">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-[#f5f3f2] px-4 py-2 text-sm font-semibold text-[#5d5e60]">
               <Filter className="h-4 w-4" />
-              Filtrar
-            </button>
 
-            <button className="inline-flex items-center gap-2 rounded-lg bg-[#f5f3f2] px-4 py-2 text-sm font-semibold text-[#5d5e60]">
+              <select
+                value={selectedCourseFilter}
+                onChange={(event) => setSelectedCourseFilter(event.target.value)}
+                className="bg-transparent outline-none"
+              >
+                <option value="all">Todos los cursos</option>
+
+                {courseFilterOptions.map((course) => (
+                  <option key={course} value={course}>
+                    {course}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#f5f3f2] px-4 py-2 text-sm font-semibold text-[#5d5e60]"
+            >
               <Download className="h-4 w-4" />
-              Exportar CSV
+              Exportar Excel
             </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[850px]">
+          <table className="w-full min-w-[750px]">
             <thead className="bg-[#f5f3f2]/70">
               <tr className="text-left text-xs font-bold uppercase tracking-wider text-[#5d5e60]">
                 <th className="px-8 py-4">Estudiante</th>
                 <th className="px-8 py-4">Curso</th>
                 <th className="px-8 py-4">Estado</th>
-                <th className="px-8 py-4">Progreso</th>
-                <th className="px-8 py-4 text-right">Calificación</th>
+                <th className="px-8 py-4">Asistencia</th>
               </tr>
             </thead>
 
             <tbody>
-              {students.length === 0 ? (
+              {filteredStudents.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="px-8 py-8 text-center text-sm text-[#5d5e60]"
                   >
-                    No hay estudiantes matriculados en sus cursos.
+                    No hay estudiantes matriculados en este filtro.
                   </td>
                 </tr>
               ) : (
-                students.map((student) => (
-                  <tr
-                    key={student.id}
-                    className="border-t border-[#e9e8e7]"
-                  >
+                filteredStudents.map((student) => (
+                  <tr key={student.id} className="border-t border-[#e9e8e7]">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e4e4e7]">
@@ -311,23 +420,19 @@ const TeacherDashboard = () => {
 
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="h-1 w-24 rounded-full bg-[#e4e2e1]">
+                        <div className="h-2 w-32 overflow-hidden rounded-full bg-[#e4e2e1]">
                           <div
                             className="h-full rounded-full bg-[#b70700]"
                             style={{
-                              width: `${student.progress}%`,
+                              width: `${getAttendancePercentage(student)}%`,
                             }}
                           />
                         </div>
 
-                        <span className="text-[10px] font-bold text-[#1b1c1b]">
-                          {student.progress}%
+                        <span className="text-xs font-bold text-[#1b1c1b]">
+                          {getAttendancePercentage(student)}%
                         </span>
                       </div>
-                    </td>
-
-                    <td className="px-8 py-5 text-right text-sm text-[#5d5e60]">
-                      {student.grade}
                     </td>
                   </tr>
                 ))

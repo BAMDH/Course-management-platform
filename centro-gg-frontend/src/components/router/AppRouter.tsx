@@ -16,16 +16,15 @@ import AdminResources from '@/pages/admin/AdminResources';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 
 // ── Páginas públicas / auth ──────────────────────────────────────────────────
-
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const CoursesPage = lazy(() => import('@/pages/landing/CoursesPage'));
 const CourseDetail = lazy(() => import('@/pages/landing/CourseDetailPage'));
 const AboutPage = lazy(() => import('@/pages/landing/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/landing/ContactPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const AuthCallback = lazy(() => import('@/pages/auth/AuthCallback'));
-//const AuthRedirect   = lazy(() => import('@/pages/auth/AuthRedirect'));
 const Unauthorized = lazy(() => import('@/pages/other/UnauthorizedPage'));
 const ErrorPage = lazy(() => import('@/pages/other/ErrorPage'));
 
@@ -47,7 +46,10 @@ const TeacherAttendance = lazy(() => import('@/pages/teacher/TeacherAttendance')
 const TeacherAnnouncements = lazy(() => import('@/pages/teacher/TeacherAnnouncements'));
 const TeacherGrades = lazy(() => import('@/pages/teacher/TeacherGrades'));
 const TeacherCalendar = lazy(() => import('@/pages/teacher/TeacherCalendar'));
-
+const TeacherProfile = lazy(() => import('@/pages/teacher/TeacherProfile'));
+const TeacherStudents = lazy(() => import('@/pages/teacher/TeacherStudents'));
+const TeacherStudentDetail = lazy(() => import('@/pages/teacher/TeacherStudentDetail'));
+const HelpPage = lazy(() => import('@/pages/HelpPage'));
 
 // ── Páginas de administrador ─────────────────────────────────────────────────
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -58,10 +60,10 @@ const AdminPaymentDetail = lazy(() => import('@/pages/admin/AdminPaymentDetail')
 const AdminReports = lazy(() => import('@/pages/admin/AdminReports'));
 const AdminCreateCourse = lazy(() => import('@/pages/admin/AdminCreateCourse'));
 const AdminAttendance = lazy(() => import('@/pages/admin/AdminAttendance'));
-const AdminAttendanceDetails =  lazy(() =>import("@/pages/admin/AdminAttendanceDetails")
-  );
+const AdminAttendanceDetails = lazy(() => import('@/pages/admin/AdminAttendanceDetails'));
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Rutas públicas (con Header compartido)
+// Rutas públicas
 // ─────────────────────────────────────────────────────────────────────────────
 const publicLayout = (
   <Route element={<PublicLayout />} errorElement={<ErrorPage />}>
@@ -74,12 +76,13 @@ const publicLayout = (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Rutas de autenticación (sin Header)
+// Rutas de autenticación
 // ─────────────────────────────────────────────────────────────────────────────
 const authLayout = (
   <Route errorElement={<ErrorPage />}>
     <Route path="welcome" element={<LandingPage />} />
     <Route path="login" element={<LoginPage />} />
+    <Route path="reset-password" element={<ResetPasswordPage />} />
     <Route path="register" element={<RegisterPage />} />
     <Route path="auth/callback" element={<AuthCallback />} />
     <Route path="unauthorized" element={<Unauthorized />} />
@@ -98,7 +101,6 @@ const studentLayout = (
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
-
   >
     <Route index element={<StudentDashboard />} />
     <Route path="courses" element={<StudentCourses />} />
@@ -132,6 +134,10 @@ const teacherLayout = (
     <Route path="courses/:courseId/attendance" element={<TeacherAttendance />} />
     <Route path="attendance" element={<TeacherAttendance />} />
     <Route path="calendar" element={<TeacherCalendar />} />
+    <Route path="profile" element={<TeacherProfile />} />
+    <Route path="students" element={<TeacherStudents />} />
+    <Route path="students/:studentId" element={<TeacherStudentDetail />} />
+    <Route path="help" element={<HelpPage />} />
   </Route>
 );
 
@@ -141,27 +147,24 @@ const teacherLayout = (
 const adminLayout = (
   <Route
     path="admin"
-
     element={
       <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
         <Header />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}
-
   >
-    <Route path="courses/create" element={<AdminCreateCourse />} />
     <Route index element={<AdminDashboard />} />
     <Route path="users" element={<AdminUsers />} />
     <Route path="courses" element={<AdminCourses />} />
+    <Route path="courses/create" element={<AdminCreateCourse />} />
     <Route path="payments" element={<AdminPayments />} />
-    <Route path="reports" element={<AdminReports />} />
     <Route path="payments/detail/:id" element={<AdminPaymentDetail />} />
+    <Route path="reports" element={<AdminReports />} />
     <Route path="resources/:id" element={<AdminResources />} />
-     <Route path="attendance" element={<AdminAttendance />} /> 
-     <Route path="attendance/details/:id" element={<AdminAttendanceDetails />} />
-     
-      </Route>
+    <Route path="attendance" element={<AdminAttendance />} />
+    <Route path="attendance/details/:id" element={<AdminAttendanceDetails />} />
+  </Route>
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,14 +183,13 @@ const router = createBrowserRouter(
   )
 );
 
-// Spinner mientras se carga un chunk lazy
 const PageLoader = () => (
   <div
-    className="flex items-center justify-center min-h-screen"
+    className="flex min-h-screen items-center justify-center"
     style={{ backgroundColor: 'var(--background)' }}
   >
     <div
-      className="animate-spin rounded-full h-8 w-8 border-b-2"
+      className="h-8 w-8 animate-spin rounded-full border-b-2"
       style={{ borderBottomColor: 'var(--brand-tertiary-500, #3b82f6)' }}
     />
   </div>

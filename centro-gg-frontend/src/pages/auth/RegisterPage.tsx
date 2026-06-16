@@ -96,6 +96,8 @@ export default function RegisterPage() {
     event.preventDefault()
     setErrorMessage("")
 
+    const normalizedEmail = formData.email.trim().toLowerCase()
+
     if (!isValidIdentification(formData.identification)) {
       setErrorMessage("La cédula debe contener exactamente 9 dígitos numéricos.")
       return
@@ -120,8 +122,27 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
 
+    const { data: emailExists, error: emailExistsError } = await supabase.rpc(
+      "email_already_registered",
+      {
+        input_email: normalizedEmail,
+      }
+    )
+
+    if (emailExistsError) {
+      setErrorMessage("No se pudo validar el correo electrónico. Intentá nuevamente.")
+      setIsSubmitting(false)
+      return
+    }
+
+    if (emailExists) {
+      setErrorMessage("Este correo electrónico ya se encuentra registrado.")
+      setIsSubmitting(false)
+      return
+    }
+
     const { error } = await supabase.auth.signUp({
-      email: formData.email,
+      email: normalizedEmail,
       password: formData.password,
       options: {
         data: {

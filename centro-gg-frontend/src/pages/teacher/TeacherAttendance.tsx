@@ -312,18 +312,17 @@ export default function TeacherAttendance() {
         recorded_at: new Date().toISOString(),
       }));
 
-    if (records.length === 0) return;
+    if (records.length === 0) {
+      alert("Debe marcar la asistencia de al menos un estudiante.");
+      return;
+    }
 
     setSaving(true);
 
     try {
-      await supabase
-        .from("attendance")
-        .delete()
-        .eq("course_id", selectedCourseId)
-        .eq("session_id", selectedSession.id);
-
-      const { error } = await supabase.from("attendance").insert(records);
+      const { error } = await supabase.from("attendance").upsert(records, {
+        onConflict: "session_id,student_id",
+      });
 
       if (error) throw error;
 

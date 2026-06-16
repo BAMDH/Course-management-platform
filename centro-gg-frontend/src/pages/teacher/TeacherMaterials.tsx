@@ -4,11 +4,11 @@ import { useAuth } from "@/providers/auth/useAuth";
 import {
   ArrowLeft,
   BookOpen,
+  CalendarDays,
   ExternalLink,
   FileText,
   Link as LinkIcon,
   Plus,
-  Save,
   Upload,
   Video,
   X,
@@ -18,6 +18,12 @@ import clsx from "clsx";
 import { supabase } from "@/services/supabase";
 
 type MaterialKind = "recipe" | "document" | "video" | "link" | "extra";
+
+type CourseSession = {
+  id: string;
+  title: string | null;
+  starts_at: string | null;
+};
 
 type Material = {
   id: string;
@@ -31,6 +37,8 @@ type Material = {
   is_extra_purchase: boolean | null;
   price: number | null;
   published_at: string | null;
+  session: string | null;
+  course_sessions?: CourseSession | null;
 };
 
 type Course = {
@@ -47,6 +55,7 @@ type MaterialForm = {
   is_downloadable: boolean;
   is_extra_purchase: boolean;
   price: string;
+  session: string;
 };
 
 const emptyForm: MaterialForm = {
@@ -57,6 +66,7 @@ const emptyForm: MaterialForm = {
   is_downloadable: true,
   is_extra_purchase: false,
   price: "",
+  session: "",
 };
 
 const filters: { label: string; value: "all" | MaterialKind }[] = [
@@ -96,15 +106,28 @@ function sanitizeFileName(fileName: string) {
     .toLowerCase();
 }
 
+function formatSessionDate(value: string | null) {
+  if (!value) return "";
+
+  return new Intl.DateTimeFormat("es-CR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 export default function TeacherMaterials() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [course, setCourse] = useState<Course | null>(null);
+  const [sessions, setSessions] = useState<CourseSession[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [selectedFilter, setSelectedFilter] =
     useState<"all" | MaterialKind>("all");
+  const [selectedSessionFilter, setSelectedSessionFilter] = useState("all");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -126,6 +149,14 @@ export default function TeacherMaterials() {
 
         if (courseError) throw courseError;
 
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .from("course_sessions")
+          .select("id, title, starts_at")
+          .eq("course_id", courseId)
+          .order("starts_at", { ascending: true });
+
+        if (sessionsError) throw sessionsError;
+
         const { data: materialsData, error: materialsError } = await supabase
           .from("materials")
           .select(`
@@ -139,7 +170,13 @@ export default function TeacherMaterials() {
             is_downloadable,
             is_extra_purchase,
             price,
-            published_at
+            published_at,
+            session,
+            course_sessions:session (
+              id,
+              title,
+              starts_at
+            )
           `)
           .eq("course_id", courseId)
           .order("published_at", { ascending: false });
@@ -148,6 +185,7 @@ export default function TeacherMaterials() {
 
         if (isMounted) {
           setCourse(courseData as Course);
+          setSessions((sessionsData ?? []) as CourseSession[]);
           setMaterials((materialsData ?? []) as unknown as Material[]);
         }
       } catch (error) {
@@ -162,10 +200,17 @@ export default function TeacherMaterials() {
     };
   }, [courseId]);
 
-  const filteredMaterials =
-    selectedFilter === "all"
-      ? materials
-      : materials.filter((material) => material.kind === selectedFilter);
+  const filteredMaterials = materials.filter((material) => {
+    const matchesKind =
+      selectedFilter === "all" || material.kind === selectedFilter;
+
+    const matchesSession =
+      selectedSessionFilter === "all" ||
+      (selectedSessionFilter === "general" && !material.session) ||
+      material.session === selectedSessionFilter;
+
+    return matchesKind && matchesSession;
+  });
 
   function closeModal() {
     setIsModalOpen(false);
@@ -236,10 +281,10 @@ export default function TeacherMaterials() {
           external_url: form.external_url.trim() || null,
           is_downloadable: form.is_downloadable,
           is_extra_purchase: form.is_extra_purchase,
-          price:
-            form.is_extra_purchase && form.price ? Number(form.price) : 0,
+          price: form.is_extra_purchase && form.price ? Number(form.price) : 0,
           published_at: new Date().toISOString(),
           created_by: user.id,
+          session: form.session || null,
         })
         .select(`
           id,
@@ -252,7 +297,13 @@ export default function TeacherMaterials() {
           is_downloadable,
           is_extra_purchase,
           price,
-          published_at
+          published_at,
+          session,
+          course_sessions:session (
+            id,
+            title,
+            starts_at
+          )
         `)
         .single();
 
@@ -273,7 +324,7 @@ export default function TeacherMaterials() {
   }
 
   return (
-    <main className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl p-8 font-['Inter',sans-serif]">
       <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <button
@@ -289,8 +340,7 @@ export default function TeacherMaterials() {
           </h1>
 
           <p className="mt-2 text-base text-[#5d5e60]">
-            {course?.title ?? "Curso"}{" "}
-            {course?.level ? `• ${course.level}` : ""}
+            {course?.title ?? "Curso"} {course?.level ? `• ${course.level}` : ""}
           </p>
         </div>
 
@@ -303,7 +353,7 @@ export default function TeacherMaterials() {
         </button>
       </header>
 
-      <section className="mb-8 flex flex-wrap gap-3">
+      <section className="mb-5 flex flex-wrap gap-3">
         {filters.map((filter) => (
           <button
             key={filter.value}
@@ -320,10 +370,58 @@ export default function TeacherMaterials() {
         ))}
       </section>
 
+      <section className="mb-8 flex flex-wrap items-center gap-3 rounded-3xl border border-[#e9e8e7] bg-white p-4 shadow-sm">
+        <span className="text-sm font-extrabold text-[#1b1c1b]">
+          Filtrar por sesión:
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setSelectedSessionFilter("all")}
+          className={clsx(
+            "rounded-full px-4 py-2 text-xs font-bold transition-colors",
+            selectedSessionFilter === "all"
+              ? "bg-[#dd2817] text-white"
+              : "bg-[#f5f3f2] text-[#5d5e60] hover:bg-[#e9e8e7]"
+          )}
+        >
+          Todas
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedSessionFilter("general")}
+          className={clsx(
+            "rounded-full px-4 py-2 text-xs font-bold transition-colors",
+            selectedSessionFilter === "general"
+              ? "bg-[#dd2817] text-white"
+              : "bg-[#f5f3f2] text-[#5d5e60] hover:bg-[#e9e8e7]"
+          )}
+        >
+          Material general
+        </button>
+
+        {sessions.map((session) => (
+          <button
+            key={session.id}
+            type="button"
+            onClick={() => setSelectedSessionFilter(session.id)}
+            className={clsx(
+              "rounded-full px-4 py-2 text-xs font-bold transition-colors",
+              selectedSessionFilter === session.id
+                ? "bg-[#dd2817] text-white"
+                : "bg-[#f5f3f2] text-[#5d5e60] hover:bg-[#e9e8e7]"
+            )}
+          >
+            {session.title ?? "Sesión sin título"}
+          </button>
+        ))}
+      </section>
+
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {filteredMaterials.length === 0 ? (
           <div className="col-span-full rounded-3xl border border-[#e9e8e7] bg-white p-10 text-center text-[#5d5e60]">
-            No hay materiales registrados para este curso.
+            No hay materiales registrados para este filtro.
           </div>
         ) : (
           filteredMaterials.map((material) => (
@@ -349,6 +447,17 @@ export default function TeacherMaterials() {
                 <p className="mt-2 min-h-12 text-sm leading-6 text-[#5d5e60]">
                   {material.description ?? "Sin descripción registrada."}
                 </p>
+
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-xs font-bold text-[#dd2817]">
+                  <CalendarDays className="h-4 w-4" />
+                  {material.course_sessions
+                    ? `Sesión: ${material.course_sessions.title ?? "Sin título"} ${
+                        material.course_sessions.starts_at
+                          ? `• ${formatSessionDate(material.course_sessions.starts_at)}`
+                          : ""
+                      }`
+                    : "Material general del curso"}
+                </div>
 
                 {material.file_path && (
                   <p className="mt-3 rounded-xl bg-[#f5f3f2] px-4 py-3 text-xs font-bold text-[#5d5e60]">
@@ -413,6 +522,40 @@ export default function TeacherMaterials() {
             </div>
 
             <div className="grid grid-cols-1 gap-5">
+              <div>
+                <label className="mb-2 flex items-center gap-2 text-sm font-bold text-[#1b1c1b]">
+                  <CalendarDays className="h-4 w-4 text-[#dd2817]" />
+                  Sesión asociada
+                </label>
+
+                <select
+                  value={form.session}
+                  onChange={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      session: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-[#e4e2e1] px-4 py-3"
+                >
+                  <option value="">Material general del curso</option>
+
+                  {sessions.map((session) => (
+                    <option key={session.id} value={session.id}>
+                      {session.title ?? "Sesión sin título"}
+                      {session.starts_at
+                        ? ` • ${formatSessionDate(session.starts_at)}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+
+                <p className="mt-2 text-xs text-[#5d5e60]">
+                  Seleccione una sesión para ligar este material a una clase
+                  específica.
+                </p>
+              </div>
+
               <div>
                 <label className="mb-2 block text-sm font-bold text-[#1b1c1b]">
                   Título
@@ -518,41 +661,35 @@ export default function TeacherMaterials() {
                   className="w-full rounded-xl border border-[#e4e2e1] px-4 py-3"
                   placeholder="https://..."
                 />
-
-                <p className="mt-2 text-xs text-[#5d5e60]">
-                  Puede usar archivo, URL externa o ambos.
-                </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="flex items-center gap-3 rounded-xl bg-[#f5f3f2] p-4 text-sm font-bold">
-                  <input
-                    type="checkbox"
-                    checked={form.is_downloadable}
-                    onChange={(event) =>
-                      setForm((currentForm) => ({
-                        ...currentForm,
-                        is_downloadable: event.target.checked,
-                      }))
-                    }
-                  />
-                  Descargable
-                </label>
+              <label className="flex items-center gap-3 text-sm font-semibold text-[#5d5e60]">
+                <input
+                  type="checkbox"
+                  checked={form.is_downloadable}
+                  onChange={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      is_downloadable: event.target.checked,
+                    }))
+                  }
+                />
+                Permitir descarga
+              </label>
 
-                <label className="flex items-center gap-3 rounded-xl bg-[#f5f3f2] p-4 text-sm font-bold">
-                  <input
-                    type="checkbox"
-                    checked={form.is_extra_purchase}
-                    onChange={(event) =>
-                      setForm((currentForm) => ({
-                        ...currentForm,
-                        is_extra_purchase: event.target.checked,
-                      }))
-                    }
-                  />
-                  Compra extra
-                </label>
-              </div>
+              <label className="flex items-center gap-3 text-sm font-semibold text-[#5d5e60]">
+                <input
+                  type="checkbox"
+                  checked={form.is_extra_purchase}
+                  onChange={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      is_extra_purchase: event.target.checked,
+                    }))
+                  }
+                />
+                Material extra con costo
+              </label>
 
               {form.is_extra_purchase && (
                 <div>
@@ -570,27 +707,18 @@ export default function TeacherMaterials() {
                       }))
                     }
                     className="w-full rounded-xl border border-[#e4e2e1] px-4 py-3"
-                    placeholder="0"
+                    placeholder="Ej. 5000"
                   />
                 </div>
               )}
-            </div>
-
-            <div className="mt-8 flex justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="rounded-xl bg-[#f5f3f2] px-5 py-3 font-bold text-[#5d5e60] hover:bg-[#e9e8e7]"
-              >
-                Cancelar
-              </button>
 
               <button
+                type="button"
+                onClick={() => void handleCreateMaterial()}
                 disabled={saving}
-                onClick={handleCreateMaterial}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#dd2817] px-5 py-3 font-extrabold text-white hover:bg-[#b70700] disabled:opacity-50"
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#dd2817] px-5 py-4 font-extrabold text-white hover:bg-[#b70700] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Save className="h-5 w-5" />
-                {saving ? "Guardando..." : "Guardar Material"}
+                {saving ? "Guardando..." : "Guardar material"}
               </button>
             </div>
           </div>

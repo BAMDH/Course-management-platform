@@ -37,6 +37,28 @@ export default function LoginPage() {
     navigate(getRouteByRole(role))
   }
 
+  async function handleForgotPassword() {
+    setErrorMessage("")
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!normalizedEmail) {
+      setErrorMessage("Ingresá tu correo electrónico para recuperar la contraseña.")
+      return
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
+    if (error) {
+      setErrorMessage("No se pudo enviar el correo de recuperación. Intentá nuevamente.")
+      return
+    }
+
+    setErrorMessage("Te enviamos un correo para restablecer tu contraseña.")
+  }
+
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -128,6 +150,7 @@ export default function LoginPage() {
 
                   <button
                     type="button"
+                    onClick={handleForgotPassword}
                     className="text-xs font-semibold text-red-700"
                   >
                     ¿Olvidaste tu contraseña?

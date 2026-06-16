@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ClipboardList,
-  FolderOpen,
-  User,
-  Users,
-} from "lucide-react";
+import { ClipboardList, FolderOpen, User, Users } from "lucide-react";
 import clsx from "clsx";
 
 import { useAuth } from "@/providers/auth/useAuth";
+import { supabase } from "@/services/supabase";
 import { getTeacherDashboardData } from "@/services/teacherDashboardService";
 import type { TeacherDashboardData } from "@/services/teacherDashboardService";
+
+type CourseProgress = {
+  totalSessions: number;
+  completedSessions: number;
+  progress: number;
+};
 
 export default function TeacherCourses() {
   const navigate = useNavigate();
@@ -18,6 +20,10 @@ export default function TeacherCourses() {
 
   const [dashboardData, setDashboardData] =
     useState<TeacherDashboardData | null>(null);
+
+  const [courseProgressById, setCourseProgressById] = useState<
+    Record<string, CourseProgress>
+  >({});
 
   useEffect(() => {
     const teacherId = user?.id ?? "";
@@ -45,10 +51,59 @@ export default function TeacherCourses() {
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    async function loadCourseProgress() {
+      const courses = dashboardData?.courses ?? [];
+
+      if (courses.length === 0) return;
+
+      const courseIds = courses.map((course) => course.id);
+
+      const { data, error } = await supabase
+        .from("course_sessions")
+        .select("id, course_id, starts_at")
+        .in("course_id", courseIds);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const now = new Date();
+
+      const progressMap: Record<string, CourseProgress> = {};
+
+      courseIds.forEach((courseId) => {
+        const sessions = data?.filter((session) => session.course_id === courseId) ?? [];
+
+        const totalSessions = sessions.length;
+
+        const completedSessions = sessions.filter(
+          (session) => new Date(session.starts_at) <= now
+        ).length;
+
+        const progress =
+          totalSessions === 0
+            ? 0
+            : Math.round((completedSessions / totalSessions) * 100);
+
+        progressMap[courseId] = {
+          totalSessions,
+          completedSessions,
+          progress,
+        };
+      });
+
+      setCourseProgressById(progressMap);
+    }
+
+    void loadCourseProgress();
+  }, [dashboardData?.courses]);
+
   const courses = dashboardData?.courses ?? [];
 
   return (
-    <main className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl p-8 font-['Inter',sans-serif]">
       <header className="mb-10">
         <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
           Mis Cursos Asignados
@@ -59,22 +114,25 @@ export default function TeacherCourses() {
         </p>
       </header>
 
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-14">
+      <section className="mb-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {courses.length === 0 ? (
-          <p className="text-sm text-[#5d5e60]">
-            No tiene cursos asignados.
-          </p>
+          <p className="text-sm text-[#5d5e60]">No tiene cursos asignados.</p>
         ) : (
           courses.map((course) => {
-            const progressNumber = Number(course.progress.replace("%", ""));
+            const courseProgress = courseProgressById[course.id];
 
-            const disabled = progressNumber === 0;
+            const progressNumber = courseProgress?.progress ?? 0;
+
+            const completedSessions = courseProgress?.completedSessions ?? 0;
+            const totalSessions = courseProgress?.totalSessions ?? 0;
+
+            const disabled = totalSessions === 0 || progressNumber === 0;
 
             return (
               <article
                 key={course.id}
                 onClick={() => navigate(`/teacher/courses/${course.id}`)}
-                className="overflow-hidden rounded-3xl border border-[#e9e8e7] bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer overflow-hidden rounded-3xl border border-[#e9e8e7] bg-white shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="relative h-48">
                   <img
@@ -104,7 +162,7 @@ export default function TeacherCourses() {
                 </div>
 
                 <div className="p-6">
-                  <div className="grid grid-cols-2 gap-5 mb-7">
+                  <div className="mb-7 grid grid-cols-2 gap-5">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f5f3f2]">
                         <Users className="h-5 w-5 text-[#dd2817]" />
@@ -150,7 +208,7 @@ export default function TeacherCourses() {
                           disabled ? "text-[#5d5e60]" : "text-[#b70700]"
                         )}
                       >
-                        {Math.round(progressNumber)}%
+                        {progressNumber}%
                       </span>
                     </div>
 
@@ -163,6 +221,10 @@ export default function TeacherCourses() {
                         style={{ width: `${progressNumber}%` }}
                       />
                     </div>
+
+                    <p className="mt-2 text-xs font-semibold text-[#5d5e60]">
+                      {completedSessions} de {totalSessions} sesiones realizadas
+                    </p>
                   </div>
 
                   <button
@@ -174,7 +236,7 @@ export default function TeacherCourses() {
                     className={clsx(
                       "mb-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-extrabold transition-colors",
                       disabled
-                        ? "bg-[#f5f3f2] text-[#858688] cursor-not-allowed"
+                        ? "cursor-not-allowed bg-[#f5f3f2] text-[#858688]"
                         : "bg-[#f5f3f2] text-[#1b1c1b] hover:bg-[#e9e8e7]"
                     )}
                   >
@@ -191,22 +253,19 @@ export default function TeacherCourses() {
                     className={clsx(
                       "mb-3 flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-extrabold transition-colors",
                       disabled
-                        ? "border-[#e9e8e7] text-[#dd2817]/40 cursor-not-allowed"
+                        ? "cursor-not-allowed border-[#e9e8e7] text-[#dd2817]/40"
                         : "border-[#e9e8e7] text-[#b70700] hover:bg-[#fef2f2]"
                     )}
                   >
                     <ClipboardList className="h-4 w-4" />
                     Pasar Lista
                   </button>
-
                 </div>
               </article>
             );
           })
         )}
       </section>
-
     </main>
   );
 }
-
