@@ -7,9 +7,7 @@ import AdminLayout from "@/layout/AdminLayout";
 import {
   Users,
   ChefHat,
-  Plus,
   Wallet,
-  BookOpen,
   ClipboardList,
   ArrowRight,
   TrendingUp,
@@ -26,65 +24,7 @@ import StatCard from "@/components/admin/Cards/StatCard";
 import { supabase } from "@/services/supabase";
 import { Link } from "react-router-dom";
 
-const activities = [
-  {
-    icon: <Plus size={22} className="text-blue-600" />,
-    iconBg: "bg-blue-50",
 
-    title: "Nueva Inscripción: Lucía Méndez",
-
-    subtitle:
-      "Curso: Pastelería Francesa Avanzada",
-
-    time: "Hace 15 min",
-  },
-
-  {
-    icon: (
-      <Wallet
-        size={22}
-        className="text-green-600"
-      />
-    ),
-    iconBg: "bg-green-50",
-
-    title: "Pago Recibido: $450.00",
-
-    subtitle:
-      "ID Transacción: #GG-99281",
-
-    time: "Hace 2 horas",
-  },
-
-  {
-    icon: (
-      <BookOpen
-        size={22}
-        className="text-red-500"
-      />
-    ),
-    iconBg: "bg-red-50",
-
-    title: "Curso terminado",
-
-    subtitle:
-      "Curso: Diplomado en Ferretería",
-
-    time: "Hace 5 horas",
-  },
-
-  {
-    icon: <Plus size={22} className="text-blue-600" />,
-    iconBg: "bg-blue-50",
-
-    title: "Nueva Inscripción: Elena Torres",
-
-    subtitle:
-      "Curso: Gestión de Negocios",
-
-    time: "Ayer",
-  },
-];
 const quickActions = [
   {
     icon: (
@@ -135,11 +75,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
 
-      // TODOS LOS USUARIOS
-      const { data: profiles } =
-        await supabase
-          .from("profiles")
-          .select("id");
+     
 
       // ROLES
       const { data: roles } =
@@ -157,8 +93,7 @@ const AdminDashboard = () => {
           .select("id")
           .eq("status", "Activo");
 
-      const totalUsers =
-        profiles?.length ?? 0;
+     
 
       const totalTeachers =
         roles?.filter(
@@ -167,7 +102,10 @@ const AdminDashboard = () => {
         ).length ?? 0;
 
       const totalStudents =
-        totalUsers - totalTeachers;
+        roles?.filter(
+          (role) =>
+            role.role === "student"
+        ).length ?? 0;
 
       const totalCourses =
         courses?.length ?? 0;
@@ -218,7 +156,6 @@ const AdminDashboard = () => {
                   )
             }
             icon={<Users size={28} />}
-            trend="+12% este mes"
           />
 
           <StatCard
@@ -257,101 +194,35 @@ const AdminDashboard = () => {
 
         {/* Main */}
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
-          {/* Activities */}
-          <div className="min-w-0">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-[#202020]">
-                Actividad Reciente
-              </h2>
-
-              <button className="text-red-600 font-semibold hover:opacity-80 transition">
-                Ver todo el historial
-              </button>
-            </div>
-
-            <Card className="overflow-hidden p-0">
-              {activities.map(
-                (activity, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 px-6 py-6 ${
-                      index !==
-                      activities.length - 1
-                        ? "border-b border-gray-100"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-5 min-w-0">
-                      <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${activity.iconBg}`}
-                      >
-                        {activity.icon}
-                      </div>
-
-                      <div className="min-w-0">
-                        <h3 className="text-lg font-bold text-[#202020] truncate">
-                          {activity.title}
-                        </h3>
-
-                        <p className="text-gray-500 mt-1 truncate">
-                          {
-                            activity.subtitle
-                          }
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-left lg:text-right shrink-0">
-                      <p className="text-sm text-gray-500">
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                )
-              )}
-            </Card>
-          </div>
 
           {/* Quick Actions */}
-          <div className="w-full max-w-[340px] xl:ml-auto">
-            <h2 className="text-3xl font-bold text-[#202020] mb-6">
-              Acciones Rápidas
-            </h2>
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    {quickActions.map((action, index) => (
+      <Link
+        to={action.href}
+        key={index}
+      >
+        <Card className="p-6 hover:shadow-md transition cursor-pointer hover:-translate-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0">
+                {action.icon}
+              </div>
 
-            <div className="space-y-5">
-              {quickActions.map(
-                (action, index) => (
-                  <Link
-                      to={action.href}
-                      key={index}
-                    >
-                      <Card className="p-6 hover:shadow-md transition cursor-pointer hover:-translate-y-1">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0">
-                          {
-                            action.icon
-                          }
-                        </div>
-
-                        <h3 className="text-lg font-bold whitespace-pre-line text-[#202020] leading-tight">
-                          {
-                            action.title
-                          }
-                        </h3>
-                      </div>
-
-                      <ArrowRight
-                        size={24}
-                        className="text-[#202020] shrink-0"
-                      />
-                    </div>
-                    </Card>
-                     </Link>
-                )
-              )}
+              <h3 className="text-xl font-bold text-[#202020]">
+                {action.title}
+              </h3>
             </div>
+
+            <ArrowRight
+              size={24}
+              className="text-[#202020] shrink-0"
+            />
           </div>
+      </Card>
+    </Link>
+  ))}
+</div>
         </div>
       </main>
     </AdminLayout>

@@ -1,143 +1,301 @@
-// app/admin/reports/page.tsx
-
+import { useEffect, useState } from "react";
 import AdminLayout from "@/layout/AdminLayout";
+import { supabase } from "@/services/supabase";
+
 import {
   TrendingUp,
   Users,
   BadgeDollarSign,
   Star,
-  Download,
 } from "lucide-react";
 
-const courses = [
-  {
-    name: "Pastelería Francesa",
-    percentage: "45%",
-    width: "w-[45%]",
-    color: "bg-red-600",
-  },
-  {
-    name: "Pastelería Tradicional",
-    percentage: "28%",
-    width: "w-[28%]",
-    color: "bg-gray-500",
-  },
-  {
-    name: "Administración",
-    percentage: "17%",
-    width: "w-[17%]",
-    color: "bg-blue-600",
-  },
-  {
-    name: "Chocolatería",
-    percentage: "10%",
-    width: "w-[10%]",
-    color: "bg-gray-400",
-  },
-];
 
-const monthlyBars = [
-  { month: "MAY", height: "h-20", active: false },
-  { month: "JUN", height: "h-28", active: false },
-  { month: "JUL", height: "h-36", active: false },
-  { month: "AGO", height: "h-32", active: false },
-  { month: "SEP", height: "h-44", active: true },
-  { month: "OCT", height: "h-40", active: false },
-];
-
-const recentTransactions = [
-  {
-    student: "Carlos Méndez",
-    course: "Pastelería Francesa",
-    amount: "$425.00",
-    status: "Pagado",
-  },
-  {
-    student: "Lucía Ferrero",
-    course: "Administración",
-    amount: "$310.00",
-    status: "Pendiente",
-  },
-  {
-    student: "Andrés Valerio",
-    course: "Chocolatería",
-    amount: "$195.00",
-    status: "Pagado",
-  },
-];
 
 const AdminReports = () => {
+  const [selectedMonth, setSelectedMonth] =
+  useState<number | "all">("all");
+
+const [selectedYear, setSelectedYear] =
+  useState(new Date().getFullYear());
+  const [totalSales, setTotalSales] =
+    useState(0);
+
+  const [averageSale, setAverageSale] =
+    useState(0);
+
+  const [newStudents, setNewStudents] =
+    useState(0);
+
+  const [topCategory, setTopCategory] =
+    useState("N/A");
+
+  const [categoriesChart, setCategoriesChart] =
+    useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+useEffect(() => {
+  fetchReportData();
+}, [selectedMonth, selectedYear]);
+
+  const fetchReportData = async () => {
+    try {
+      setLoading(true);
+
+      // PAGOS
+      const { data: payments } =
+        await supabase
+          .from("payments")
+          .select(`
+            total,
+            paid_at,
+            status
+          `)
+          .eq("status", "paid");
+
+      const filteredPayments =
+          payments?.filter((payment: any) => {
+            const date = new Date(
+              payment.paid_at
+            );
+
+            const yearMatch =
+              date.getFullYear() ===
+              selectedYear;
+
+            const monthMatch =
+              selectedMonth === "all" ||
+              date.getMonth() ===
+                selectedMonth;
+
+            return yearMatch && monthMatch;
+          }) ?? [];
+      const sales =
+        filteredPayments.reduce(
+          (sum, payment: any) =>
+            sum + Number(payment.total),
+          0
+        );
+
+      setTotalSales(sales);
+
+      setAverageSale(
+        filteredPayments && filteredPayments.length> 0
+          ? sales / filteredPayments.length
+          : 0
+      );
+
+      // ESTUDIANTES
+      const { data: students } =
+        await supabase
+          .from("profiles")
+          .select(`
+            id,
+            created_at,
+            user_roles (
+              role
+            )
+          `);
+
+      const studentCount =
+      students?.filter((student: any) => {
+        const created = new Date(student.created_at);
+
+        const isStudent =
+          student.user_roles?.some(
+            (role: any) =>
+              role.role === "student"
+          );
+
+        const yearMatch =
+          created.getFullYear() === selectedYear;
+
+        const monthMatch =
+          selectedMonth === "all" ||
+          created.getMonth() === selectedMonth;
+
+        return (
+          isStudent &&
+          yearMatch &&
+          monthMatch
+        );
+      }).length ?? 0;
+
+      setNewStudents(studentCount);
+
+      // CATEGORÍAS
+      const { data: items } =
+        await supabase
+          .from("payment_items")
+          .select(`
+            quantity,
+            courses (
+              category
+            ),
+            payments (
+              status,
+            paid_at
+            )
+          `);
+
+      const categoryTotals: Record<
+        string,
+        number
+      > = {};
+
+      items?.forEach((item: any) => {
+        if (
+          item.payments?.status !==
+          "paid"
+        )
+          return;
+
+        const category =
+          item.courses?.category ??
+          "Sin categoría";
+          const paymentDate = new Date(
+            item.payments?.paid_at
+          );
+
+          const yearMatch =
+            paymentDate.getFullYear() ===
+            selectedYear;
+
+          const monthMatch =
+            selectedMonth === "all" ||
+            paymentDate.getMonth() ===
+              selectedMonth;
+
+          if (!yearMatch || !monthMatch)
+            return;
+        categoryTotals[category] =
+          (categoryTotals[
+            category
+          ] ?? 0) + item.quantity;
+      });
+
+      const top =
+        Object.entries(
+          categoryTotals
+        ).sort(
+          (a, b) => b[1] - a[1]
+        )[0]?.[0] ?? "N/A";
+
+      setTopCategory(top);
+
+      const totalSold =
+        Object.values(
+          categoryTotals
+        ).reduce(
+          (a, b) => a + b,
+          0
+        );
+
+      const chart =
+        Object.entries(
+          categoryTotals
+        ).map(
+          ([name, amount]) => ({
+            name,
+            percentage:
+              totalSold > 0
+                ? (
+                    (amount /
+                      totalSold) *
+                    100
+                  ).toFixed(0)
+                : "0",
+          })
+        );
+
+      setCategoriesChart(chart);
+
+    } catch (error) {
+      console.error(error);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AdminLayout>
       <main className="bg-[#f6f6f6] min-h-screen p-8">
-        {/* HEADER */}
         <div className="mb-10">
-          <p className="text-sm text-gray-400 mb-2">
-            Administración / Dashboard / Control de Pagos
-          </p>
-
           <h1 className="text-5xl font-bold mb-3">
             Informe de Ventas
           </h1>
 
-          <p className="text-gray-500 text-lg max-w-2xl">
-            Análisis detallado de ingresos y tendencias del
-            Centro de Capacitación G&G para el periodo actual.
+          <p className="text-gray-500">
+            Reportes generales del sistema.
           </p>
         </div>
+<div className="bg-white rounded-[32px] border border-gray-200 p-8 mb-8">
+  <div className="grid md:grid-cols-2 gap-6">
 
-        {/* FILTERS */}
-        <div className="bg-white rounded-[32px] border border-gray-200 p-8 mb-8">
-          <div className="grid xl:grid-cols-4 gap-6">
-            <div>
-              <label className="text-xs tracking-widest text-gray-400 font-semibold block mb-3">
-                MES DE ANÁLISIS
-              </label>
+    <div>
+      <label className="text-xs tracking-widest text-gray-400 font-semibold block mb-3">
+        MES
+      </label>
 
-              <select className="w-full bg-gray-100 rounded-2xl p-4 border border-gray-200">
-                <option>Octubre 2023</option>
-              </select>
-            </div>
+      <select
+        value={selectedMonth}
+        onChange={(e) =>
+          setSelectedMonth(
+            e.target.value === "all"
+              ? "all"
+              : Number(e.target.value)
+          )
+        }
+        className="w-full bg-gray-100 rounded-2xl p-4 border border-gray-200"
+      >
+        <option value="all">Todos</option>
+        <option value={0}>Enero</option>
+        <option value={1}>Febrero</option>
+        <option value={2}>Marzo</option>
+        <option value={3}>Abril</option>
+        <option value={4}>Mayo</option>
+        <option value={5}>Junio</option>
+        <option value={6}>Julio</option>
+        <option value={7}>Agosto</option>
+        <option value={8}>Septiembre</option>
+        <option value={9}>Octubre</option>
+        <option value={10}>Noviembre</option>
+        <option value={11}>Diciembre</option>
+      </select>
+    </div>
 
-            <div>
-              <label className="text-xs tracking-widest text-gray-400 font-semibold block mb-3">
-                CURSO O MAESTRÍA
-              </label>
+    <div>
+      <label className="text-xs tracking-widest text-gray-400 font-semibold block mb-3">
+        AÑO
+      </label>
 
-              <select className="w-full bg-gray-100 rounded-2xl p-4 border border-gray-200">
-                <option>Todos los cursos</option>
-              </select>
-            </div>
+      <select
+        value={selectedYear}
+        onChange={(e) =>
+          setSelectedYear(Number(e.target.value))
+        }
+        className="w-full bg-gray-100 rounded-2xl p-4 border border-gray-200"
+      >
+        {Array.from({ length: 2406 - 2026 + 1 }, (_, i) => 2026 + i).map((year) => (
+        <option
+          key={year}
+          value={year}
+        >
+          {year}
+        </option>
+      ))}
 
-            <div>
-              <label className="text-xs tracking-widest text-gray-400 font-semibold block mb-3">
-                PROFESOR RESPONSABLE
-              </label>
+      </select>
+    </div>
 
-              <select className="w-full bg-gray-100 rounded-2xl p-4 border border-gray-200">
-                <option>Todos los instructores</option>
-              </select>
-            </div>
-
-            <div className="flex items-end">
-              <button className="w-full bg-red-600 text-white rounded-2xl py-4 font-semibold flex items-center justify-center gap-3">
-                Aplicar Filtros
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* STATS */}
+  </div>
+</div>
         <div className="grid xl:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-[32px] p-6 border border-gray-200">
-            <div className="flex justify-between items-start mb-6">
-              <div className="bg-red-100 p-3 rounded-2xl">
-                <TrendingUp className="text-red-600" />
-              </div>
-
-              <span className="text-green-600 font-bold text-sm">
-                +12.4%
-              </span>
+            <div className="bg-red-100 p-3 rounded-2xl w-fit mb-6">
+              <TrendingUp className="text-red-600" />
             </div>
 
             <p className="text-sm text-gray-400 mb-2">
@@ -145,19 +303,14 @@ const AdminReports = () => {
             </p>
 
             <h2 className="text-4xl font-bold">
-              $42,850.00
+              ₡
+              {totalSales.toLocaleString()}
             </h2>
           </div>
 
           <div className="bg-white rounded-[32px] p-6 border border-gray-200">
-            <div className="flex justify-between items-start mb-6">
-              <div className="bg-blue-100 p-3 rounded-2xl">
-                <Users className="text-blue-600" />
-              </div>
-
-              <span className="text-green-600 font-bold text-sm">
-                +8%
-              </span>
+            <div className="bg-blue-100 p-3 rounded-2xl w-fit mb-6">
+              <Users className="text-blue-600" />
             </div>
 
             <p className="text-sm text-gray-400 mb-2">
@@ -165,27 +318,27 @@ const AdminReports = () => {
             </p>
 
             <h2 className="text-4xl font-bold">
-              128
+              {newStudents}
             </h2>
           </div>
 
           <div className="bg-white rounded-[32px] p-6 border border-gray-200">
-            <div className="flex justify-between items-start mb-6">
-              <div className="bg-gray-100 p-3 rounded-2xl">
-                <BadgeDollarSign className="text-gray-600" />
-              </div>
-
-              <span className="text-red-500 font-bold text-sm">
-                -2.1%
-              </span>
+            <div className="bg-gray-100 p-3 rounded-2xl w-fit mb-6">
+              <BadgeDollarSign className="text-gray-600" />
             </div>
 
             <p className="text-sm text-gray-400 mb-2">
-              GANANCIA PROMEDIO
+              INGRESO PROMEDIO
             </p>
 
             <h2 className="text-4xl font-bold">
-              $334.70
+              ₡
+              {averageSale.toLocaleString(
+                undefined,
+                {
+                  maximumFractionDigits: 0,
+                }
+              )}
             </h2>
           </div>
 
@@ -199,134 +352,53 @@ const AdminReports = () => {
             </p>
 
             <h2 className="text-4xl font-bold">
-              Pastelería
+              {topCategory}
             </h2>
           </div>
         </div>
 
-        {/* CHARTS */}
-        <div className="grid xl:grid-cols-2 gap-8 mb-10">
-          {/* MONTHLY TREND */}
-          <div className="bg-white rounded-[32px] border border-gray-200 p-8">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-bold">
-                Tendencia Mensual
-              </h2>
-
-              <span className="text-gray-400 text-2xl">
-                •••
-              </span>
-            </div>
-
-            <div className="flex items-end justify-between h-[260px]">
-              {monthlyBars.map((bar, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center gap-4"
-                >
-                  <div
-                    className={`${bar.height} w-10 rounded-t-2xl ${
-                      bar.active
-                        ? "bg-red-600"
-                        : "bg-gray-200"
-                    }`}
-                  />
-
-                  <span
-                    className={`text-sm font-semibold ${
-                      bar.active
-                        ? "text-red-600"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {bar.month}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* SALES BY COURSE */}
-          <div className="bg-white rounded-[32px] border border-gray-200 p-8">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-bold">
-                Ventas por Curso
-              </h2>
-
-              <div className="w-8 h-8 rounded-full border border-gray-300"></div>
-            </div>
-
-            <div className="space-y-8">
-              {courses.map((course, index) => (
-                <div key={index}>
-                  <div className="flex justify-between mb-3">
-                    <span className="font-medium">
-                      {course.name}
-                    </span>
-
-                    <span className="font-bold">
-                      {course.percentage}
-                    </span>
-                  </div>
-
-                  <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-                    <div
-                      className={`${course.width} ${course.color} h-full rounded-full`}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RECENT TRANSACTIONS */}
         <div className="bg-white rounded-[32px] border border-gray-200 p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">
-              Transacciones Recientes
-            </h2>
+          <h2 className="text-3xl font-bold mb-8">
+            Ventas por Categoría
+          </h2>
 
-            <button className="text-red-600 font-semibold flex items-center gap-2">
-              Exportar a CSV
-              <Download size={18} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {recentTransactions.map((transaction, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 rounded-2xl p-5 flex items-center justify-between"
-              >
-                <div>
-                  <h3 className="font-bold text-lg">
-                    {transaction.student}
-                  </h3>
-
-                  <p className="text-gray-400">
-                    {transaction.course}
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <h3 className="font-bold text-xl">
-                    {transaction.amount}
-                  </h3>
-
-                  <p
-                    className={`font-semibold ${
-                      transaction.status === "Pagado"
-                        ? "text-green-600"
-                        : "text-orange-500"
-                    }`}
+          {loading ? (
+            <p>Cargando...</p>
+          ) : (
+            <div className="space-y-8">
+              {categoriesChart.map(
+                (category) => (
+                  <div
+                    key={category.name}
                   >
-                    {transaction.status}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="flex justify-between mb-3">
+                      <span>
+                        {
+                          category.name
+                        }
+                      </span>
+
+                      <span className="font-bold">
+                        {
+                          category.percentage
+                        }
+                        %
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-gray-100 h-3 rounded-full">
+                      <div
+                        className="bg-red-600 h-3 rounded-full"
+                        style={{
+                          width: `${category.percentage}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          )}
         </div>
       </main>
     </AdminLayout>

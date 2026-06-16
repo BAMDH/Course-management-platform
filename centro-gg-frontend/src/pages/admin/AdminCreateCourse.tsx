@@ -465,6 +465,8 @@ const AdminCreateCourse = () => {
               <FormInput
                 label="Duración (Horas)"
                 placeholder="Ej: 40"
+                type="number"
+                min="0"
                 value={
                   formData.duration_hours
                 }
