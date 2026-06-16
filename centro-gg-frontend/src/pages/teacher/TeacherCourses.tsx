@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart2,
-  CalendarCheck,
-  CheckCircle2,
   ClipboardList,
   FolderOpen,
-  Star,
   User,
   Users,
 } from "lucide-react";
@@ -186,41 +182,23 @@ export default function TeacherCourses() {
                     Ver Materiales
                   </button>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      disabled={disabled}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigate(`/teacher/courses/${course.id}/attendance`);
-                      }}
-                      className={clsx(
-                        "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-extrabold",
-                        disabled
-                          ? "border-[#e9e8e7] text-[#dd2817]/40 cursor-not-allowed"
-                          : "border-[#e9e8e7] text-[#b70700] hover:bg-[#fef2f2]"
-                      )}
-                    >
-                      <ClipboardList className="h-4 w-4" />
-                      Pasar Lista
-                    </button>
+                  <button
+                    disabled={disabled}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      navigate(`/teacher/courses/${course.id}/attendance`);
+                    }}
+                    className={clsx(
+                      "mb-3 flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-extrabold transition-colors",
+                      disabled
+                        ? "border-[#e9e8e7] text-[#dd2817]/40 cursor-not-allowed"
+                        : "border-[#e9e8e7] text-[#b70700] hover:bg-[#fef2f2]"
+                    )}
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    Pasar Lista
+                  </button>
 
-                    <button
-                      disabled={disabled}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigate(`/teacher/courses/${course.id}/grades`);
-                      }}
-                      className={clsx(
-                        "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-extrabold",
-                        disabled
-                          ? "border-[#e9e8e7] text-[#dd2817]/40 cursor-not-allowed"
-                          : "border-[#e9e8e7] text-[#b70700] hover:bg-[#fef2f2]"
-                      )}
-                    >
-                      <CalendarCheck className="h-4 w-4" />
-                      Calificaciones
-                    </button>
-                  </div>
                 </div>
               </article>
             );
@@ -228,58 +206,7 @@ export default function TeacherCourses() {
         )}
       </section>
 
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <MetricCard
-          icon={<Star className="h-6 w-6 fill-[#dd2817] text-[#dd2817]" />}
-          bg="bg-[#fef2f2]"
-          value="N/A"
-          label="Promedio Calificación"
-        />
-
-        <MetricCard
-          icon={<BarChart2 className="h-6 w-6 text-[#0073d1]" />}
-          bg="bg-[#d4e3ff]"
-          value="N/A"
-          label="Tasa de Asistencia"
-        />
-
-        <MetricCard
-          icon={<CheckCircle2 className="h-6 w-6 text-[#16a34a]" />}
-          bg="bg-[#dcfce7]"
-          value="0"
-          label="Tareas Revisadas hoy"
-        />
-      </section>
     </main>
   );
 }
 
-function MetricCard({
-  icon,
-  bg,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  bg: string;
-  value: string;
-  label: string;
-}) {
-  return (
-    <article className="flex items-center gap-5 rounded-3xl border border-[#e9e8e7] bg-white p-6 shadow-sm">
-      <div
-        className={`flex h-14 w-14 items-center justify-center rounded-full ${bg}`}
-      >
-        {icon}
-      </div>
-
-      <div>
-        <p className="font-['Manrope',sans-serif] text-3xl font-extrabold leading-tight text-[#1b1c1b]">
-          {value}
-        </p>
-
-        <p className="text-sm font-medium text-[#5d5e60]">{label}</p>
-      </div>
-    </article>
-  );
-}

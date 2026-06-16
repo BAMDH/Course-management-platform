@@ -390,21 +390,6 @@ export default function TeacherCalendar() {
               ))
             )}
           </div>
-
-          <div className="mt-8 overflow-hidden rounded-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=700"
-              alt="Chef evaluando"
-              className="h-48 w-full object-cover"
-            />
-
-            <div className="-mt-16 relative bg-gradient-to-t from-black/90 to-transparent p-5 pt-16 text-white">
-              <h4 className="font-bold">Guía de Evaluación</h4>
-              <p className="text-sm text-white/80">
-                Documento de apoyo para profesores
-              </p>
-            </div>
-          </div>
         </aside>
       </section>
     </main>

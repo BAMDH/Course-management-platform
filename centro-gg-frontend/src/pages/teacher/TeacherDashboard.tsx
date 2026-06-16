@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
-  ClipboardCheck,
   Download,
   Filter,
   Search,
@@ -66,22 +65,6 @@ const TeacherDashboard = () => {
       valueClass: "text-[#1b1c1b]",
       iconBg: "bg-[#fef2f2]",
       iconColor: "text-[#dd2817]",
-    },
-    {
-      label: "Evaluaciones\nPendientes",
-      value: "0",
-      icon: ClipboardCheck,
-      valueClass: "text-[#dd2817]",
-      iconBg: "bg-[#fef2f2]",
-      iconColor: "text-[#dd2817]",
-    },
-    {
-      label: "Asistencia\nPromedio",
-      value: "N/A",
-      icon: CalendarDays,
-      valueClass: "text-[#1b1c1b]",
-      iconBg: "bg-[#f0fdf4]",
-      iconColor: "text-[#16a34a]",
     },
   ];
 
