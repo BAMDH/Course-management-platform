@@ -197,7 +197,11 @@ function TitleManager() {
     document.title = title;
   }, [location]);
 
-  return <Outlet />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Outlet />
+    </Suspense>
+  );
 }
 
 const router = createBrowserRouter(
@@ -226,9 +230,5 @@ const PageLoader = () => (
 );
 
 export function AppRouter() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <RouterProvider router={router} />
-    </Suspense>
-  );
+  return <RouterProvider router={router} />;
 }
