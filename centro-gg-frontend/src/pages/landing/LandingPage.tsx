@@ -136,12 +136,9 @@ const LandingPage = () => {
                       {course.location && <span>• {course.location}</span>}
                     </div>
 
-                    <Link
-                      to={`/courses/${course.id}`}
-                      className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700"
-                    >
+                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700">
                       Más información <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    </span>
                   </div>
                 </Link>
               ))}
@@ -174,33 +171,40 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-zinc-900 px-8 py-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl font-extrabold text-white md:text-5xl">
-            ¿Quieres elevar tu pasión al siguiente nivel?
+      <section className="bg-zinc-900 px-8 py-20 text-center text-white">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-4xl font-extrabold leading-tight text-white font-['Manrope',sans-serif] mb-6 md:text-5xl">
+            ¿Listo para descubrir tus habilidades?
           </h2>
-
-          <p className="mx-auto mt-6 max-w-2xl text-neutral-200">
-            Inscripciones abiertas para el ciclo 2026. Cupos limitados para
-            garantizar una enseñanza personalizada.
+          <p className="text-lg text-white/80 mb-10">
+            Únete a nuestra comunidad de estudiantes y comienza tu camino hacia la excelencia personal y profesional.
           </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               asChild
-              size="lg"
-              className="bg-red-600 px-10 font-bold hover:bg-red-700"
+              className="bg-red-600 px-8 py-6 text-lg hover:bg-red-700 rounded-xl font-bold"
             >
-              <Link to="/register">Inscribirse Ahora</Link>
+              <Link to="/courses">Conoce nuestras capacitaciones</Link>
+            </Button>
+            
+            <Button
+              asChild
+              variant="outline"
+              className="border-white/20 bg-white/10 px-8 py-6 text-lg text-white hover:bg-white/20 hover:text-white rounded-xl font-bold"
+            >
+              <a href="https://www.instagram.com/centrodecapacitaciongyg/" target="_blank" rel="noopener noreferrer">
+                Instagram
+              </a>
             </Button>
 
             <Button
               asChild
-              size="lg"
               variant="outline"
-              className="border-white/20 bg-white/10 px-10 text-white hover:bg-white/20"
+              className="border-white/20 bg-white/10 px-8 py-6 text-lg text-white hover:bg-white/20 hover:text-white rounded-xl font-bold"
             >
-              <Link to="/login">Iniciar Sesión</Link>
+              <a href="https://www.facebook.com/centrodecapacitaciongyg" target="_blank" rel="noopener noreferrer">
+                Facebook
+              </a>
             </Button>
           </div>
         </div>

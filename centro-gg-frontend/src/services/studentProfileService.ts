@@ -5,14 +5,14 @@ export type StudentProfileData = {
   email: string;
   full_name: string;
   phone: string;
-  cedula: string;
+  identification: string;
   date_of_birth: string;
   level: string;
   avatar_url: string;
-  provincia: string;
+  province: string;
   canton: string;
-  distrito: string;
-  direccion_exacta: string;
+  district: string;
+  exact_address: string;
   created_at: string;
   generalAverage: number;
   generalAttendance: number;
@@ -133,14 +133,14 @@ export async function getStudentProfileData(email: string): Promise<StudentProfi
     email: profileData.email,
     full_name: profileData.full_name || '',
     phone: profileData.phone || '',
-    cedula: profileData.cedula || '',
+    identification: profileData.identification || '',
     date_of_birth: profileData.date_of_birth || '',
     level: profileData.level || '',
     avatar_url: profileData.avatar_url || '',
-    provincia: profileData.provincia || '',
+    province: profileData.province || '',
     canton: profileData.canton || '',
-    distrito: profileData.distrito || '',
-    direccion_exacta: profileData.direccion_exacta || '',
+    district: profileData.district || '',
+    exact_address: profileData.exact_address || '',
     created_at: profileData.created_at,
     email_notifications: profileData.email_notifications ?? true,
     generalAverage: 0, // Placeholder as calculating accurate average depends on multiple weights
@@ -158,12 +158,12 @@ export async function updateStudentProfile(userId: string, updates: ProfileUpdat
     .update({
       full_name: updates.full_name,
       phone: updates.phone,
-      cedula: updates.cedula,
+      identification: updates.identification,
       date_of_birth: updates.date_of_birth,
-      provincia: updates.provincia,
+      province: updates.province,
       canton: updates.canton,
-      distrito: updates.distrito,
-      direccion_exacta: updates.direccion_exacta,
+      district: updates.district,
+      exact_address: updates.exact_address,
       avatar_url: updates.avatar_url,
       email_notifications: updates.email_notifications,
     })

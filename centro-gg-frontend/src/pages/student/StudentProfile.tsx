@@ -57,13 +57,13 @@ const StudentProfile = () => {
 
   const provincesList = Object.keys(costaRicaLocations);
 
-  const cantonsList = formData.provincia
-    ? Object.keys(costaRicaLocations[formData.provincia as Province] || {})
+  const cantonsList = formData.province
+    ? Object.keys(costaRicaLocations[formData.province as Province] || {})
     : [];
 
   const districtsList =
-    formData.provincia && formData.canton
-      ? costaRicaLocations[formData.provincia as Province]?.[
+    formData.province && formData.canton
+      ? costaRicaLocations[formData.province as Province]?.[
           formData.canton as keyof (typeof costaRicaLocations)[Province]
         ] ?? []
       : [];
@@ -88,11 +88,11 @@ const StudentProfile = () => {
       setFormData({
         full_name: profile.full_name,
         phone: profile.phone,
-        cedula: profile.cedula,
-        provincia: profile.provincia,
+        identification: profile.identification,
+        province: profile.province,
         canton: profile.canton,
-        distrito: profile.distrito,
-        direccion_exacta: profile.direccion_exacta,
+        district: profile.district,
+        exact_address: profile.exact_address,
         date_of_birth: profile.date_of_birth,
         avatar_url: profile.avatar_url,
         email_notifications: profile.email_notifications,
@@ -103,15 +103,17 @@ const StudentProfile = () => {
     }
   }, [profile, isEditing]);
 
+  const isProfileComplete = profile && profile.full_name && profile.phone && profile.identification;
+
   // Force edit mode if essential info is missing
   useEffect(() => {
     if (profile && !isEditing) {
-      if (!profile.full_name || !profile.phone || !profile.cedula) {
+      if (!isProfileComplete) {
         setIsEditing(true);
-        setFormError('Por favor completa tu información personal obligatoria.');
+        setFormError('Por favor completa tu información personal obligatoria para poder continuar.');
       }
     }
-  }, [profile]);
+  }, [profile, isEditing, isProfileComplete]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -132,12 +134,12 @@ const StudentProfile = () => {
   const handleSave = async () => {
     setFormError('');
     // Validation
-    if (!formData.full_name?.trim() || !formData.phone?.trim() || !formData.cedula?.trim()) {
+    if (!formData.full_name?.trim() || !formData.phone?.trim() || !formData.identification?.trim()) {
       setFormError('Nombre Completo, Teléfono y Cédula son obligatorios.');
       return;
     }
 
-    if (!isValidIdentification(formData.cedula || '')) {
+    if (!isValidIdentification(formData.identification || '')) {
       setFormError('La cédula debe contener exactamente 9 dígitos numéricos.');
       return;
     }
@@ -277,7 +279,7 @@ const StudentProfile = () => {
                   <CreditCard className="w-4 h-4 text-[#dc2626] mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="text-[10px] font-bold text-[#5d5e60] uppercase tracking-wider">Cédula</div>
-                    <div className="text-sm text-[#1b1c1b] font-medium mt-0.5">{profile.cedula || 'No especificada'}</div>
+                    <div className="text-sm text-[#1b1c1b] font-medium mt-0.5">{profile.identification || 'No especificada'}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -292,8 +294,8 @@ const StudentProfile = () => {
                   <div>
                     <div className="text-[10px] font-bold text-[#5d5e60] uppercase tracking-wider">Dirección</div>
                     <div className="text-sm text-[#1b1c1b] font-medium mt-0.5">
-                      {profile.provincia || profile.canton 
-                        ? `${profile.provincia}, ${profile.canton}, ${profile.distrito}` 
+                      {profile.province || profile.canton 
+                        ? `${profile.province}, ${profile.canton}, ${profile.district}` 
                         : 'No especificada'}
                     </div>
                   </div>
@@ -508,8 +510,8 @@ const StudentProfile = () => {
                       <label className="block text-xs font-bold text-[#1b1c1b] mb-1.5">Cédula <span className="text-red-500">*</span></label>
                       <input 
                         type="text" 
-                        value={formData.cedula || ''}
-                        onChange={e => setFormData({...formData, cedula: onlyNumbers(e.target.value).slice(0, 9)})}
+                        value={formData.identification || ''}
+                        onChange={e => setFormData({...formData, identification: onlyNumbers(e.target.value).slice(0, 9)})}
                         className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
                       />
                     </div>
@@ -551,8 +553,8 @@ const StudentProfile = () => {
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">Provincia</label>
                         <select 
-                          value={formData.provincia || ''}
-                          onChange={e => setFormData({...formData, provincia: e.target.value, canton: '', distrito: ''})}
+                          value={formData.province || ''}
+                          onChange={e => setFormData({...formData, province: e.target.value, canton: '', district: ''})}
                           className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white"
                         >
                           <option value="">Seleccionar...</option>
@@ -565,8 +567,8 @@ const StudentProfile = () => {
                         <label className="block text-xs text-gray-500 mb-1">Cantón</label>
                         <select 
                           value={formData.canton || ''}
-                          onChange={e => setFormData({...formData, canton: e.target.value, distrito: ''})}
-                          disabled={!formData.provincia}
+                          onChange={e => setFormData({...formData, canton: e.target.value, district: ''})}
+                          disabled={!formData.province}
                           className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white disabled:bg-gray-50 disabled:text-gray-400"
                         >
                           <option value="">Seleccionar...</option>
@@ -578,8 +580,8 @@ const StudentProfile = () => {
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">Distrito</label>
                         <select 
-                          value={formData.distrito || ''}
-                          onChange={e => setFormData({...formData, distrito: e.target.value})}
+                          value={formData.district || ''}
+                          onChange={e => setFormData({...formData, district: e.target.value})}
                           disabled={!formData.canton}
                           className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626] bg-white disabled:bg-gray-50 disabled:text-gray-400"
                         >
@@ -594,8 +596,8 @@ const StudentProfile = () => {
                       <label className="block text-xs text-gray-500 mb-1">Dirección Exacta</label>
                       <input 
                         type="text" 
-                        value={formData.direccion_exacta || ''}
-                        onChange={e => setFormData({...formData, direccion_exacta: e.target.value})}
+                        value={formData.exact_address || ''}
+                        onChange={e => setFormData({...formData, exact_address: e.target.value})}
                         className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]/20 focus:border-[#dc2626]"
                       />
                     </div>
@@ -663,12 +665,14 @@ const StudentProfile = () => {
 
               {/* Actions */}
               <div className="flex justify-end gap-4 pt-4">
-                <button 
-                  onClick={() => setIsEditing(false)}
-                  className="px-6 py-2.5 rounded-full font-bold text-sm text-[#1b1c1b] border border-[#e9e8e7] hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
+                {isProfileComplete && (
+                  <button 
+                    onClick={() => setIsEditing(false)}
+                    className="px-6 py-2.5 rounded-full font-bold text-sm text-[#1b1c1b] border border-[#e9e8e7] hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                )}
                 <button 
                   onClick={handleSave}
                   disabled={updateMutation.isPending}

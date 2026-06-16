@@ -16,7 +16,7 @@ export function LandingNavbar() {
   async function handleLogout() {
     localStorage.removeItem("selected_app_role")
     await supabase.auth.signOut()
-    window.location.href = "/"
+    window.location.href = window.location.origin
   }
 
   return (
