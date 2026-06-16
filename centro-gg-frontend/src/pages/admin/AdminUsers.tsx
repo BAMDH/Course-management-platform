@@ -463,7 +463,7 @@ const AdminUsers = () => {
                 Roles
               </h3>
 
-              <p className="leading-relaxed max-w-md text-red-100">
+              <p className="leading-relaxed max-w-md text-red-600">
                 Los roles de
                 profesor habilitan
                 herramientas de

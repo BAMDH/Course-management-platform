@@ -4,13 +4,6 @@ import StatusBadge from "@/components/admin/badges/StatusBadge";
 
 import TableCell from "@/components/admin/tables/TableCell";
 
-type User = {
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  image: string;
-};
 
 type Props = {
   user: any;

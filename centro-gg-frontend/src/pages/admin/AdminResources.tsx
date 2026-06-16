@@ -17,7 +17,7 @@ import ImageLibraryModal from "@/components/admin/imageManager/ImageLibraryModal
 import SearchInput from "@/components/admin/ui/SearchInput";
 
 import { supabase } from "@/services/supabase";
-
+import CourseSessionsManager from "@/components/admin/sessions/CourseSessionsManager" 
 type Course = {
   id: string;
 
@@ -49,6 +49,7 @@ type PendingStudent = {
     avatar: string;
   };
 };
+
 
 const AdminResources = () => {
   const { id } = useParams();
@@ -322,38 +323,7 @@ setStudents(formattedStudents);
     }
   };
 
-  const updateTeacher =
-    async () => {
-      if (!id) return;
 
-      // DELETE OLD
-      await supabase
-        .from("course_teachers")
-        .delete()
-        .eq("course_id", id);
-
-      // INSERT NEW
-      if (teacherId) {
-        const { error } =
-          await supabase
-            .from("course_teachers")
-            .insert({
-              course_id: id,
-
-              teacher_id: teacherId,
-            });
-
-        if (error) {
-          console.error(error);
-
-          return;
-        }
-      }
-
-      alert(
-        "Profesor actualizado correctamente"
-      );
-    };
 
   const approveStudent =
     async (
@@ -565,7 +535,7 @@ const availableSlots =
 
               <div className="flex justify-between">
                 <span className="text-gray-500">
-                  Pendientes
+                  Solicitudes pendientes
                 </span>
 
                 <span className="font-bold">
@@ -639,6 +609,9 @@ const availableSlots =
             </div>
 
             <div className="mt-10">
+              <p className="text-sm text-gray-400 mb-2">
+                  Lista de solicitudes pendientes
+                </p>
               <SearchInput
                 placeholder="Buscar estudiante..."
                 value={search}
@@ -722,6 +695,9 @@ const availableSlots =
           </Card>
 
         </div>
+        <CourseSessionsManager
+        courseId={course.id}
+      />
       </main>
       <ImageLibraryModal
         open={showImageLibrary}
@@ -730,8 +706,10 @@ const availableSlots =
         }
         onSelect={handleImageChange}
       />
+      
     </AdminLayout>
-  );
+  )
+  ;
 };
 
 export default AdminResources;

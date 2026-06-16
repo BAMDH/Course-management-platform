@@ -102,17 +102,16 @@ const AdminCourses = () => {
             enrollment.status ===
             "active"
         ) ?? [];
-
+        
       return {
         id: course.id,
 
         title:
           course.title ?? "Sin título",
 
-        teacher:
-          course.course_teachers?.[0]
-            ?.teacher?.full_name ??
-          "Sin asignar",
+       teacher:
+        (course.course_teachers?.[0]?.teacher as any)?.full_name ??
+        "Sin asignar",
 
         slots: `${
           activeEnrollments.length
@@ -354,7 +353,7 @@ const AdminCourses = () => {
                 Instructores
               </h3>
 
-              <p className="leading-relaxed max-w-md text-red-100">
+              <p className="leading-relaxed max-w-md text-red-600">
                 Asigne chefs
                 profesionales y
                 especialistas para elevar

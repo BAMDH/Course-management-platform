@@ -1,80 +1,384 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  ClipboardList,
+  Users,
+  CalendarDays,
+} from "lucide-react";
+
+import { Link } from "react-router-dom";
+
 import AdminLayout from "@/layout/AdminLayout";
 
-const courses = [
-  {
-    title: "Pastelería de Alta Gama",
-    level: "Avanzado",
-    attendance: "92%",
-    image:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
-  },
-  {
-    title: "Panadería Artesanal",
-    level: "Inicial",
-    attendance: "78%",
-    image:
-      "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-  },
-];
+import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
-const AdminAttendance = () => {
-  return (
-    <AdminLayout>
-      <main className="bg-[#f6f6f6] min-h-screen p-8">
-        <div className="mb-8">
-          <p className="text-sm text-gray-400 mb-2">
-            Administración / Informe de Asistencias
-          </p>
+import PageHeader from "@/components/admin/Headers/PageHeader";
 
-          <h1 className="text-5xl font-bold mb-4">
-            Informe de Asistencia
-          </h1>
-        </div>
+import Card from "@/components/admin/Cards/Card";
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {courses.map((course, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-[28px] overflow-hidden border border-gray-200"
-            >
-              <img
-                src={course.image}
-                className="h-52 w-full object-cover"
-              />
+import { supabase } from "@/services/supabase";
 
-              <div className="p-6">
-                <span className="text-xs bg-black text-white px-3 py-1 rounded-full">
-                  Nivel: {course.level}
-                </span>
+type CourseCard = {
+  id: string;
 
-                <h2 className="text-2xl font-bold mt-4">
-                  {course.title}
-                </h2>
+  title: string;
 
-                <div className="flex justify-between mt-6 mb-3">
-                  <span className="text-gray-500">
-                    Tasa de Asistencia
-                  </span>
+  cover_image_path: string | null;
 
-                  <span className="font-bold text-red-600">
-                    {course.attendance}
-                  </span>
-                </div>
+  studentsCount: number;
 
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="w-4/5 h-full bg-red-600"></div>
-                </div>
+  sessionsCount: number;
 
-                <button className="w-full border border-gray-200 rounded-2xl py-3 mt-6 font-semibold">
-                  Ver Alumnos
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-    </AdminLayout>
-  );
+  attendancePercentage: number;
 };
+
+const AdminAttendance =
+  () => {
+    const [
+      courses,
+      setCourses,
+    ] = useState<
+      CourseCard[]
+    >([]);
+
+    const [loading, setLoading] =
+      useState(true);
+
+    useEffect(() => {
+      fetchData();
+    }, []);
+
+    const fetchData =
+      async () => {
+        try {
+          setLoading(true);
+
+          const {
+            data: coursesData,
+            error,
+          } = await supabase
+            .from("courses")
+            .select(`
+              id,
+              title,
+              cover_image_path
+            `)
+            .neq(
+            "status",
+            "Pendiente"
+          );
+
+          if (error)
+            throw error;
+
+          const result =
+            await Promise.all(
+              (
+                coursesData ||
+                []
+              ).map(
+                async (
+                  course
+                ) => {
+                  const {
+                    count:
+                      studentsCount,
+                  } =
+                    await supabase
+                      .from(
+                        "enrollments"
+                      )
+                      .select(
+                        "*",
+                        {
+                          count:
+                            "exact",
+
+                          head: true,
+                        }
+                      )
+                      .eq(
+                        "course_id",
+                        course.id
+                      )
+                      .eq(
+                        "status",
+                        "active"
+                      );
+
+                  const {
+                    count:
+                      sessionsCount,
+                  } =
+                    await supabase
+                      .from(
+                        "course_sessions"
+                      )
+                      .select(
+                        "*",
+                        {
+                          count:
+                            "exact",
+
+                          head: true,
+                        }
+                      )
+                      .eq(
+                        "course_id",
+                        course.id
+                      );
+
+                  const {
+                    data:
+                      attendanceRows,
+                  } =
+                    await supabase
+                      .from(
+                        "attendance"
+                      )
+                      .select(
+                        "status"
+                      )
+                      .eq(
+                        "course_id",
+                        course.id
+                      );
+
+                 const valid =
+                  (
+                    attendanceRows ||
+                    []
+                  ).filter(
+                    (
+                      row
+                    ) =>
+                      [
+                        "present",
+                        "late",
+                        "excused",
+                      ].includes(
+                        row.status
+                      )
+                  ).length;
+
+                const total =
+                  (studentsCount || 0) *
+                  (sessionsCount || 0);
+
+                const percentage =
+                  total === 0
+                    ? 0
+                    : Math.round(
+                        (
+                          valid /
+                          total
+                        ) *
+                          100
+                      );
+
+                  return {
+                    id: course.id,
+
+                    title:
+                      course.title,
+
+                    cover_image_path:
+                      course.cover_image_path,
+
+                    studentsCount:
+                      studentsCount ||
+                      0,
+
+                    sessionsCount:
+                      sessionsCount ||
+                      0,
+
+                    attendancePercentage:
+                      percentage,
+                  };
+                }
+              )
+            );
+
+          setCourses(result);
+
+        } catch (
+          error
+        ) {
+          console.error(
+            error
+          );
+        } finally {
+          setLoading(false);
+        }
+      };
+
+    const getBarColor =
+      (
+        percentage: number
+      ) => {
+        if (
+          percentage >= 80
+        )
+          return "bg-green-500";
+
+        if (
+          percentage >= 60
+        )
+          return "bg-yellow-500";
+
+        return "bg-red-500";
+      };
+
+    return (
+      <AdminLayout>
+        <main className="bg-[#f5f5f5] min-h-screen p-8">
+
+          <div className="mb-10">
+            <Breadcrumbs
+              items={[
+                {
+                  label:
+                    "Administración",
+
+                  href:
+                    "/admin",
+                },
+
+                {
+                  label:
+                    "Informe de Asistencias",
+
+                  href:
+                    "/admin/attendance",
+                },
+              ]}
+            />
+
+            <PageHeader
+              title="Informe de Asistencias"
+              description="Visualice el desempeño de asistencia por curso."
+            />
+          </div>
+
+          {loading ? (
+            <div>
+              Cargando...
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+              {courses.map(
+                (
+                  course
+                ) => (
+                  <Card
+                    key={
+                      course.id
+                    }
+                    className="overflow-hidden"
+                  >
+                    <img
+                      src={
+                        course.cover_image_path ||
+                        "https://images.unsplash.com/photo-1556911220-bff31c812dba"
+                      }
+                      className="w-full h-52 object-cover"
+                    />
+
+                    <div className="p-6">
+
+                      <h2 className="text-2xl font-bold mb-6">
+                        {
+                          course.title
+                        }
+                      </h2>
+
+                      <div className="flex items-center justify-between mb-4">
+
+                        <span className="text-gray-500">
+                          Asistencia
+                        </span>
+
+                        <span className="font-bold text-xl">
+                          {
+                            course.attendancePercentage
+                          }
+                          %
+                        </span>
+                      </div>
+
+                      <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-6">
+
+                        <div
+                          className={`h-full ${getBarColor(
+                            course.attendancePercentage
+                          )}`}
+                          style={{
+                            width: `${course.attendancePercentage}%`,
+                          }}
+                        />
+                      </div>
+
+                      <div className="space-y-3 mb-8">
+
+                        <div className="flex items-center gap-3">
+                          <Users
+                            size={
+                              18
+                            }
+                          />
+
+                          <span>
+                            {
+                              course.studentsCount
+                            }{" "}
+                            estudiantes
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <CalendarDays
+                            size={
+                              18
+                            }
+                          />
+
+                          <span>
+                            {
+                              course.sessionsCount
+                            }{" "}
+                            sesiones
+                          </span>
+                        </div>
+                      </div>
+
+                      <Link
+                        to={`/admin/attendance/details/${course.id}`}
+                      >
+                        <button className="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl py-3 font-semibold flex items-center justify-center gap-2">
+
+                          <ClipboardList
+                            size={
+                              18
+                            }
+                          />
+
+                          Ver Detalles
+                        </button>
+                      </Link>
+                    </div>
+                  </Card>
+                )
+              )}
+            </div>
+          )}
+        </main>
+      </AdminLayout>
+    );
+  };
 
 export default AdminAttendance;

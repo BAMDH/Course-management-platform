@@ -93,7 +93,7 @@ const quickActions = [
 
     title: "Informe de\nasistencias",
 
-    href: "/admin/attendance",
+    href: "/admin/Attendance",
   },
 
   {
@@ -237,7 +237,7 @@ const AdminDashboard = () => {
 
           <Card className="bg-red-600 text-white p-6 relative overflow-hidden border-none">
             <div className="relative z-10">
-              <p className="text-sm font-semibold text-red-100 mb-3">
+              <p className="text-sm font-semibold text-red-600 mb-3">
                 CURSOS ACTIVOS
               </p>
 
