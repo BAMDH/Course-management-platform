@@ -40,7 +40,10 @@ type CourseDetail = {
 
 type CourseSession = {
   id: string;
+  title: string | null;
   starts_at: string;
+  ends_at: string;
+  session_order: number | null;
 };
 
 type AttendanceRow = {
@@ -112,7 +115,7 @@ export default function TeacherCourseDetail() {
 
         const { data: sessionData, error: sessionError } = await supabase
           .from("course_sessions")
-          .select("id, starts_at")
+          .select("id, title, starts_at, ends_at, session_order")
           .eq("course_id", courseId)
           .order("starts_at", { ascending: true });
 
@@ -373,6 +376,31 @@ export default function TeacherCourseDetail() {
                 Estado: {course?.status ?? "Sin estado"}
               </p>
             </div>
+          </div>
+
+          <div className="mt-8 border-t border-[#e9e8e7] pt-8 space-y-4">
+            <h3 className="font-['Manrope',sans-serif] text-lg font-bold text-[#1b1c1b] mb-4">
+              Cronograma de Clases
+            </h3>
+            {sessions.length === 0 ? (
+              <p className="text-sm text-[#858688]">No hay sesiones registradas.</p>
+            ) : (
+              sessions.map((session, i) => (
+                <div key={session.id} className="flex flex-col gap-1 border-b border-[#f5f3f2] pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#1b1c1b]">
+                      {session.title || `Sesión ${session.session_order ?? i + 1}`}
+                    </span>
+                    <span className="text-xs font-semibold text-[#858688]">
+                      {formatDate(session.starts_at)}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#5d5e60]">
+                    {new Date(session.starts_at).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit", hour12: true })} - {new Date(session.ends_at).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
