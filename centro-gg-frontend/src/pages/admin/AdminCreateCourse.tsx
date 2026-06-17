@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Card from "@/components/admin/Cards/Card";
 
@@ -197,8 +196,8 @@ const AdminCreateCourse = () => {
   formData.price.trim() !== "" &&
   formData.teacher_id.trim() !== "";
   return (
-    <AdminLayout>
-      <main className="bg-[#f6f6f6] min-h-screen p-6">
+    <>
+      <main className="p-6">
         {/* HEADER */}
         <div className="mb-8">
           <Breadcrumbs
@@ -555,7 +554,7 @@ const AdminCreateCourse = () => {
         })
       }
     />
-    </AdminLayout>
+    </>
   );
 };
 

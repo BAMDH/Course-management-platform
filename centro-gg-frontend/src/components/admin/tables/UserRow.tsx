@@ -1,15 +1,11 @@
 import Badge from "@/components/admin/badges/Badges";
-
 import StatusBadge from "@/components/admin/badges/StatusBadge";
-
 import TableCell from "@/components/admin/tables/TableCell";
-
+import { Pencil, Ban, CheckCircle } from "lucide-react";
 
 type Props = {
   user: any;
-
   onBan?: () => void;
-
   onEdit?: () => void;
 };
 
@@ -19,36 +15,30 @@ const roleVariants: Record<string, string> = {
   Administrador: "danger",
 };
 
-const UserRow = ({
-  user,
-  onBan,
-  onEdit,
-}: Props) => {
+const UserRow = ({ user, onBan, onEdit }: Props) => {
   return (
-    <tr className="border-b border-gray-100 hover:bg-gray-50 transition">
+    <tr className="border-b border-[#e9e8e7] hover:bg-[#f5f3f2] transition">
       {/* User */}
       <TableCell>
         <div className="flex items-center gap-4">
           <img
             src={user.image}
             alt={user.name}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover border border-[#e9e8e7]"
           />
-
           <div>
-            <h4 className="font-semibold text-sm">
+            <h4 className="font-bold text-[#1b1c1b] text-sm">
               {user.name}
             </h4>
-
-            <p className="text-sm text-gray-400">
-              Registrado recientemente
+            <p className="text-xs text-[#5d5e60]">
+              Usuario del sistema
             </p>
           </div>
         </div>
       </TableCell>
 
       {/* Email */}
-      <TableCell className="text-gray-600">
+      <TableCell className="text-[#5d5e60]">
         {user.email}
       </TableCell>
 
@@ -68,29 +58,30 @@ const UserRow = ({
 
       {/* Status */}
       <TableCell>
-        <StatusBadge
-          status={user.status}
-        />
+        <StatusBadge status={user.status} />
       </TableCell>
 
       {/* Actions */}
-   
       <TableCell>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={onEdit}
-            className="hover:scale-110 transition text-lg"
+            title="Editar rol"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e9e8e7] hover:shadow-sm text-[#5d5e60] hover:text-[#1b1c1b] transition-all"
           >
-            ✏️
+            <Pencil className="w-4 h-4" />
           </button>
 
           <button
             onClick={onBan}
-            className="hover:scale-110 transition text-lg"
+            title={user.status === "Activo" ? "Bloquear" : "Activar"}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e9e8e7] hover:shadow-sm transition-all"
           >
-            {user.status === "Activo"
-              ? "🚫"
-              : "✅"}
+            {user.status === "Activo" ? (
+              <Ban className="w-4 h-4 text-[#dc2626]" />
+            ) : (
+              <CheckCircle className="w-4 h-4 text-green-600" />
+            )}
           </button>
         </div>
       </TableCell>

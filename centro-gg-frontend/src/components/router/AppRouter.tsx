@@ -10,8 +10,8 @@ import {
 } from 'react-router-dom';
 
 // ── Componentes core ─────────────────────────────────────────────────────────
-import Header from '@/components/nav/Header';
 import { TeacherLayout } from '@/layout/TeacherLayout';
+import AdminLayout from '@/layout/AdminLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROLES } from '@/auth/roles';
 import AdminResources from '@/pages/admin/AdminResources';
@@ -155,7 +155,7 @@ const adminLayout = (
     path="admin"
     element={
       <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-        <Header />
+        <AdminLayout />
       </ProtectedRoute>
     }
     errorElement={<ErrorPage />}

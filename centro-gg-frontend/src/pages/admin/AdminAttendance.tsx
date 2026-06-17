@@ -11,7 +11,6 @@ import {
 
 import { Link } from "react-router-dom";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
@@ -234,8 +233,8 @@ const AdminAttendance =
       };
 
     return (
-      <AdminLayout>
-        <main className="bg-[#f5f5f5] min-h-screen p-8">
+      <>
+        <main className="p-8">
 
           <div className="mb-10">
             <Breadcrumbs
@@ -377,7 +376,7 @@ const AdminAttendance =
             </div>
           )}
         </main>
-      </AdminLayout>
+      </>
     );
   };
 

@@ -6,7 +6,6 @@ import {
   useState,
 } from "react";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Card from "@/components/admin/Cards/Card";
 
@@ -23,6 +22,8 @@ import TableHeader from "@/components/admin/tables/TableHeader";
 import UserRow from "@/components/admin/tables/UserRow";
 
 import { supabase } from "@/services/supabase";
+
+import { Users, GraduationCap, UserCheck, Zap, Shield, Star } from "lucide-react";
 
 type UserData = {
   id: string;
@@ -235,8 +236,8 @@ const AdminUsers = () => {
   };
 
   return (
-    <AdminLayout>
-      <main className="min-h-screen bg-[#f5f5f5] p-8">
+    <>
+      <main className="p-8">
         {/* Header */}
         <div className="mb-8">
           <Breadcrumbs
@@ -268,34 +269,26 @@ const AdminUsers = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
           <StatCard
             title="TOTAL USUARIOS"
-            value={String(
-              totalUsers
-            )}
-            icon="👤"
+            value={String(totalUsers)}
+            icon={<Users className="w-6 h-6" />}
           />
 
           <StatCard
             title="ESTUDIANTES"
-            value={String(
-              totalStudents
-            )}
-            icon="🎓"
+            value={String(totalStudents)}
+            icon={<GraduationCap className="w-6 h-6" />}
           />
 
           <StatCard
             title="PROFESORES"
-            value={String(
-              totalTeachers
-            )}
-            icon="🧑‍🏫"
+            value={String(totalTeachers)}
+            icon={<UserCheck className="w-6 h-6" />}
           />
 
           <StatCard
             title="ACTIVOS"
-            value={String(
-              totalActive
-            )}
-            icon="⚡"
+            value={String(totalActive)}
+            icon={<Zap className="w-6 h-6" />}
           />
         </div>
 
@@ -452,7 +445,7 @@ const AdminUsers = () => {
             </div>
 
             <div className="absolute right-0 bottom-0 text-8xl opacity-10">
-              🛡️
+              <Shield className="w-48 h-48 translate-x-12 translate-y-12" />
             </div>
           </Card>
 
@@ -463,7 +456,7 @@ const AdminUsers = () => {
                 Roles
               </h3>
 
-              <p className="leading-relaxed max-w-md text-red-600">
+              <p className="leading-relaxed max-w-md text-white/90">
                 Los roles de
                 profesor habilitan
                 herramientas de
@@ -475,7 +468,7 @@ const AdminUsers = () => {
             </div>
 
             <div className="absolute right-0 bottom-0 text-8xl opacity-10">
-              ⭐
+              <Star className="w-48 h-48 translate-x-12 translate-y-12" />
             </div>
           </Card>
         </div>
@@ -569,7 +562,7 @@ const AdminUsers = () => {
           </div>
         )}
       </main>
-    </AdminLayout>
+    </>
   );
 };
 

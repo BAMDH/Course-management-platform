@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 import { useParams } from "react-router-dom";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
@@ -493,17 +492,17 @@ const availableSlots =
 
   if (loading || !course) {
     return (
-      <AdminLayout>
+      <>
         <main className="p-8">
           Cargando...
         </main>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
-      <main className="bg-[#f6f6f6] min-h-screen p-8">
+    <>
+      <main className="p-8">
         {/* HEADER */}
         <div className="mb-8">
           <Breadcrumbs
@@ -750,7 +749,7 @@ const availableSlots =
         onSelect={handleImageChange}
       />
       
-    </AdminLayout>
+    </>
   )
   ;
 };

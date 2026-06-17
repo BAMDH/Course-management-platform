@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Card from "@/components/admin/Cards/Card";
 
@@ -19,6 +18,8 @@ import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 import PageHeader from "@/components/admin/Headers/PageHeader";
 
 import { supabase } from "@/services/supabase";
+
+import { BookOpen, ChefHat } from "lucide-react";
 
 type Course = {
   id: string;
@@ -183,8 +184,8 @@ const AdminCourses = () => {
     );
 
   return (
-    <AdminLayout>
-      <main className="min-h-screen bg-[#f5f5f5] p-8">
+    <>
+      <main className="p-8">
         {/* Header */}
         <div className="mb-8 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
           <div>
@@ -342,7 +343,7 @@ const AdminCourses = () => {
             </div>
 
             <div className="absolute right-0 bottom-0 text-8xl opacity-10">
-              📖
+              <BookOpen className="w-48 h-48 translate-x-12 translate-y-12" />
             </div>
           </Card>
 
@@ -353,7 +354,7 @@ const AdminCourses = () => {
                 Instructores
               </h3>
 
-              <p className="leading-relaxed max-w-md text-red-600">
+              <p className="leading-relaxed max-w-md text-white/90">
                 Asigne chefs
                 profesionales y
                 especialistas para elevar
@@ -363,12 +364,12 @@ const AdminCourses = () => {
             </div>
 
             <div className="absolute right-0 bottom-0 text-8xl opacity-10">
-              👨‍🍳
+              <ChefHat className="w-48 h-48 translate-x-12 translate-y-12" />
             </div>
           </Card>
         </div>
       </main>
-    </AdminLayout>
+    </>
   );
 };
 

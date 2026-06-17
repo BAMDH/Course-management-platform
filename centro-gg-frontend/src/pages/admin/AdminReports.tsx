@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "@/layout/AdminLayout";
 import { supabase } from "@/services/supabase";
 
 import {
@@ -220,8 +219,8 @@ useEffect(() => {
   };
 
   return (
-    <AdminLayout>
-      <main className="bg-[#f6f6f6] min-h-screen p-8">
+    <>
+      <main className="p-8">
         <div className="mb-10">
           <h1 className="text-5xl font-bold mb-3">
             Informe de Ventas
@@ -401,7 +400,7 @@ useEffect(() => {
           )}
         </div>
       </main>
-    </AdminLayout>
+    </>
   );
 };
 

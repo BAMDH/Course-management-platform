@@ -5,7 +5,6 @@ import {
   useParams,
 } from "react-router-dom";
 
-import AdminLayout from "@/layout/AdminLayout";
 
 import Breadcrumbs from "@/components/admin/navigation/Breadcrumbs";
 
@@ -210,11 +209,11 @@ const AdminPaymentDetail = () => {
 
   if (loading || !payment) {
     return (
-      <AdminLayout>
+      <>
         <main className="p-8">
           <p>Cargando factura...</p>
         </main>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -392,8 +391,8 @@ const rejectPayment = async () => {
   }
 };
   return (
-    <AdminLayout>
-      <main className="bg-[#f5f5f5] min-h-screen p-8">
+    <>
+      <main className="p-8">
         {/* Header */}
         <div className="mb-10">
           <Breadcrumbs
@@ -674,7 +673,7 @@ const rejectPayment = async () => {
           </Card>
         </div>
       </main>
-    </AdminLayout>
+    </>
   );
 };
 

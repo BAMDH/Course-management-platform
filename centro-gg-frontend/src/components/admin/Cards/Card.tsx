@@ -1,13 +1,9 @@
-type Props =
-  React.HTMLAttributes<HTMLDivElement>;
+type Props = React.HTMLAttributes<HTMLDivElement>;
 
-const Card = ({
-  className = "",
-  ...props
-}: Props) => {
+const Card = ({ className = "", ...props }: Props) => {
   return (
     <div
-      className={`bg-white rounded-3xl border border-gray-200 shadow-sm ${className}`}
+      className={`bg-white rounded-3xl border border-[#e9e8e7] shadow-sm ${className}`}
       {...props}
     />
   );

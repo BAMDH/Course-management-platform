@@ -1,4 +1,3 @@
-import AdminLayout from "@/layout/AdminLayout";
 
 import {
   Wallet,
@@ -156,8 +155,8 @@ const filteredPayments =
 
 
   return (
-    <AdminLayout>
-      <main className="bg-[#f5f5f5] min-h-screen p-8">
+    <>
+      <main className="p-8">
         {/* Header */}
         <div className="mb-10">
           <Breadcrumbs
@@ -284,7 +283,7 @@ const filteredPayments =
           </div>
         </Card>
       </main>
-    </AdminLayout>
+    </>
   );
 };
 

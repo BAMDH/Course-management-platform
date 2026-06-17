@@ -1,5 +1,4 @@
 
-import AdminLayout from "@/layout/AdminLayout";
 
 const students = [
   {
@@ -20,8 +19,8 @@ const students = [
 
 const AdminStudentsAttendance = () => {
   return (
-    <AdminLayout>
-      <main className="bg-[#f6f6f6] min-h-screen p-8">
+    <>
+      <main className="p-8">
         <div className="mb-8">
           <p className="text-sm text-gray-400 mb-2">
             Administración / Asistencia por Alumno
@@ -73,7 +72,7 @@ const AdminStudentsAttendance = () => {
           ))}
         </div>
       </main>
-    </AdminLayout>
+    </>
   );
 };
 
