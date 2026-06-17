@@ -12,9 +12,11 @@ import {
   Loader2
 } from 'lucide-react';
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 
 export default function StudentCertificates() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['studentGrades', user?.email],
@@ -44,7 +46,7 @@ export default function StudentCertificates() {
 
   const handleDownload = () => {
     if (courses.length === 0) return;
-    
+
     const wsData = courses.map(course => ({
       Materia: course.courseTitle,
       Profesor: course.professor,
@@ -71,13 +73,13 @@ export default function StudentCertificates() {
           </p>
         </div>
 
-        <button 
+        <button
           onClick={handleDownload}
           disabled={courses.length === 0}
           className={clsx(
             "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[#1b1c1b] font-bold flex-shrink-0 shadow-sm transition-colors",
-            courses.length > 0 
-              ? "bg-white text-[#1b1c1b] hover:bg-[#f5f3f2]" 
+            courses.length > 0
+              ? "bg-white text-[#1b1c1b] hover:bg-[#f5f3f2]"
               : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
           )}
         >
@@ -192,10 +194,13 @@ export default function StudentCertificates() {
 
                     {/* Acción Col */}
                     <td className="py-5 px-8 whitespace-nowrap">
-                      <button className={clsx(
-                        "text-[14px] font-bold hover:underline",
-                        row.status === 'Próximo' ? "text-[#a3a3a3]" : "text-[#dc2626]"
-                      )}>
+                      <button
+                        onClick={() => navigate(`/student/courses/${row.id}/classroom`)}
+                        disabled={row.status === 'Próximo'}
+                        className={clsx(
+                          "text-[14px] font-bold hover:underline",
+                          row.status === 'Próximo' ? "text-[#a3a3a3] cursor-not-allowed" : "text-[#dc2626]"
+                        )}>
                         Ver Detalles
                       </button>
                     </td>

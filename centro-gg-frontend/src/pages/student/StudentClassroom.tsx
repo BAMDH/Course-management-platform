@@ -1,76 +1,98 @@
 import { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/providers/auth/useAuth';
+import { getStudentClassroomData, type CourseMaterial } from '@/services/studentClassroomService';
+import { supabase } from '@/services/supabase';
 import { 
   ChevronRight, 
   User, 
   Calendar, 
   Search, 
-  ChevronDown, 
   Eye, 
   Download, 
-  PlayCircle, 
-  Lock, 
-  Clock, 
-  FileText, 
-  ShoppingCart, 
-  Megaphone, 
+  CheckCircle2,
+  Loader2,
   Bell,
-  CheckCircle2
+  Lock,
+  Clock
 } from 'lucide-react';
 import clsx from 'clsx';
 
-interface MaterialCard {
-  id: string;
-  type: 'PDF' | 'DOC' | 'VIDEO' | 'LOCKED';
-  classNum: string;
-  title: string;
-  description: string;
-  status: 'Disponible' | 'Próximamente';
-  imageUrl?: string;
-}
-
-const MOCK_MATERIALS: MaterialCard[] = [
-  {
-    id: 'm1',
-    type: 'PDF',
-    classNum: 'CLASE 1',
-    title: 'Receta 01 - Masa base de vainilla',
-    description: 'Receta detallada con gramajes exactos y procedimiento paso a paso',
-    status: 'Disponible',
-    imageUrl: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=600'
-  },
-  {
-    id: 'm2',
-    type: 'DOC',
-    classNum: 'CLASE 1',
-    title: 'Receta 02 - Relleno de crema pastelera',
-    description: 'Documento de texto con las proporciones ideales para una crema',
-    status: 'Disponible',
-    imageUrl: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&q=80&w=600'
-  },
-  {
-    id: 'm3',
-    type: 'VIDEO',
-    classNum: 'CLASE 2',
-    title: 'Receta 03 - Decoración con manga',
-    description: 'Video demostrativo de técnicas básicas de boquilla: rosetones,...',
-    status: 'Disponible',
-    imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&q=80&w=600'
-  },
-  {
-    id: 'm4',
-    type: 'LOCKED',
-    classNum: 'CLASE 2',
-    title: 'Receta 04 - Cupcakes de chocolate',
-    description: 'Receta y tips de horneado para cupcakes húmedos.',
-    status: 'Próximamente'
-  }
-];
-
 export default function StudentClassroom() {
+  const { courseId } = useParams();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('Materiales');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const tabs = ['Materiales', 'Anuncios', 'Información', 'Tareas'];
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['studentClassroom', courseId, user?.email],
+    queryFn: () => getStudentClassroomData(courseId || '', user?.email || ''),
+    enabled: !!courseId && !!user?.email,
+  });
+
+  const tabs = ['Materiales', 'Anuncios', 'Información'];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#dc2626] animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !data || !data.course) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-8 text-center">
+        <h2 className="text-2xl font-bold text-[#1b1c1b] mb-2">Error al cargar el aula virtual</h2>
+        <p className="text-[#5d5e60] mb-6">No se pudo cargar la información del curso.</p>
+        <Link to="/student/courses" className="bg-[#dc2626] text-white px-6 py-2.5 rounded-full font-bold">
+          Volver a mis cursos
+        </Link>
+      </div>
+    );
+  }
+
+  const { course, materials, announcements } = data;
+
+  const filteredMaterials = materials.filter(m => 
+    m.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (m.description && m.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const handleOpenMaterial = async (mat: CourseMaterial) => {
+    if (!mat.isUnlocked) return;
+    if (mat.external_url) {
+      window.open(mat.external_url, '_blank');
+      return;
+    }
+    if (mat.file_path) {
+      const { data, error } = await supabase.storage.from('course-materials').createSignedUrl(mat.file_path, 600);
+      if (error) {
+        alert("Error al abrir el archivo.");
+      } else if (data) {
+        window.open(data.signedUrl, '_blank');
+      }
+    }
+  };
+
+
+
+  const getMaterialLabel = (kind: string) => {
+    switch(kind) {
+      case 'video': return 'VIDEO';
+      case 'recipe': return 'RECETA';
+      case 'document': return 'DOCUMENTO';
+      case 'link': return 'ENLACE';
+      case 'extra': return 'EXTRA';
+      default: return 'ARCHIVO';
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Por definir';
+    return new Date(dateString).toLocaleDateString('es-CR', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto font-['Inter',sans-serif]">
@@ -80,7 +102,7 @@ export default function StudentClassroom() {
         <ChevronRight className="w-3.5 h-3.5" />
         <span>Aula virtual</span>
         <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-[#1b1c1b] font-bold">Pastelería Básica</span>
+        <span className="text-[#1b1c1b] font-bold">{course.title}</span>
       </div>
 
       <div className="flex flex-col xl:flex-row gap-8 items-start">
@@ -88,25 +110,32 @@ export default function StudentClassroom() {
         <div className="flex-1 w-full min-w-0">
           
           {/* Header Section */}
-          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm mb-8">
-            <h1 className="text-[28px] font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] leading-tight mb-4">
-              Pastelería Básica • Recetas y materiales de clase
-            </h1>
-            <p className="text-[#5d5e60] text-[15px] leading-relaxed mb-6 max-w-3xl">
-              Encuentra aquí todas las recetas, guías paso a paso y videos demostrativos correspondientes a cada módulo. Los materiales se desbloquean a medida que avanzamos en las clases en vivo.
-            </p>
-            
-            <div className="flex flex-wrap items-center gap-4 text-[14px]">
-              <div className="flex items-center gap-2 bg-[#f5f3f2] px-4 py-2 rounded-full text-[#1b1c1b] font-medium">
-                <User className="w-4 h-4 text-[#dc2626]" />
-                Prof. Elena Gómez
-              </div>
-              <div className="hidden sm:block w-px h-5 bg-[#e9e8e7]" />
-              <div className="flex items-center gap-2 bg-[#f5f3f2] px-4 py-2 rounded-full text-[#1b1c1b] font-medium">
-                <Calendar className="w-4 h-4 text-[#dc2626]" />
-                Próxima clase: 12 mayo
+          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm mb-8 relative overflow-hidden">
+            <div className="relative z-10">
+              <h1 className="text-[28px] font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] leading-tight mb-4">
+                {course.title}
+              </h1>
+              <p className="text-[#5d5e60] text-[15px] leading-relaxed mb-6 max-w-3xl">
+                Los materiales se desbloquean a medida que se registra tu asistencia en las clases presenciales.
+              </p>
+              
+              <div className="flex flex-wrap items-center gap-4 text-[14px]">
+                <div className="flex items-center gap-2 bg-[#f5f3f2] px-4 py-2 rounded-full text-[#1b1c1b] font-medium">
+                  <User className="w-4 h-4 text-[#dc2626]" />
+                  Prof. {course.teacherName}
+                </div>
+                <div className="hidden sm:block w-px h-5 bg-[#e9e8e7]" />
+                <div className="flex items-center gap-2 bg-[#f5f3f2] px-4 py-2 rounded-full text-[#1b1c1b] font-medium">
+                  <Calendar className="w-4 h-4 text-[#dc2626]" />
+                  Próxima clase: {formatDate(course.nextClassDate)}
+                </div>
               </div>
             </div>
+            {course.cover_image_path && (
+              <div className="absolute top-0 right-0 bottom-0 w-1/3 opacity-10 pointer-events-none">
+                <img src={course.cover_image_path} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
 
           {/* Tabs Navigation */}
@@ -139,115 +168,139 @@ export default function StudentClassroom() {
                   <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#a3a3a3]" />
                   <input 
                     type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="BUSCAR MATERIAL" 
                     className="w-full pl-11 pr-4 py-3 rounded-xl border border-[#e9e8e7] bg-white text-[13px] font-bold text-[#1b1c1b] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#dc2626] transition-colors"
                   />
-                </div>
-                <div className="flex gap-4">
-                  <button className="flex items-center justify-between gap-3 px-5 py-3 rounded-xl border border-[#e9e8e7] bg-white text-[13px] font-bold text-[#5d5e60] hover:bg-[#f5f3f2] transition-colors min-w-[180px]">
-                    FILTRAR POR CLASE
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  <button className="flex items-center justify-between gap-3 px-5 py-3 rounded-xl border border-[#e9e8e7] bg-white text-[13px] font-bold text-[#5d5e60] hover:bg-[#f5f3f2] transition-colors min-w-[180px]">
-                    TIPO DE MATERIAL
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
 
               {/* Material Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {MOCK_MATERIALS.map((mat) => (
-                  <div key={mat.id} className={clsx(
-                    "rounded-3xl border shadow-sm overflow-hidden flex flex-col transition-all",
-                    mat.type === 'LOCKED' ? "bg-[#f5f3f2] border-transparent border-dashed border-2 hover:border-[#a3a3a3]" : "bg-white border-[#e9e8e7] hover:shadow-md"
-                  )}>
-                    {/* Card Image Area */}
-                    <div className="h-[180px] w-full relative bg-[#e9e8e7]">
-                      {mat.imageUrl && (
-                        <img src={mat.imageUrl} alt={mat.title} className={clsx(
-                          "w-full h-full object-cover",
-                          mat.type === 'VIDEO' ? "brightness-75" : ""
-                        )} />
-                      )}
-                      
-                      {mat.type === 'VIDEO' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <PlayCircle className="w-16 h-16 text-white/80" />
-                        </div>
-                      )}
-
-                      {mat.type === 'LOCKED' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Lock className="w-10 h-10 text-[#a3a3a3]" />
-                        </div>
-                      )}
-
-                      <div className="absolute top-4 left-4 flex gap-2">
-                        <span className="bg-white px-2.5 py-1 rounded-md text-[10px] font-bold text-[#1b1c1b]">
-                          {mat.type === 'LOCKED' ? 'PDF' : mat.type}
-                        </span>
-                        <span className="bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] font-bold text-white">
-                          {mat.classNum}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Card Content Area */}
-                    <div className="p-6 flex flex-col flex-1">
-                      <h3 className={clsx(
-                        "text-[18px] font-bold font-['Manrope',sans-serif] leading-tight mb-2",
-                        mat.type === 'LOCKED' ? "text-[#a3a3a3]" : "text-[#1b1c1b]"
-                      )}>
-                        {mat.title}
-                      </h3>
-                      <p className={clsx(
-                        "text-[14px] leading-relaxed mb-6",
-                        mat.type === 'LOCKED' ? "text-[#a3a3a3]" : "text-[#5d5e60]"
-                      )}>
-                        {mat.description}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between">
-                        {mat.status === 'Disponible' ? (
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-[12px] font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            {mat.status}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#e9e8e7] text-[#5d5e60] rounded-full text-[12px] font-bold">
-                            <Clock className="w-3.5 h-3.5" />
-                            {mat.status}
-                          </div>
-                        )}
-
-                        <div className="flex gap-2">
-                          {mat.type === 'VIDEO' ? (
-                            <button className="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-4 py-2 rounded-xl text-[13px] font-bold transition-colors">
-                              Reproducir
-                            </button>
-                          ) : mat.type !== 'LOCKED' ? (
-                            <>
-                              <button className="p-2 text-[#5d5e60] hover:bg-[#f5f3f2] rounded-lg transition-colors">
-                                <Eye className="w-5 h-5" />
-                              </button>
-                              <button className="p-2 text-[#dc2626] hover:bg-red-50 rounded-lg transition-colors">
-                                <Download className="w-5 h-5" />
-                              </button>
-                            </>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
+                {filteredMaterials.length === 0 ? (
+                  <div className="col-span-full py-12 text-center border-2 border-dashed border-[#e9e8e7] rounded-3xl">
+                    <p className="text-[#5d5e60] font-medium text-lg">No hay materiales disponibles</p>
                   </div>
-                ))}
+                ) : (
+                  filteredMaterials.map((mat) => (
+                    <div key={mat.id} className={clsx(
+                      "rounded-3xl border shadow-sm overflow-hidden flex flex-col transition-all",
+                      !mat.isUnlocked ? "bg-[#f5f3f2] border-transparent border-dashed border-2 hover:border-[#a3a3a3]" : "bg-white border-[#e9e8e7] hover:shadow-md"
+                    )}>
+                      {/* Card Content Area */}
+                      <div className="p-6 flex flex-col flex-1">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className={clsx(
+                            "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase",
+                            !mat.isUnlocked ? "bg-white text-[#5d5e60]" : "bg-red-50 text-[#dc2626]"
+                          )}>
+                            {getMaterialLabel(mat.kind)}
+                          </span>
+                          {mat.course_sessions && (
+                            <span className={clsx(
+                              "px-2.5 py-1 rounded-md text-[10px] font-bold",
+                              !mat.isUnlocked ? "bg-white text-[#5d5e60]" : "bg-[#f5f3f2] text-[#5d5e60]"
+                            )}>
+                              {mat.course_sessions.title}
+                            </span>
+                          )}
+                          {mat.is_extra_purchase && (
+                            <span className="bg-[#fff7ed] px-2.5 py-1 rounded-md text-[10px] font-bold text-[#c2410c]">
+                              EXTRA
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className={clsx(
+                          "text-[18px] font-bold font-['Manrope',sans-serif] leading-tight mb-2",
+                          !mat.isUnlocked ? "text-[#a3a3a3]" : "text-[#1b1c1b]"
+                        )}>
+                          {mat.title}
+                        </h3>
+                        <p className={clsx(
+                          "text-[14px] leading-relaxed mb-6",
+                          !mat.isUnlocked ? "text-[#a3a3a3]" : "text-[#5d5e60]"
+                        )}>
+                          {mat.description || "Sin descripción"}
+                        </p>
+
+                        <div className="mt-auto flex items-center justify-between">
+                          {mat.isUnlocked ? (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-[12px] font-bold">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Disponible
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#5d5e60] rounded-full text-[12px] font-bold">
+                              <Clock className="w-3.5 h-3.5" />
+                              Próximamente
+                            </div>
+                          )}
+
+                          <div className="flex gap-2">
+                            {mat.isUnlocked ? (
+                              mat.kind === 'video' ? (
+                                <button onClick={() => handleOpenMaterial(mat)} className="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-4 py-2 rounded-xl text-[13px] font-bold transition-colors">
+                                  Reproducir
+                                </button>
+                              ) : (
+                                <>
+                                  <button onClick={() => handleOpenMaterial(mat)} className="p-2 text-[#5d5e60] hover:bg-[#f5f3f2] rounded-lg transition-colors" title="Ver">
+                                    <Eye className="w-5 h-5" />
+                                  </button>
+                                  <button onClick={() => handleOpenMaterial(mat)} className="p-2 text-[#dc2626] hover:bg-red-50 rounded-lg transition-colors" title="Descargar">
+                                    <Download className="w-5 h-5" />
+                                  </button>
+                                </>
+                              )
+                            ) : (
+                              <button disabled className="p-2 text-[#a3a3a3] rounded-lg cursor-not-allowed">
+                                <Lock className="w-5 h-5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
 
-          {activeTab !== 'Materiales' && (
-            <div className="py-12 text-center border-2 border-dashed border-[#e9e8e7] rounded-3xl">
-              <p className="text-[#5d5e60] font-medium text-lg">Contenido de {activeTab} en construcción</p>
+          {/* Tab Content - Información */}
+          {activeTab === 'Información' && (
+            <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
+              <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-4">Información del Curso</h2>
+              <div className="prose max-w-none text-[#5d5e60]">
+                {course.description ? (
+                  <p className="whitespace-pre-wrap">{course.description}</p>
+                ) : (
+                  <p>No hay descripción registrada para este curso.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content - Anuncios */}
+          {activeTab === 'Anuncios' && (
+            <div className="space-y-4">
+              {announcements.length === 0 ? (
+                <div className="py-12 text-center border-2 border-dashed border-[#e9e8e7] rounded-3xl">
+                  <p className="text-[#5d5e60] font-medium text-lg">No hay anuncios para este curso</p>
+                </div>
+              ) : (
+                announcements.map((ann) => (
+                  <div key={ann.id} className="bg-white rounded-3xl p-6 border border-[#e9e8e7] shadow-sm">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-[18px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">{ann.title}</h3>
+                      <span className="text-xs text-[#a3a3a3]">{formatDate(ann.created_at)}</span>
+                    </div>
+                    <p className="text-[14px] text-[#5d5e60] whitespace-pre-wrap">{ann.content}</p>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
@@ -255,44 +308,6 @@ export default function StudentClassroom() {
         {/* Right Sidebar */}
         <div className="w-full xl:w-[320px] flex flex-col gap-6 flex-shrink-0">
           
-          {/* Acceso Rápido */}
-          <div className="bg-white rounded-3xl p-6 border border-[#e9e8e7] shadow-sm">
-            <h3 className="text-[16px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-4">
-              Acceso Rápido
-            </h3>
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 bg-red-50 hover:bg-red-100 border border-red-100 rounded-2xl transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#dc2626] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-[14px] font-bold text-[#dc2626] text-left leading-tight">
-                    Descargar recetario completo
-                  </span>
-                </div>
-                <Download className="w-4 h-4 text-[#dc2626] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-
-              <button className="w-full flex items-center gap-3 p-4 bg-white hover:bg-[#f5f3f2] border border-[#e9e8e7] rounded-2xl transition-colors">
-                <div className="w-8 h-8 bg-[#f5f3f2] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingCart className="w-4 h-4 text-[#dc2626]" />
-                </div>
-                <span className="text-[14px] font-bold text-[#1b1c1b] text-left leading-tight">
-                  Ver ingredientes de la semana
-                </span>
-              </button>
-
-              <button className="w-full flex items-center gap-3 p-4 bg-white hover:bg-[#f5f3f2] border border-[#e9e8e7] rounded-2xl transition-colors">
-                <div className="w-8 h-8 bg-[#f5f3f2] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Megaphone className="w-4 h-4 text-[#f59e0b]" />
-                </div>
-                <span className="text-[14px] font-bold text-[#1b1c1b] text-left leading-tight">
-                  Abrir anuncio reciente
-                </span>
-              </button>
-            </div>
-          </div>
-
           {/* Estado del Curso */}
           <div className="bg-white rounded-3xl p-6 border border-[#e9e8e7] shadow-sm">
             <h3 className="text-[16px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-4">
@@ -300,34 +315,36 @@ export default function StudentClassroom() {
             </h3>
             <div className="flex gap-4">
               <div className="flex-1 bg-[#f5f3f2] rounded-2xl p-4 text-center">
-                <div className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] mb-1">12</div>
-                <div className="text-[10px] font-bold text-[#5d5e60] tracking-wider uppercase">Materiales<br/>Public.</div>
+                <div className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] mb-1">{materials.length}</div>
+                <div className="text-[10px] font-bold text-[#5d5e60] tracking-wider uppercase">Materiales<br/>Totales</div>
               </div>
               <div className="flex-1 bg-[#f5f3f2] rounded-2xl p-4 text-center">
-                <div className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#dc2626] mb-1">4</div>
-                <div className="text-[10px] font-bold text-[#dc2626] tracking-wider uppercase">Recetas<br/>Descarg.</div>
+                <div className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#dc2626] mb-1">{materials.filter(m => m.isUnlocked).length}</div>
+                <div className="text-[10px] font-bold text-[#dc2626] tracking-wider uppercase">Materiales<br/>Disponibles</div>
               </div>
             </div>
           </div>
 
           {/* Último Anuncio */}
-          <div className="bg-[#fffbeb] rounded-3xl p-6 border border-[#fef3c7] shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#fef3c7] rounded-full -mr-12 -mt-12 blur-xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <Bell className="w-5 h-5 text-[#d97706]" />
-                <h3 className="text-[15px] font-bold font-['Manrope',sans-serif] text-[#92400e]">
-                  Último Anuncio
-                </h3>
+          {announcements.length > 0 && (
+            <div className="bg-[#fffbeb] rounded-3xl p-6 border border-[#fef3c7] shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#fef3c7] rounded-full -mr-12 -mt-12 blur-xl" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bell className="w-5 h-5 text-[#d97706]" />
+                  <h3 className="text-[15px] font-bold font-['Manrope',sans-serif] text-[#92400e]">
+                    Último Anuncio
+                  </h3>
+                </div>
+                <p className="text-[14px] text-[#92400e] leading-relaxed mb-4 line-clamp-3">
+                  {announcements[0].content}
+                </p>
+                <button onClick={() => setActiveTab('Anuncios')} className="text-[14px] font-bold text-[#d97706] hover:text-[#b45309] transition-colors flex items-center gap-1">
+                  Ver todos <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-              <p className="text-[14px] text-[#92400e] leading-relaxed mb-4">
-                Recuerden que para la clase del sábado deben tener pesados los ingredientes de la Receta 01.
-              </p>
-              <button className="text-[14px] font-bold text-[#d97706] hover:text-[#b45309] transition-colors flex items-center gap-1">
-                Leer más <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

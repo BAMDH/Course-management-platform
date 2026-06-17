@@ -102,7 +102,11 @@ const StudentDashboard = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ongoingCourses.map(course => (
-              <div key={course.id} className="bg-white rounded-3xl p-4 shadow-sm border border-[#e9e8e7] flex flex-col hover:shadow-md transition-shadow">
+              <div 
+                key={course.id} 
+                onClick={() => navigate(`/student/courses/${course.id}/classroom`)}
+                className="bg-white rounded-3xl p-4 shadow-sm border border-[#e9e8e7] flex flex-col hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div className="h-40 rounded-2xl overflow-hidden mb-4 relative">
                   <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-transform hover:scale-105 duration-500" />
                 </div>

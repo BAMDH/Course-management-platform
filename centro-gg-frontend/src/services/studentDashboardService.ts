@@ -41,7 +41,8 @@ export async function getStudentDashboardData(email: string): Promise<StudentDas
         title,
         duration_hours,
         cover_image_path,
-        level
+        level,
+        materials ( id, session )
       )
     `)
     .eq('student_id', studentId)
@@ -52,16 +53,42 @@ export async function getStudentDashboardData(email: string): Promise<StudentDas
     throw enrollmentsError;
   }
 
+  // Fetch attendance to calculate real progress
+  const { data: attendanceData } = await supabase
+    .from("attendance")
+    .select("session_id, status")
+    .eq("student_id", studentId);
+
+  let attendanceMap: Record<string, boolean> = {};
+  if (attendanceData) {
+    attendanceData.forEach(att => {
+      if (att.status === 'present' || att.status === 'late') {
+        attendanceMap[att.session_id] = true;
+      }
+    });
+  }
+
   // 3. Process data
   const ongoingCourses = (enrollments || []).map((enrollment: any, index: number) => {
     const course = enrollment.courses;
+    const materials = course.materials || [];
+    
+    let progress = 0;
+    if (materials.length > 0) {
+      let unlockedCount = 0;
+      materials.forEach((mat: any) => {
+        if (!mat.session || attendanceMap[mat.session]) {
+          unlockedCount++;
+        }
+      });
+      progress = Math.round((unlockedCount / materials.length) * 100);
+    }
     
     return {
       id: course.id,
       title: course.title,
       module: course.level ? course.level.toUpperCase() : `MÓDULO ${index + 1}`,
-      // Progress is not natively tracked yet, simulate a value for visual purposes
-      progress: Math.floor(Math.random() * 40) + 10, // random between 10 and 50
+      progress,
       image: course.cover_image_path || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=600',
     };
   });

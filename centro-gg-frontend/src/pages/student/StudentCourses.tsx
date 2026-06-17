@@ -121,7 +121,8 @@ export default function StudentCourses() {
             const course = enrollment.course;
             const isEnCurso = enrollment.status === 'active';
             const displayStatus = isEnCurso ? 'EN CURSO' : 'PRÓXIMAMENTE';
-            const progress = isEnCurso ? 50 : 0; // Simulated progress
+            
+            const progress = enrollment.progress || 0;
 
             return (
               <div key={enrollment.id} className="bg-white rounded-3xl border border-[#e9e8e7] shadow-sm overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
@@ -201,9 +202,6 @@ export default function StudentCourses() {
                           className="flex-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold py-2.5 rounded-xl transition-colors text-[14px]"
                         >
                           Ver Materiales
-                        </button>
-                        <button className="flex-1 bg-white border border-[#e9e8e7] text-[#1b1c1b] hover:bg-[#f5f3f2] font-bold py-2.5 rounded-xl transition-colors text-[14px]">
-                          Calificaciones
                         </button>
                       </div>
                     ) : (
