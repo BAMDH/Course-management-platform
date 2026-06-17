@@ -38,6 +38,7 @@ const StudentPayments = lazy(() => import('@/pages/student/StudentPayments'));
 const StudentCertificates = lazy(() => import('@/pages/student/StudentCertificates'));
 const StudentProfile = lazy(() => import('@/pages/student/StudentProfile'));
 const StudentCalendar = lazy(() => import('@/pages/student/StudentCalendar'));
+const StudentCourseEnrollment = lazy(() => import('@/pages/student/StudentCourseEnrollment'));
 
 // ── Páginas de profesor ──────────────────────────────────────────────────────
 const TeacherDashboard = lazy(() => import('@/pages/teacher/TeacherDashboard'));
@@ -107,6 +108,7 @@ const studentLayout = (
     <Route index element={<StudentDashboard />} />
     <Route path="courses" element={<StudentCourses />} />
     <Route path="courses/:courseId/classroom" element={<StudentClassroom />} />
+    <Route path="courses/:courseId/enroll" element={<StudentCourseEnrollment />} />
     <Route path="payments" element={<StudentPayments />} />
     <Route path="certificates" element={<StudentCertificates />} />
     <Route path="profile" element={<StudentProfile />} />

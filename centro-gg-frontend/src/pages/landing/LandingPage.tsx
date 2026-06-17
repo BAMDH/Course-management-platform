@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getFeaturedPublishedCourses } from "@/services/courseService"
+import { getStudentEnrolledCourseIds } from "@/services/studentEnrollmentService"
+import { useAuth } from "@/providers/auth/useAuth"
 
 const DEFAULT_COURSE_IMAGE =
   "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=1200&auto=format&fit=crop"
@@ -19,6 +21,15 @@ const LandingPage = () => {
   } = useQuery({
     queryKey: ["landing-courses"],
     queryFn: getFeaturedPublishedCourses,
+  })
+
+  const { user, role } = useAuth()
+  const isStudent = user && role === "student"
+
+  const { data: enrolledCourseIds = [] } = useQuery({
+    queryKey: ["enrolled-courses", user?.email],
+    queryFn: () => getStudentEnrolledCourseIds(user?.email || ""),
+    enabled: Boolean(isStudent),
   })
 
   return (
@@ -40,13 +51,23 @@ const LandingPage = () => {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
-            <Button
-              asChild
-              size="lg"
-              className="bg-red-600 px-8 font-bold shadow-lg shadow-red-600/20 hover:bg-red-700"
-            >
-              <Link to="/register">Inscribirse Ahora</Link>
-            </Button>
+            {isStudent ? (
+              <Button
+                asChild
+                size="lg"
+                className="bg-red-600 px-8 font-bold shadow-lg shadow-red-600/20 hover:bg-red-700"
+              >
+                <Link to="/student">Ir a Mi Panel</Link>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                size="lg"
+                className="bg-red-600 px-8 font-bold shadow-lg shadow-red-600/20 hover:bg-red-700"
+              >
+                <Link to="/register">Inscribirse Ahora</Link>
+              </Button>
+            )}
 
             <Button asChild size="lg" variant="secondary" className="px-8">
               <a href="#cursos">Ver Cursos</a>
@@ -139,6 +160,11 @@ const LandingPage = () => {
                     <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700">
                       Más información <ArrowRight className="h-4 w-4" />
                     </span>
+                    {isStudent && enrolledCourseIds.includes(course.id) && (
+                      <div className="mt-4 rounded-lg bg-green-50 px-3 py-2 text-center text-xs font-bold text-green-700 border border-green-200">
+                        ✓ Ya estás inscrito en este curso
+                      </div>
+                    )}
                   </div>
                 </Link>
               ))}
@@ -180,12 +206,21 @@ const LandingPage = () => {
             Únete a nuestra comunidad de estudiantes y comienza tu camino hacia la excelencia personal y profesional.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              asChild
-              className="bg-red-600 px-8 py-6 text-lg hover:bg-red-700 rounded-xl font-bold"
-            >
-              <Link to="/courses">Conoce nuestras capacitaciones</Link>
-            </Button>
+            {isStudent ? (
+              <Button
+                asChild
+                className="bg-red-600 px-8 py-6 text-lg hover:bg-red-700 rounded-xl font-bold"
+              >
+                <Link to="/student">Ir a mi Panel Académico</Link>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                className="bg-red-600 px-8 py-6 text-lg hover:bg-red-700 rounded-xl font-bold"
+              >
+                <Link to="/courses">Conoce nuestras capacitaciones</Link>
+              </Button>
+            )}
             
             <Button
               asChild

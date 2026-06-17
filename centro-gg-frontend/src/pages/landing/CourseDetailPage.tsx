@@ -7,6 +7,7 @@ import {
   CalendarDays,
   ArrowLeft,
   MapPin,
+  CheckCircle2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,8 @@ import {
   getPublishedCourseById,
   getCourseSessions,
 } from "@/services/courseService"
+import { getStudentEnrolledCourseIds } from "@/services/studentEnrollmentService"
+import { useAuth } from "@/providers/auth/useAuth"
 
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=1200&auto=format&fit=crop"
@@ -56,6 +59,17 @@ export default function CourseDetailPage() {
     queryFn: () => getCourseSessions(courseId!),
     enabled: Boolean(courseId),
   })
+
+  const { user, role } = useAuth()
+  const isStudent = user && role === "student"
+
+  const { data: enrolledCourseIds = [] } = useQuery({
+    queryKey: ["enrolled-courses", user?.email],
+    queryFn: () => getStudentEnrolledCourseIds(user?.email || ""),
+    enabled: Boolean(isStudent),
+  })
+
+  const isEnrolled = isStudent && enrolledCourseIds.includes(courseId!)
 
   if (isLoading) {
     return (
@@ -258,15 +272,39 @@ export default function CourseDetailPage() {
             {formatPrice(course.price)}
           </p>
 
-          <Button
-            asChild
-            className="w-full bg-red-600 py-6 text-base font-bold hover:bg-red-700"
-          >
-            <Link to="/register">
-              <CalendarDays className="mr-2" size={18} />
-              Inscribirse ahora
-            </Link>
-          </Button>
+          {isEnrolled ? (
+            <div className="w-full rounded-xl bg-green-50 px-4 py-6 text-center border border-green-200 shadow-sm">
+              <p className="text-green-800 font-bold flex items-center justify-center gap-2">
+                <CheckCircle2 size={20} />
+                Ya estás inscrito en este curso
+              </p>
+              <Button
+                asChild
+                className="mt-4 w-full bg-green-600 font-bold hover:bg-green-700 text-white"
+              >
+                <Link to={`/student/courses/${courseId}/classroom`}>
+                  Ir al aula virtual
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              asChild
+              className="w-full bg-red-600 py-6 text-base font-bold hover:bg-red-700"
+            >
+              {isStudent ? (
+                <Link to={`/student/courses/${courseId}/enroll`}>
+                  <CalendarDays className="mr-2" size={18} />
+                  Matricularse
+                </Link>
+              ) : (
+                <Link to="/register">
+                  <CalendarDays className="mr-2" size={18} />
+                  Inscribirse ahora
+                </Link>
+              )}
+            </Button>
+          )}
 
           <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-widest text-neutral-400">
             Consultas por WhatsApp 24/7
