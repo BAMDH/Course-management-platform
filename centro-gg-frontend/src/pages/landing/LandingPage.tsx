@@ -26,11 +26,14 @@ const LandingPage = () => {
   const { user, role } = useAuth()
   const isStudent = user && role === "student"
 
-  const { data: enrolledCourseIds = [] } = useQuery({
-    queryKey: ["enrolled-courses", user?.email],
+  const { data: studentCoursesData } = useQuery({
+    queryKey: ['student-courses', user?.email],
     queryFn: () => getStudentEnrolledCourseIds(user?.email || ""),
-    enabled: Boolean(isStudent),
-  })
+    enabled: Boolean(user?.email && user?.user_metadata?.role === 'student')
+  });
+
+  const enrolledCourseIds = studentCoursesData?.enrolledIds || [];
+  const pendingCourseIds = studentCoursesData?.pendingIds || [];
 
   return (
     <main className="min-h-screen bg-white text-zinc-900">
@@ -160,11 +163,15 @@ const LandingPage = () => {
                     <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700">
                       Más información <ArrowRight className="h-4 w-4" />
                     </span>
-                    {isStudent && enrolledCourseIds.includes(course.id) && (
-                      <div className="mt-4 rounded-lg bg-green-50 px-3 py-2 text-center text-xs font-bold text-green-700 border border-green-200">
-                        ✓ Ya estás inscrito en este curso
-                      </div>
-                    )}
+                    {enrolledCourseIds.includes(course.id) ? (
+                    <div className="mt-6 flex items-center justify-center py-2 px-4 rounded-xl bg-green-50 text-green-700 font-bold text-[14px]">
+                      <span className="flex items-center gap-2">✓ Ya estás inscrito en este curso</span>
+                    </div>
+                  ) : pendingCourseIds.includes(course.id) ? (
+                    <div className="mt-6 flex items-center justify-center py-2 px-4 rounded-xl bg-orange-50 text-orange-700 font-bold text-[14px]">
+                      <span className="flex items-center gap-2">⏳ Pago en verificación</span>
+                    </div>
+                  ) : null}
                   </div>
                 </Link>
               ))}

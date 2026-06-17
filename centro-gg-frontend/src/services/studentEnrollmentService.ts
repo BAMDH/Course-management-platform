@@ -24,6 +24,10 @@ export async function submitStudentEnrollment(data: EnrollmentSubmission): Promi
     throw new Error(`Failed to upload receipt: ${uploadError.message}`);
   }
 
+  const { data: publicUrlData } = supabase.storage
+    .from('receipts')
+    .getPublicUrl(fileName);
+
   // 2. Create Payment record (status 'pending')
   const { data: payment, error: paymentError } = await supabase
     .from('payments')
@@ -33,7 +37,7 @@ export async function submitStudentEnrollment(data: EnrollmentSubmission): Promi
       method: method,
       subtotal: price,
       total: price,
-      receipt_image_path: fileName,
+      receipt_image_path: publicUrlData.publicUrl,
       issued_at: new Date().toISOString()
     })
     .select('id')
@@ -60,35 +64,31 @@ export async function submitStudentEnrollment(data: EnrollmentSubmission): Promi
     throw new Error(`Failed to create payment item: ${paymentItemError.message}`);
   }
 
-  // 4. Create Enrollment record (status 'pending_payment')
-  const { error: enrollmentError } = await supabase
-    .from('enrollments')
-    .insert({
-      student_id: studentId,
-      course_id: courseId,
-      status: 'pending_payment'
-    });
-
-  if (enrollmentError) {
-    throw new Error(`Failed to create enrollment record: ${enrollmentError.message}`);
-  }
 }
 
-export async function getStudentEnrolledCourseIds(email: string): Promise<string[]> {
+export async function getStudentEnrolledCourseIds(email: string): Promise<{ enrolledIds: string[], pendingIds: string[] }> {
   const { data: profile } = await supabase
     .from('profiles')
     .select('id')
     .eq('email', email)
     .single();
 
-  if (!profile) return [];
+  if (!profile) return { enrolledIds: [], pendingIds: [] };
 
   const { data: enrollments, error } = await supabase
     .from('enrollments')
     .select('course_id')
     .eq('student_id', profile.id);
 
-  if (error || !enrollments) return [];
-  
-  return enrollments.map(e => e.course_id);
+  const enrolledIds = (!error && enrollments) ? enrollments.map(e => e.course_id) : [];
+
+  const { data: pendingItems, error: pendingError } = await supabase
+    .from('payment_items')
+    .select('course_id, payments!inner(status, student_id)')
+    .eq('payments.student_id', profile.id)
+    .eq('payments.status', 'pending');
+
+  const pendingIds = (!pendingError && pendingItems) ? pendingItems.map(p => p.course_id) : [];
+
+  return { enrolledIds, pendingIds };
 }

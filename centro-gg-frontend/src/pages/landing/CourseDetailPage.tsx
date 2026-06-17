@@ -63,13 +63,17 @@ export default function CourseDetailPage() {
   const { user, role } = useAuth()
   const isStudent = user && role === "student"
 
-  const { data: enrolledCourseIds = [] } = useQuery({
-    queryKey: ["enrolled-courses", user?.email],
+  const { data: studentCoursesData } = useQuery({
+    queryKey: ['student-courses', user?.email],
     queryFn: () => getStudentEnrolledCourseIds(user?.email || ""),
-    enabled: Boolean(isStudent),
-  })
+    enabled: Boolean(user?.email && user?.user_metadata?.role === 'student')
+  });
+
+  const enrolledCourseIds = studentCoursesData?.enrolledIds || [];
+  const pendingCourseIds = studentCoursesData?.pendingIds || [];
 
   const isEnrolled = isStudent && enrolledCourseIds.includes(courseId!)
+  const isPending = isStudent && pendingCourseIds.includes(courseId!)
 
   if (isLoading) {
     return (
@@ -287,6 +291,18 @@ export default function CourseDetailPage() {
                 </Link>
               </Button>
             </div>
+          ) : isPending ? (
+            <div className="w-full rounded-xl bg-orange-50 px-4 py-6 text-center border border-orange-200 shadow-sm">
+              <p className="text-orange-800 font-bold flex items-center justify-center gap-2">
+                ⏳ Matrícula en verificación
+              </p>
+              <Button
+                disabled
+                className="mt-4 w-full bg-neutral-200 font-bold text-neutral-500 cursor-not-allowed"
+              >
+                Verificando comprobante
+              </Button>
+            </div>
           ) : (
             <Button
               asChild
@@ -295,12 +311,12 @@ export default function CourseDetailPage() {
               {isStudent ? (
                 <Link to={`/student/courses/${courseId}/enroll`}>
                   <CalendarDays className="mr-2" size={18} />
-                  Matricularse
+                  Matricularme Ahora
                 </Link>
               ) : (
-                <Link to="/register">
+                <Link to="/login">
                   <CalendarDays className="mr-2" size={18} />
-                  Inscribirse ahora
+                  Inicia sesión para matricularte
                 </Link>
               )}
             </Button>

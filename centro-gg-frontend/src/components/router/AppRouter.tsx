@@ -39,6 +39,7 @@ const StudentCertificates = lazy(() => import('@/pages/student/StudentCertificat
 const StudentProfile = lazy(() => import('@/pages/student/StudentProfile'));
 const StudentCalendar = lazy(() => import('@/pages/student/StudentCalendar'));
 const StudentCourseEnrollment = lazy(() => import('@/pages/student/StudentCourseEnrollment'));
+const StudentHelpPage = lazy(() => import('@/pages/student/StudentHelpPage'));
 
 // ── Páginas de profesor ──────────────────────────────────────────────────────
 const TeacherDashboard = lazy(() => import('@/pages/teacher/TeacherDashboard'));
@@ -113,6 +114,7 @@ const studentLayout = (
     <Route path="certificates" element={<StudentCertificates />} />
     <Route path="profile" element={<StudentProfile />} />
     <Route path="calendar" element={<StudentCalendar />} />
+    <Route path="help" element={<StudentHelpPage />} />
   </Route>
 );
 

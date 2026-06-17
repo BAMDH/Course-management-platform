@@ -173,7 +173,7 @@ export function StudentLayout() {
                   <span className="text-[14px]">Cerrar Sesión</span>
                 </button>
                 <Link
-                  to="/help"
+                  to="/student/help"
                   className="flex items-center gap-3 px-4 py-2 text-[#5d5e60] font-medium hover:text-[#1b1c1b] transition-colors rounded-xl w-full"
                 >
                   <HelpCircle className="w-5 h-5" />
@@ -190,7 +190,7 @@ export function StudentLayout() {
                   <LogOut className="w-5 h-5" />
                 </button>
                 <Link
-                  to="/help"
+                  to="/student/help"
                   title="Ayuda"
                   className="w-12 h-12 flex items-center justify-center text-[#5d5e60] hover:text-[#1b1c1b] hover:bg-white/50 rounded-xl transition-colors"
                 >
