@@ -18,6 +18,7 @@ import Button from "@/components/admin/Button";
 import Badge from "@/components/admin/badges/Badges";
 
 import { supabase } from "@/services/supabase";
+import { ExternalLink } from "lucide-react";
 
 type PaymentDetail = {
   id: string;
@@ -610,23 +611,46 @@ const rejectPayment = async () => {
             </div>
 
             <div className="mt-10">
-                  <h3 className="text-xl font-bold mb-4">
-                    Comprobante de Pago
-                  </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold">
+                  Comprobante de Pago
+                </h3>
+                {payment.receipt_image_path && (
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={payment.receipt_image_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition-colors"
+                    >
+                      <ExternalLink size={16} />
+                      Ver completo
+                    </a>
+                  </div>
+                )}
+              </div>
 
-                  {payment.receipt_image_path ? (
-                    <img
-                      src={payment.receipt_image_path}
-                      className="rounded-3xl w-full h-[420px] object-cover border border-gray-200"
-                    />
-                  ) : (
-                    <div className="rounded-3xl border border-dashed border-gray-300 h-[220px] flex items-center justify-center bg-gray-50">
-                      <p className="text-gray-400 font-medium">
-                        No se ha pagado la factura
-                      </p>
-                    </div>
-                  )}
+              {payment.receipt_image_path ? (
+                <a 
+                  href={payment.receipt_image_path} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="block cursor-pointer bg-gray-50 rounded-3xl overflow-hidden border border-gray-200 hover:opacity-90 transition-opacity"
+                >
+                  <img
+                    src={payment.receipt_image_path}
+                    className="w-full h-[420px] object-contain"
+                    alt="Comprobante de pago"
+                  />
+                </a>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-gray-300 h-[220px] flex items-center justify-center bg-gray-50">
+                  <p className="text-gray-400 font-medium">
+                    No se ha adjuntado un comprobante
+                  </p>
                 </div>
+              )}
+            </div>
 
            {payment.status ===
             "PENDIENTE" && (
