@@ -46,7 +46,7 @@ export default function StudentCourses() {
   });
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
         <div>

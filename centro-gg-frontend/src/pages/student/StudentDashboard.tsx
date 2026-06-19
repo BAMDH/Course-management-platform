@@ -17,7 +17,7 @@ const StudentDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center p-8">
+      <div className="flex h-full items-center justify-center p-4 md:p-8">
         <Loader2 className="w-8 h-8 text-[#dc2626] animate-spin" />
       </div>
     );
@@ -25,7 +25,7 @@ const StudentDashboard = () => {
 
   if (error) {
     return (
-      <div className="p-8 text-red-500">
+      <div className="p-4 md:p-8 text-red-500">
         Error cargando el dashboard. Intenta de nuevo más tarde.
       </div>
     );
@@ -38,9 +38,9 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-8 font-['Inter',sans-serif]">
       {/* Welcome Banner */}
-      <section className="bg-[#f5f3f2] rounded-3xl p-8 relative overflow-hidden flex justify-between items-center shadow-sm">
+      <section className="bg-[#f5f3f2] rounded-3xl p-4 md:p-8 relative overflow-hidden flex justify-between items-center shadow-sm">
         <div className="z-10 max-w-xl space-y-6">
           <div>
             <span className="text-[#dc2626] font-bold text-xs tracking-widest uppercase mb-2 block">

@@ -43,7 +43,7 @@ export default function StudentClassroom() {
 
   if (error || !data || !data.course) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-8 text-center">
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4 md:p-8 text-center">
         <h2 className="text-2xl font-bold text-[#1b1c1b] mb-2">Error al cargar el aula virtual</h2>
         <p className="text-[#5d5e60] mb-6">No se pudo cargar la información del curso.</p>
         <Link to="/student/courses" className="bg-[#dc2626] text-white px-6 py-2.5 rounded-full font-bold">
@@ -95,7 +95,7 @@ export default function StudentClassroom() {
   };
 
   return (
-    <div className="p-8 max-w-[1400px] mx-auto font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-[1400px] mx-auto font-['Inter',sans-serif]">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-[13px] font-medium text-[#5d5e60] mb-8">
         <Link to="/student/courses" className="hover:text-[#dc2626] transition-colors">Mis cursos</Link>
@@ -105,12 +105,12 @@ export default function StudentClassroom() {
         <span className="text-[#1b1c1b] font-bold">{course.title}</span>
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-8 items-start">
+      <div className="flex flex-col xl:flex-row gap-4 md:gap-8 items-start">
         {/* Main Content Column */}
-        <div className="flex-1 w-full min-w-0">
+        <div className="flex-1 w-full text-sm md:text-base min-w-0">
           
           {/* Header Section */}
-          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm mb-8 relative overflow-hidden">
+          <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm mb-8 relative overflow-hidden">
             <div className="relative z-10">
               <h1 className="text-[28px] font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] leading-tight mb-4">
                 {course.title}
@@ -139,7 +139,7 @@ export default function StudentClassroom() {
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex items-center gap-8 border-b border-[#e9e8e7] mb-8 overflow-x-auto hide-scrollbar">
+          <div className="flex items-center gap-4 md:gap-8 border-b border-[#e9e8e7] mb-8 overflow-x-auto hide-scrollbar">
             {tabs.map(tab => (
               <button
                 key={tab}
@@ -271,7 +271,7 @@ export default function StudentClassroom() {
 
           {/* Tab Content - Información */}
           {activeTab === 'Información' && (
-            <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
+            <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm">
               <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-4">Información del Curso</h2>
               <div className="prose max-w-none text-[#5d5e60]">
                 {course.description ? (

@@ -34,7 +34,7 @@ export default function StudentCertificates() {
 
   if (error) {
     return (
-      <div className="p-8 text-red-500">
+      <div className="p-4 md:p-8 text-red-500">
         Error cargando las calificaciones. Intenta de nuevo más tarde.
       </div>
     );
@@ -61,7 +61,7 @@ export default function StudentCertificates() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
         <div>
@@ -138,16 +138,16 @@ export default function StudentCertificates() {
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-[#fcfbfb] border-b border-[#e9e8e7]">
-                <th className="py-4 px-8 text-[13px] font-bold text-[#5d5e60]">Materia</th>
-                <th className="py-4 px-8 text-[13px] font-bold text-[#5d5e60]">Calificación</th>
-                <th className="py-4 px-8 text-[13px] font-bold text-[#5d5e60]">Estado</th>
-                <th className="py-4 px-8 text-[13px] font-bold text-[#5d5e60]">Acción</th>
+                <th className="py-4 px-4 md:px-8 text-[13px] font-bold text-[#5d5e60]">Materia</th>
+                <th className="py-4 px-4 md:px-8 text-[13px] font-bold text-[#5d5e60]">Calificación</th>
+                <th className="py-4 px-4 md:px-8 text-[13px] font-bold text-[#5d5e60]">Estado</th>
+                <th className="py-4 px-4 md:px-8 text-[13px] font-bold text-[#5d5e60]">Acción</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e9e8e7]">
               {courses.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-8 px-8 text-center text-[#5d5e60] text-[15px]">
+                  <td colSpan={4} className="py-4 md:py-8 px-4 md:px-8 text-center text-[#5d5e60] text-[15px]">
                     No tienes cursos inscritos aún.
                   </td>
                 </tr>
@@ -155,7 +155,7 @@ export default function StudentCertificates() {
                 courses.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                     {/* Materia Col */}
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-50 text-[#dc2626]">
                           <BookOpen className="w-5 h-5" />
@@ -168,14 +168,14 @@ export default function StudentCertificates() {
                     </td>
 
                     {/* Calificación Col */}
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <span className="text-[18px] font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">
                         {row.grade}
                       </span>
                     </td>
 
                     {/* Estado Col */}
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <div className={clsx(
                         "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold",
                         row.status === 'Aprobado' ? "bg-green-100 text-green-700" :
@@ -193,7 +193,7 @@ export default function StudentCertificates() {
                     </td>
 
                     {/* Acción Col */}
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <button
                         onClick={() => navigate(`/student/courses/${row.id}/classroom`)}
                         disabled={row.status === 'Próximo'}

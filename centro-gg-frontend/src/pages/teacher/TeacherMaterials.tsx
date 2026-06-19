@@ -324,7 +324,7 @@ export default function TeacherMaterials() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl p-4 md:p-8 font-['Inter',sans-serif]">
       <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <button
@@ -501,7 +501,7 @@ export default function TeacherMaterials() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-8 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-4 md:p-8 shadow-xl">
             <div className="mb-6 flex items-center justify-between gap-6">
               <div>
                 <h2 className="font-['Manrope',sans-serif] text-2xl font-extrabold text-[#1b1c1b]">
@@ -620,7 +620,7 @@ export default function TeacherMaterials() {
                   Archivo
                 </label>
 
-                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-[#dd2817]/40 bg-[#fef2f2] px-5 py-8 text-center">
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-[#dd2817]/40 bg-[#fef2f2] px-5 py-4 md:py-8 text-center">
                   <Upload className="mb-3 h-8 w-8 text-[#dd2817]" />
 
                   <span className="font-bold text-[#1b1c1b]">

@@ -145,7 +145,7 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-10 bg-white p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl space-y-10 bg-white p-4 md:p-8 font-['Inter',sans-serif]">
       <section className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
@@ -223,8 +223,8 @@ const TeacherDashboard = () => {
         ))}
       </section>
 
-      <section className="grid grid-cols-1 gap-8 xl:grid-cols-[2fr_1fr]">
-        <div className="rounded-2xl bg-[#f5f3f2] p-8">
+      <section className="grid grid-cols-1 gap-4 md:gap-8 xl:grid-cols-[2fr_1fr]">
+        <div className="rounded-2xl bg-[#f5f3f2] p-4 md:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-['Manrope',sans-serif] text-xl font-extrabold text-[#1b1c1b]">
               Cursos Asignados
@@ -331,7 +331,7 @@ const TeacherDashboard = () => {
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-[#e9e8e7] bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-[#e9e8e7] p-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 border-b border-[#e9e8e7] p-4 md:p-8 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="font-['Manrope',sans-serif] text-xl font-extrabold text-[#1b1c1b]">
               Estudiantes matriculados en sus cursos
@@ -373,13 +373,13 @@ const TeacherDashboard = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[750px]">
+          <table className="w-full text-sm md:text-base min-w-[750px]">
             <thead className="bg-[#f5f3f2]/70">
               <tr className="text-left text-xs font-bold uppercase tracking-wider text-[#5d5e60]">
-                <th className="px-8 py-4">Estudiante</th>
-                <th className="px-8 py-4">Curso</th>
-                <th className="px-8 py-4">Estado</th>
-                <th className="px-8 py-4">Asistencia</th>
+                <th className="px-4 md:px-8 py-4">Estudiante</th>
+                <th className="px-4 md:px-8 py-4">Curso</th>
+                <th className="px-4 md:px-8 py-4">Estado</th>
+                <th className="px-4 md:px-8 py-4">Asistencia</th>
               </tr>
             </thead>
 
@@ -388,7 +388,7 @@ const TeacherDashboard = () => {
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-8 py-8 text-center text-sm text-[#5d5e60]"
+                    className="px-4 md:px-8 py-4 md:py-8 text-center text-sm text-[#5d5e60]"
                   >
                     No hay estudiantes matriculados en este filtro.
                   </td>
@@ -396,7 +396,7 @@ const TeacherDashboard = () => {
               ) : (
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="border-t border-[#e9e8e7]">
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e4e4e7]">
                           <Star className="h-4 w-4 text-[#858688]" />
@@ -408,17 +408,17 @@ const TeacherDashboard = () => {
                       </div>
                     </td>
 
-                    <td className="px-8 py-5 text-sm text-[#5d5e60]">
+                    <td className="px-4 md:px-8 py-5 text-sm text-[#5d5e60]">
                       {student.course}
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <span className="rounded-full bg-[#dcfce7] px-2 py-1 text-[10px] font-bold uppercase text-[#15803d]">
                         {student.status}
                       </span>
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="h-2 w-32 overflow-hidden rounded-full bg-[#e4e2e1]">
                           <div

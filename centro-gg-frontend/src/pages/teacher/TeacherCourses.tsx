@@ -103,7 +103,7 @@ export default function TeacherCourses() {
   const courses = dashboardData?.courses ?? [];
 
   return (
-    <main className="mx-auto max-w-7xl p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl p-4 md:p-8 font-['Inter',sans-serif]">
       <header className="mb-10">
         <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
           Mis Cursos Asignados

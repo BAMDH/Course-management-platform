@@ -103,7 +103,7 @@ export default function CourseDetailPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="mx-auto max-w-7xl px-6 py-8">
+      <section className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
         <Link
           to="/courses"
           className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-red-700 hover:text-red-800"
@@ -113,19 +113,19 @@ export default function CourseDetailPage() {
         </Link>
 
         <div
-          className="relative min-h-[520px] overflow-hidden rounded-2xl bg-cover bg-center"
+          className="relative min-h-[400px] md:min-h-[520px] overflow-hidden rounded-2xl bg-cover bg-center"
           style={{
             backgroundImage: `url(${course.cover_image_path || DEFAULT_IMAGE})`,
           }}
         >
           <div className="absolute inset-0 bg-black/50" />
 
-          <div className="relative z-10 flex min-h-[520px] max-w-3xl flex-col justify-end p-10 text-white">
+          <div className="relative z-10 flex min-h-[400px] md:min-h-[520px] max-w-3xl flex-col justify-end p-6 md:p-10 text-white">
             <span className="mb-4 w-fit rounded-sm bg-red-600 px-3 py-1 text-xs font-bold uppercase tracking-widest">
               {course.level || "Curso"}
             </span>
 
-            <h1 className="mb-4 text-5xl font-extrabold text-white">
+            <h1 className="mb-4 text-4xl md:text-5xl font-extrabold text-white">
               {course.title}
             </h1>
 
@@ -153,7 +153,7 @@ export default function CourseDetailPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 pb-20 lg:grid-cols-[1fr_360px]">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 pb-12 md:px-6 md:pb-20 lg:grid-cols-[1fr_360px]">
         <div>
           <h2 className="mb-4 text-3xl font-bold text-neutral-900">
             Sobre el curso

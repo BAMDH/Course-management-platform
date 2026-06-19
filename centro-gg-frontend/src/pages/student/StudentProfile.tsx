@@ -178,7 +178,7 @@ const StudentProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center p-8">
+      <div className="flex h-full items-center justify-center p-4 md:p-8">
         <Loader2 className="w-8 h-8 text-[#dc2626] animate-spin" />
       </div>
     );
@@ -186,7 +186,7 @@ const StudentProfile = () => {
 
   if (error || !profile) {
     return (
-      <div className="p-8 text-red-500">
+      <div className="p-4 md:p-8 text-red-500">
         Error cargando el perfil: {error ? error.toString() : 'Perfil no encontrado'}
       </div>
     );
@@ -195,7 +195,7 @@ const StudentProfile = () => {
   const avatarDisplay = formData.avatar_url || profile.avatar_url || 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&q=80&w=200';
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-8 font-['Inter',sans-serif]">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -219,7 +219,7 @@ const StudentProfile = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         
         {/* Left Column: Avatar & Info */}
         <div className="space-y-6">
@@ -317,7 +317,7 @@ const StudentProfile = () => {
         </div>
 
         {/* Right Column: Dynamic Content */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-4 md:space-y-8">
           
           {!isEditing ? (
             // ================= VIEW MODE =================
@@ -481,7 +481,7 @@ const StudentProfile = () => {
               )}
 
               {/* Información Personal */}
-              <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
+              <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm">
                 <h3 className="flex items-center gap-2 text-lg font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-6">
                   Información Personal
                 </h3>
@@ -597,7 +597,7 @@ const StudentProfile = () => {
               </div>
 
               {/* Seguridad */}
-              <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
+              <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm">
                 <h3 className="flex items-center gap-2 text-lg font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-6">
                   Seguridad
                 </h3>

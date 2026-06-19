@@ -9,6 +9,8 @@ import {
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  Menu,
+  X
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -49,6 +51,7 @@ export function TeacherLayout() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [notifications, setNotifications] = useState<SessionNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const initials = profile?.full_name
   ? profile.full_name
@@ -137,30 +140,38 @@ export function TeacherLayout() {
   return (
     <div className="min-h-screen bg-white font-['Inter',sans-serif] text-[#1b1c1b]">
       <header className="fixed left-0 right-0 top-0 z-40 h-28 bg-[#fbf9f8]/80 shadow-sm backdrop-blur-md">
-        <div className="flex h-full items-center justify-between px-8">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="flex items-center gap-4"
-          >
-            <img
-              src="/logo-gyg.png"
-              alt="Centro de Capacitación G&G"
-              className="h-16 w-auto"
-            />
+        <div className="flex h-full items-center justify-between px-4 md:px-8">
+          <div className="flex items-center gap-2 md:gap-4">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 text-[#5d5e60] hover:bg-[#e9e8e7] hover:text-[#1b1c1b] rounded-xl transition-colors md:hidden"
+            >
+              {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 md:gap-4"
+            >
+              <img
+                src="/logo-gyg.png"
+                alt="Centro de Capacitación G&G"
+                className="h-10 w-auto md:h-16"
+              />
 
-            <div className="text-left">
-              <h1 className="font-['Manrope',sans-serif] text-xl font-extrabold leading-7 text-[#1b1c1b]">
-                Centro de Capacitación G&G
-              </h1>
+              <div className="text-left hidden sm:block">
+                <h1 className="font-['Manrope',sans-serif] text-xl font-extrabold leading-7 text-[#1b1c1b]">
+                  Centro de Capacitación G&G
+                </h1>
 
-              <p className="text-xs font-bold uppercase tracking-wide text-[#dd2817]">
-                Portal Profesor
-              </p>
-            </div>
-          </button>
+                <p className="text-xs font-bold uppercase tracking-wide text-[#dd2817]">
+                  Portal Profesor
+                </p>
+              </div>
+            </button>
+          </div>
 
-          <div className="relative flex items-center gap-6">
+          <div className="relative flex items-center gap-3 md:gap-6">
             <button
               type="button"
               onClick={() => setShowNotifications((current) => !current)}
@@ -176,7 +187,7 @@ export function TeacherLayout() {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-14 top-14 w-80 rounded-2xl border border-zinc-100 bg-white p-4 shadow-xl">
+              <div className="absolute right-0 top-14 w-80 rounded-2xl border border-zinc-100 bg-white p-4 shadow-xl md:right-14">
                 <p className="mb-3 text-sm font-extrabold text-[#1b1c1b]">
                   Recordatorios de sesiones
                 </p>
@@ -238,7 +249,20 @@ export function TeacherLayout() {
         </div>
       </header>
 
-      <aside className="fixed left-0 top-28 z-30 flex h-[calc(100vh-7rem)] w-64 flex-col bg-[#f5f3f2] p-6">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside 
+        className={clsx(
+          "fixed left-0 top-28 z-30 flex h-[calc(100vh-7rem)] w-64 flex-col bg-[#f5f3f2] p-6 transition-transform duration-300 md:translate-x-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="px-4 pb-8">
           <h2 className="font-['Manrope',sans-serif] text-lg font-bold leading-7 text-[#1b1c1b]">
             Panel de Control
@@ -255,6 +279,7 @@ export function TeacherLayout() {
               key={item.name}
               to={item.path}
               end={item.path === "/teacher"}
+              onClick={() => setIsSidebarOpen(false)}
               className={({ isActive }) =>
                 clsx(
                   "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold leading-5 transition-colors",
@@ -281,6 +306,7 @@ export function TeacherLayout() {
 
           <Link
             to="/teacher/help"
+            onClick={() => setIsSidebarOpen(false)}
             className="flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-semibold text-[#5d5e60] hover:text-[#1b1c1b]"
           >
             <HelpCircle className="h-4 w-4" />
@@ -289,7 +315,7 @@ export function TeacherLayout() {
         </div>
       </aside>
 
-      <div className="ml-64 pt-28">
+      <div className="pt-28 md:ml-64">
         <Outlet />
       </div>
     </div>

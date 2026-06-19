@@ -252,7 +252,7 @@ export default function TeacherCourseDetail() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl p-4 md:p-8 font-['Inter',sans-serif]">
       <div className="mb-8 flex items-start justify-between">
         <div>
           <button
@@ -286,7 +286,7 @@ export default function TeacherCourseDetail() {
       </div>
 
       <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_320px]">
-        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-8">
+        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8">
           <h2 className="mb-8 font-['Manrope',sans-serif] text-2xl font-bold">
             Resumen de progreso del grupo
           </h2>
@@ -337,7 +337,7 @@ export default function TeacherCourseDetail() {
       </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.4fr]">
-        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-8">
+        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8">
           <div className="mb-8 flex items-center justify-between">
             <h2 className="font-['Manrope',sans-serif] text-2xl font-bold">
               Sesiones del curso
@@ -348,7 +348,7 @@ export default function TeacherCourseDetail() {
             </span>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-4 md:space-y-8">
             <div>
               <p className="text-sm font-bold uppercase text-[#dd2817]">
                 INICIO
@@ -405,7 +405,7 @@ export default function TeacherCourseDetail() {
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-[#e9e8e7] bg-white">
-          <div className="flex items-center justify-between border-b border-[#e9e8e7] p-8">
+          <div className="flex items-center justify-between border-b border-[#e9e8e7] p-4 md:p-8">
             <h2 className="font-['Manrope',sans-serif] text-2xl font-bold">
               Lista de Alumnos
             </h2>
@@ -425,9 +425,9 @@ export default function TeacherCourseDetail() {
           <table className="w-full">
             <thead className="bg-[#f5f3f2]">
               <tr>
-                <th className="px-8 py-4 text-left text-xs">ALUMNO</th>
-                <th className="px-8 py-4 text-left text-xs">ESTADO</th>
-                <th className="px-8 py-4 text-left text-xs">ASISTENCIA</th>
+                <th className="px-4 md:px-8 py-4 text-left text-xs">ALUMNO</th>
+                <th className="px-4 md:px-8 py-4 text-left text-xs">ESTADO</th>
+                <th className="px-4 md:px-8 py-4 text-left text-xs">ASISTENCIA</th>
               </tr>
             </thead>
 
@@ -436,7 +436,7 @@ export default function TeacherCourseDetail() {
                 <tr>
                   <td
                     colSpan={3}
-                    className="px-8 py-8 text-center text-sm text-[#858688]"
+                    className="px-4 md:px-8 py-4 md:py-8 text-center text-sm text-[#858688]"
                   >
                     No hay alumnos matriculados en este curso.
                   </td>
@@ -444,7 +444,7 @@ export default function TeacherCourseDetail() {
               ) : (
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="border-t border-[#e9e8e7]">
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 font-bold text-red-600">
                           {student.initials}
@@ -460,7 +460,7 @@ export default function TeacherCourseDetail() {
                       </div>
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <span
                         className={clsx(
                           "rounded-full px-3 py-1 text-[10px] font-extrabold uppercase",
@@ -473,7 +473,7 @@ export default function TeacherCourseDetail() {
                       </span>
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="h-2 w-28 overflow-hidden rounded-full bg-[#e9e8e7]">
                           <div

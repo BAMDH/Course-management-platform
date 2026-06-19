@@ -250,7 +250,7 @@ export default function TeacherStudents() {
   ).length;
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl space-y-4 md:space-y-8 p-4 md:p-8 font-['Inter',sans-serif]">
       <header>
         <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
           Estudiantes
@@ -322,27 +322,27 @@ export default function TeacherStudents() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+          <table className="w-full text-sm md:text-base min-w-[900px]">
             <thead className="bg-[#f5f3f2]/70">
               <tr className="text-left text-xs font-bold uppercase tracking-wider text-[#5d5e60]">
-                <th className="px-8 py-4">Estudiante</th>
-                <th className="px-8 py-4">Curso</th>
-                <th className="px-8 py-4">Estado</th>
-                <th className="px-8 py-4">Asistencia</th>
-                <th className="px-8 py-4">Sesiones</th>
+                <th className="px-4 md:px-8 py-4">Estudiante</th>
+                <th className="px-4 md:px-8 py-4">Curso</th>
+                <th className="px-4 md:px-8 py-4">Estado</th>
+                <th className="px-4 md:px-8 py-4">Asistencia</th>
+                <th className="px-4 md:px-8 py-4">Sesiones</th>
               </tr>
             </thead>
 
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-8 text-center text-sm text-[#5d5e60]">
+                  <td colSpan={5} className="px-4 md:px-8 py-4 md:py-8 text-center text-sm text-[#5d5e60]">
                     Cargando estudiantes...
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-8 text-center text-sm text-[#5d5e60]">
+                  <td colSpan={5} className="px-4 md:px-8 py-4 md:py-8 text-center text-sm text-[#5d5e60]">
                     No hay estudiantes para mostrar.
                   </td>
                 </tr>
@@ -357,7 +357,7 @@ export default function TeacherStudents() {
                     }
                     className="cursor-pointer border-t border-[#e9e8e7] transition hover:bg-[#f5f3f2]/60"
                   >
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div>
                         <p className="font-bold text-[#1b1c1b]">
                           {student.studentName}
@@ -369,11 +369,11 @@ export default function TeacherStudents() {
                       </div>
                     </td>
 
-                    <td className="px-8 py-5 text-sm font-semibold text-[#5d5e60]">
+                    <td className="px-4 md:px-8 py-5 text-sm font-semibold text-[#5d5e60]">
                       {student.courseTitle}
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <span
                         className={clsx(
                           "rounded-full px-3 py-1 text-[10px] font-extrabold uppercase",
@@ -386,7 +386,7 @@ export default function TeacherStudents() {
                       </span>
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="h-2 w-32 overflow-hidden rounded-full bg-[#e9e8e7]">
                           <div
@@ -408,7 +408,7 @@ export default function TeacherStudents() {
                       </div>
                     </td>
 
-                    <td className="px-8 py-5 text-sm font-semibold text-[#5d5e60]">
+                    <td className="px-4 md:px-8 py-5 text-sm font-semibold text-[#5d5e60]">
                       {student.completedSessions} realizadas
                     </td>
                   </tr>

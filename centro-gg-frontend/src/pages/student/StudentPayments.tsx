@@ -46,14 +46,14 @@ export default function StudentPayments() {
 
   if (error) {
     return (
-      <div className="p-8 text-red-500">
+      <div className="p-4 md:p-8 text-red-500">
         Error cargando el historial de pagos. Intenta de nuevo más tarde.
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif] relative">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif] relative">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b]">
@@ -68,7 +68,7 @@ export default function StudentPayments() {
       <div className="grid grid-cols-1 gap-6 mb-8">
         {/* Próximo Pago Card */}
         {nextPayment ? (
-          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
+          <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
             <div className="flex items-start gap-5 mb-8">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-5 h-5 text-[#dc2626]" />
@@ -96,7 +96,7 @@ export default function StudentPayments() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
+          <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm flex flex-col justify-between max-w-lg">
              <div className="flex items-start gap-5 mb-8">
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                 <Wallet className="w-5 h-5 text-green-600" />
@@ -138,29 +138,29 @@ export default function StudentPayments() {
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="border-b border-[#e9e8e7]">
-                <th className="py-5 px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">FECHA</th>
-                <th className="py-5 px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">CONCEPTO</th>
-                <th className="py-5 px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">MONTO</th>
-                <th className="py-5 px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">ESTADO</th>
-                <th className="py-5 px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider text-right">ACCIONES</th>
+                <th className="py-5 px-4 md:px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">FECHA</th>
+                <th className="py-5 px-4 md:px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">CONCEPTO</th>
+                <th className="py-5 px-4 md:px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">MONTO</th>
+                <th className="py-5 px-4 md:px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider">ESTADO</th>
+                <th className="py-5 px-4 md:px-8 text-[11px] font-bold text-[#5d5e60] uppercase tracking-wider text-right">ACCIONES</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e9e8e7]">
               {filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 px-8 text-center text-[#5d5e60] text-[15px]">
+                  <td colSpan={5} className="py-4 md:py-8 px-4 md:px-8 text-center text-[#5d5e60] text-[15px]">
                     No se encontraron transacciones.
                   </td>
                 </tr>
               ) : (
                 filteredPayments.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <span className="text-[14px] font-medium text-[#1b1c1b]">
                         {new Date(tx.issued_at).toLocaleDateString()}
                       </span>
                     </td>
-                    <td className="py-5 px-8">
+                    <td className="py-5 px-4 md:px-8">
                       <div className="space-y-1">
                         {tx.items.length === 0 ? (
                            <p className="text-[15px] font-bold text-[#1b1c1b] leading-tight">Factura #{tx.id.slice(0,8)}</p>
@@ -174,10 +174,10 @@ export default function StudentPayments() {
                         )}
                       </div>
                     </td>
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <span className="text-[15px] font-bold text-[#1b1c1b]">₡{tx.total.toLocaleString()}</span>
                     </td>
-                    <td className="py-5 px-8 whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 whitespace-nowrap">
                       <div className={clsx(
                         "inline-flex items-center gap-2 px-3 py-1.5 rounded-full",
                         tx.status === 'PAGADO' ? "bg-[#f0fdf4]" : 
@@ -197,7 +197,7 @@ export default function StudentPayments() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-5 px-8 text-right whitespace-nowrap">
+                    <td className="py-5 px-4 md:px-8 text-right whitespace-nowrap">
                       {tx.receipt_image_path ? (
                         <button 
                           onClick={() => setSelectedReceipt(tx.receipt_image_path)}

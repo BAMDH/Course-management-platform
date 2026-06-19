@@ -92,7 +92,7 @@ export default function StudentCourseEnrollment() {
 
   if (isError || !course) {
     return (
-      <div className="p-8 text-center text-red-500 font-bold">
+      <div className="p-4 md:p-8 text-center text-red-500 font-bold">
         Error al cargar la información del curso.
       </div>
     );
@@ -100,7 +100,7 @@ export default function StudentCourseEnrollment() {
 
   if (submitSuccess) {
     return (
-      <div className="max-w-2xl mx-auto p-8 text-center mt-12 bg-white rounded-3xl shadow-sm border border-[#e9e8e7]">
+      <div className="max-w-2xl mx-auto p-4 md:p-8 text-center mt-12 bg-white rounded-3xl shadow-sm border border-[#e9e8e7]">
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-6" />
         <h2 className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] mb-4">
           ¡Inscripción Enviada!
@@ -114,7 +114,7 @@ export default function StudentCourseEnrollment() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto font-['Inter',sans-serif]">
       <div className="mb-6">
         <Link
           to={`/courses/${courseId}`}
@@ -125,7 +125,7 @@ export default function StudentCourseEnrollment() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-[#e9e8e7]">
+      <div className="bg-white rounded-3xl p-4 md:p-8 md:p-12 shadow-sm border border-[#e9e8e7]">
         <h1 className="text-3xl font-extrabold font-['Manrope',sans-serif] text-[#1b1c1b] mb-2">
           Finaliza tu Matrícula
         </h1>
@@ -134,7 +134,7 @@ export default function StudentCourseEnrollment() {
         </p>
 
         {/* Course Info Card */}
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-8 mb-8">
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 md:p-8 mb-8">
           <h2 className="text-2xl font-bold text-[#1b1c1b] mb-3">{course.title}</h2>
           <p className="text-sm text-red-800 leading-relaxed max-w-3xl mb-6">
             {course.description || "Sin descripción adicional."}
@@ -155,7 +155,7 @@ export default function StudentCourseEnrollment() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-8">
           <div>
             <label className="block text-sm font-bold text-[#1b1c1b] mb-2">
               Método de Pago
@@ -222,7 +222,7 @@ export default function StudentCourseEnrollment() {
             <button
               type="submit"
               disabled={!receiptFile || isSubmitting}
-              className="bg-[#dc2626] hover:bg-[#b91c1c] disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-xl font-bold transition-colors flex items-center gap-2"
+              className="bg-[#dc2626] hover:bg-[#b91c1c] disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 md:px-8 py-3.5 rounded-xl font-bold transition-colors flex items-center gap-2"
             >
               {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
               Confirmar Inscripción

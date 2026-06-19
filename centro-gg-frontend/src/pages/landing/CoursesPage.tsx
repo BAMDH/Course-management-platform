@@ -31,10 +31,10 @@ export default function CoursesPage() {
   return (
     <>
 
-      <main className="min-h-screen bg-[#FBF9F8] px-8 py-20">
+      <main className="min-h-screen bg-[#FBF9F8] px-4 py-12 md:px-8 md:py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14">
-            <h1 className="mb-4 text-5xl font-extrabold text-zinc-900">
+            <h1 className="mb-4 text-4xl font-extrabold text-zinc-900 md:text-5xl">
               Catálogo de Cursos
             </h1>
 

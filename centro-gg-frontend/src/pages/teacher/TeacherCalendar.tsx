@@ -209,7 +209,7 @@ export default function TeacherCalendar() {
   }
 
   return (
-    <main className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <main className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
       <header className="mb-10">
         <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
           Calendario de Clases
@@ -220,8 +220,8 @@ export default function TeacherCalendar() {
         </p>
       </header>
 
-      <section className="grid grid-cols-1 gap-8 xl:grid-cols-[1.5fr_0.9fr]">
-        <div className="rounded-2xl border border-[#e9e8e7] bg-white p-8 shadow-sm">
+      <section className="grid grid-cols-1 gap-4 md:gap-8 xl:grid-cols-[1.5fr_0.9fr]">
+        <div className="rounded-2xl border border-[#e9e8e7] bg-white p-4 md:p-8 shadow-sm">
           <div className="mb-8 flex items-center justify-between">
             <h2 className="font-['Manrope',sans-serif] text-2xl font-bold capitalize text-[#1b1c1b]">
               {formatMonthTitle(currentDate)}

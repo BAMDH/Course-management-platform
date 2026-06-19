@@ -165,7 +165,7 @@ export default function TeacherProfile() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 p-8">
+    <main className="mx-auto max-w-6xl space-y-4 md:space-y-8 p-4 md:p-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
@@ -221,7 +221,7 @@ export default function TeacherProfile() {
         </div>
       )}
 
-      <section className="grid gap-8 lg:grid-cols-[320px_1fr]">
+      <section className="grid gap-4 md:gap-8 lg:grid-cols-[320px_1fr]">
         <div className="overflow-hidden rounded-3xl border border-[#e9e8e7] bg-white shadow-sm">
           <div className="h-28 bg-red-50" />
 
@@ -269,7 +269,7 @@ export default function TeacherProfile() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-8 shadow-sm">
+        <div className="rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8 shadow-sm">
           <h2 className="mb-6 font-['Manrope',sans-serif] text-xl font-extrabold text-[#1b1c1b]">
             Información personal
           </h2>

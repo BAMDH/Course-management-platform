@@ -96,7 +96,7 @@ export default function StudentCalendar() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
@@ -112,11 +112,11 @@ export default function StudentCalendar() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         {/* Left Column: Calendar & Banner */}
         <div className="lg:col-span-2 space-y-6">
           {/* Calendar Widget */}
-          <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm">
+          <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm">
             {/* Month Header */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b]">
@@ -212,7 +212,7 @@ export default function StudentCalendar() {
         </div>
 
         {/* Right Column: Agenda */}
-        <div className="bg-white rounded-3xl p-8 border border-[#e9e8e7] shadow-sm lg:h-[calc(100vh-200px)] lg:overflow-y-auto">
+        <div className="bg-white rounded-3xl p-4 md:p-8 border border-[#e9e8e7] shadow-sm lg:h-[calc(100vh-200px)] lg:overflow-y-auto">
           <h2 className="text-xl font-bold font-['Manrope',sans-serif] text-[#1b1c1b] mb-6">
             Agenda del Mes
           </h2>
@@ -221,7 +221,7 @@ export default function StudentCalendar() {
             {/* Vertical timeline line */}
             <div className="absolute left-5 top-8 bottom-8 w-px bg-[#e9e8e7]" />
 
-            <div className="space-y-8 relative">
+            <div className="space-y-4 md:space-y-8 relative">
               {isLoading ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-8 h-8 text-[#dc2626] animate-spin" />

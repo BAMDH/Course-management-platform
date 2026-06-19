@@ -37,13 +37,13 @@ const LandingPage = () => {
 
   return (
     <main className="min-h-screen bg-white text-zinc-900">
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-32">
+      <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 md:px-6 md:grid-cols-2 md:py-32">
         <div>
           <span className="rounded-full bg-red-100 px-4 py-2 text-xs font-bold uppercase tracking-wider text-red-800">
             Tradición e innovación
           </span>
 
-          <h1 className="mt-6 max-w-2xl text-5xl font-extrabold leading-tight md:text-7xl">
+          <h1 className="mt-6 max-w-2xl text-4xl font-extrabold leading-tight md:text-5xl lg:text-7xl">
             Formá tu talento en alta{" "}
             <span className="text-red-700">pastelería profesional</span>
           </h1>
@@ -91,8 +91,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section id="cursos" className="bg-stone-100 py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section id="cursos" className="bg-stone-100 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
               <h2 className="text-4xl font-extrabold">Cursos Disponibles</h2>
@@ -179,8 +179,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section id="testimonios" className="bg-stone-50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section id="testimonios" className="bg-stone-50 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="text-center">
             <h2 className="text-4xl font-extrabold">
               Voces de Nuestra Academia
@@ -204,9 +204,9 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="bg-zinc-900 px-8 py-20 text-center text-white">
+      <section className="bg-zinc-900 px-4 py-16 text-center text-white md:px-8 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-4xl font-extrabold leading-tight text-white font-['Manrope',sans-serif] mb-6 md:text-5xl">
+          <h2 className="mb-6 font-['Manrope',sans-serif] text-3xl font-extrabold leading-tight text-white md:text-4xl lg:text-5xl">
             ¿Listo para descubrir tus habilidades?
           </h2>
           <p className="text-lg text-white/80 mb-10">

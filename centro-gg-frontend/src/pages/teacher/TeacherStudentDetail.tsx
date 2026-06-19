@@ -171,14 +171,14 @@ export default function TeacherStudentDetail() {
 
   if (isLoading) {
     return (
-      <main className="p-8 text-sm text-[#5d5e60]">
+      <main className="p-4 md:p-8 text-sm text-[#5d5e60]">
         Cargando historial del estudiante...
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 p-8 font-['Inter',sans-serif]">
+    <main className="mx-auto max-w-7xl space-y-4 md:space-y-8 p-4 md:p-8 font-['Inter',sans-serif]">
       <header>
         <button
           onClick={() => navigate("/teacher/students")}
@@ -188,7 +188,7 @@ export default function TeacherStudentDetail() {
           Volver a estudiantes
         </button>
 
-        <div className="rounded-3xl bg-red-50 p-8">
+        <div className="rounded-3xl bg-red-50 p-4 md:p-8">
           <h1 className="font-['Manrope',sans-serif] text-4xl font-extrabold text-[#1b1c1b]">
             {student?.full_name ?? "Estudiante"}
           </h1>
@@ -213,7 +213,7 @@ export default function TeacherStudentDetail() {
       </section>
 
       <section className="rounded-3xl border border-[#e9e8e7] bg-white shadow-sm">
-        <div className="border-b border-[#e9e8e7] p-8">
+        <div className="border-b border-[#e9e8e7] p-4 md:p-8">
           <h2 className="font-['Manrope',sans-serif] text-2xl font-extrabold text-[#1b1c1b]">
             Historial de asistencia
           </h2>
@@ -224,35 +224,35 @@ export default function TeacherStudentDetail() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
+          <table className="w-full text-sm md:text-base min-w-[800px]">
             <thead className="bg-[#f5f3f2]/70">
               <tr className="text-left text-xs font-bold uppercase tracking-wider text-[#5d5e60]">
-                <th className="px-8 py-4">Sesión</th>
-                <th className="px-8 py-4">Fecha</th>
-                <th className="px-8 py-4">Estado</th>
-                <th className="px-8 py-4">Registrado</th>
+                <th className="px-4 md:px-8 py-4">Sesión</th>
+                <th className="px-4 md:px-8 py-4">Fecha</th>
+                <th className="px-4 md:px-8 py-4">Estado</th>
+                <th className="px-4 md:px-8 py-4">Registrado</th>
               </tr>
             </thead>
 
             <tbody>
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-8 py-8 text-center text-sm text-[#5d5e60]">
+                  <td colSpan={4} className="px-4 md:px-8 py-4 md:py-8 text-center text-sm text-[#5d5e60]">
                     Este curso todavía no tiene sesiones realizadas.
                   </td>
                 </tr>
               ) : (
                 history.map((item) => (
                   <tr key={item.session.id} className="border-t border-[#e9e8e7]">
-                    <td className="px-8 py-5 font-bold text-[#1b1c1b]">
+                    <td className="px-4 md:px-8 py-5 font-bold text-[#1b1c1b]">
                       {item.session.title ?? "Sesión sin título"}
                     </td>
 
-                    <td className="px-8 py-5 text-sm text-[#5d5e60]">
+                    <td className="px-4 md:px-8 py-5 text-sm text-[#5d5e60]">
                       {formatDate(item.session.starts_at)}
                     </td>
 
-                    <td className="px-8 py-5">
+                    <td className="px-4 md:px-8 py-5">
                       <span
                         className={clsx(
                           "rounded-full px-3 py-1 text-[10px] font-extrabold uppercase",
@@ -271,7 +271,7 @@ export default function TeacherStudentDetail() {
                       </span>
                     </td>
 
-                    <td className="px-8 py-5 text-sm text-[#5d5e60]">
+                    <td className="px-4 md:px-8 py-5 text-sm text-[#5d5e60]">
                       {item.recordedAt ? formatDate(item.recordedAt) : "Sin registro"}
                     </td>
                   </tr>

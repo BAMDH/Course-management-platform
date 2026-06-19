@@ -32,12 +32,12 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[#FBF9F8] font-['Inter',sans-serif]">
       {/* 1. Título e 2. Introducción */}
-      <section className="relative overflow-hidden bg-white px-8 py-24 border-b border-zinc-100">
+      <section className="relative overflow-hidden bg-white px-4 py-12 border-b border-zinc-100 md:px-8 md:py-24">
         <div className="mx-auto max-w-4xl text-center">
           <span className="text-sm font-bold uppercase tracking-[0.3em] text-red-600 mb-4 block">
             Descubre nuestra historia
           </span>
-          <h1 className="text-5xl font-extrabold leading-tight text-zinc-900 md:text-6xl font-['Manrope',sans-serif]">
+          <h1 className="text-4xl font-extrabold leading-tight text-zinc-900 md:text-5xl lg:text-6xl font-['Manrope',sans-serif]">
             Sobre Nosotros
           </h1>
           <p className="mt-8 text-lg leading-8 text-zinc-600 md:text-xl">
@@ -47,7 +47,7 @@ export default function AboutPage() {
       </section>
 
       {/* 3. Experiencia */}
-      <section className="bg-red-700 px-8 py-16 text-white text-center">
+      <section className="bg-red-700 px-4 py-12 text-white text-center md:px-8 md:py-16">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-3xl font-extrabold mb-4 font-['Manrope',sans-serif]">
             Nuestra Trayectoria
@@ -59,7 +59,7 @@ export default function AboutPage() {
       </section>
 
       {/* 4. Misión, 5. Visión, 6. Propósito */}
-      <section className="px-8 py-24 mx-auto max-w-7xl">
+      <section className="px-4 py-12 mx-auto max-w-7xl md:px-8 md:py-24">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           
           <div className="rounded-3xl border border-zinc-200 bg-white p-10 shadow-sm transition-all hover:shadow-md">
@@ -114,7 +114,7 @@ export default function AboutPage() {
       </section>
 
       {/* 7. Valores / Características */}
-      <section className="bg-white px-8 py-24 border-y border-zinc-100">
+      <section className="bg-white px-4 py-12 border-y border-zinc-100 md:px-8 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold text-zinc-900 font-['Manrope',sans-serif]">
@@ -137,7 +137,7 @@ export default function AboutPage() {
       </section>
 
       {/* 8. Compromiso y 9. Redes Sociales */}
-      <section className="px-8 py-24 mx-auto max-w-7xl">
+      <section className="px-4 py-12 mx-auto max-w-7xl md:px-8 md:py-24">
         <div className="grid gap-12 lg:grid-cols-2 items-center">
           
           <div className="space-y-8">
@@ -160,7 +160,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="relative rounded-[40px] overflow-hidden shadow-2xl h-[500px]">
+          <div className="relative rounded-[40px] overflow-hidden shadow-2xl h-[300px] md:h-[500px]">
              <img 
               src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=1200&auto=format&fit=crop" 
               alt="Estudiantes en clase" 
@@ -178,9 +178,9 @@ export default function AboutPage() {
       </section>
 
       {/* 10. Llamado a la acción */}
-      <section className="bg-zinc-900 px-8 py-20 text-center text-white">
+      <section className="bg-zinc-900 px-4 py-12 text-center text-white md:px-8 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-4xl font-extrabold leading-tight text-white font-['Manrope',sans-serif] mb-6">
+          <h2 className="mb-6 font-['Manrope',sans-serif] text-3xl font-extrabold leading-tight text-white md:text-4xl lg:text-5xl">
             ¿Listo para descubrir tus habilidades?
           </h2>
           <p className="text-lg text-white/80 mb-10">

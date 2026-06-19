@@ -336,9 +336,9 @@ export default function TeacherAttendance() {
   }
 
   return (
-    <main className="p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
-      <section className="mb-8 rounded-3xl border border-[#e9e8e7] bg-white p-8 shadow-sm">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px_280px]">
+    <main className="p-4 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
+      <section className="mb-8 rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-[1fr_280px_280px]">
           <div>
             <h1 className="font-['Manrope',sans-serif] text-3xl font-extrabold text-[#1b1c1b]">
               Registro de Asistencia
@@ -431,12 +431,12 @@ export default function TeacherAttendance() {
         </div>
       </section>
 
-      <section className="mb-10 max-w-3xl rounded-3xl border border-[#e9e8e7] bg-white p-8 shadow-sm">
+      <section className="mb-10 max-w-3xl rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8 shadow-sm">
         <p className="mb-2 text-base text-[#5d5e60]">
           Estado General del Grupo
         </p>
 
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 md:gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex-1">
             <div className="mb-5 flex items-end gap-2">
               <span className="font-['Manrope',sans-serif] text-5xl font-extrabold text-[#1b1c1b]">
@@ -462,7 +462,7 @@ export default function TeacherAttendance() {
             </div>
           </div>
 
-          <div className="flex gap-8 border-l border-[#e9e8e7] pl-8">
+          <div className="flex gap-4 md:gap-8 border-l border-[#e9e8e7] pl-8">
             <div className="text-center">
               <p className="text-sm font-bold uppercase text-[#5d5e60]">
                 Tardías

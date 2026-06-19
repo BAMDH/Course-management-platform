@@ -41,7 +41,7 @@ export default function ContactPage() {
 
   return (
     <main className="min-h-screen bg-[#FBF9F8]">
-      <section className="bg-stone-100 px-8 py-20">
+      <section className="bg-stone-100 px-4 py-12 md:px-8 md:py-20">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
           <div>
             <span className="text-sm font-semibold uppercase tracking-widest text-red-600">
@@ -69,7 +69,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-8 py-16 lg:grid-cols-[2fr_1fr]">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-12 md:px-8 md:py-16 lg:grid-cols-[2fr_1fr]">
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg"
@@ -190,7 +190,7 @@ export default function ContactPage() {
         </aside>
       </section>
 
-      <section className="mx-auto max-w-7xl px-8 pb-20">
+      <section className="mx-auto max-w-7xl px-4 pb-12 md:px-8 md:pb-20">
         <div className="rounded-2xl bg-stone-200 px-8 py-14 text-center">
           <h2 className="text-3xl font-bold text-zinc-900">
             ¿Listo para transformar tu pasión?

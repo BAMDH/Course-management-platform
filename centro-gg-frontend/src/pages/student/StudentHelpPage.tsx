@@ -37,8 +37,8 @@ export default function StudentHelpPage() {
   ];
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 p-8">
-      <section className="rounded-3xl bg-red-50 p-8">
+    <main className="mx-auto max-w-6xl space-y-4 md:space-y-8 p-4 md:p-8">
+      <section className="rounded-3xl bg-red-50 p-4 md:p-8">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#dd2817] text-white">
             <HelpCircle className="h-7 w-7" />
@@ -78,7 +78,7 @@ export default function StudentHelpPage() {
         ))}
       </section>
 
-      <section className="rounded-3xl border border-[#e9e8e7] bg-white p-8 shadow-sm">
+      <section className="rounded-3xl border border-[#e9e8e7] bg-white p-4 md:p-8 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f5f3f2] text-[#dd2817]">
             <LifeBuoy className="h-6 w-6" />
