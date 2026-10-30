@@ -157,10 +157,10 @@ erDiagram
 - **Safe deletes.** Child rows use `ON DELETE CASCADE`; "who did it" columns use `ON DELETE SET NULL`
   so history survives when a user is removed.
 - **Authorization in the database.** Row Level Security is enabled on all 16 tables, with role-based
-  policies (59 in the initial migration), so access does not depend on hiding buttons in the UI.
+  policies, so access does not depend on hiding buttons in the UI.
 - **Auditability.** `audit_logs` records the actor, action, table, record and a `jsonb` payload.
 - **Storage.** Supabase Storage buckets hold course files, and a public `avatars` bucket holds profile
-  pictures (second migration).
+  pictures.
 
 ## Enum types
 
